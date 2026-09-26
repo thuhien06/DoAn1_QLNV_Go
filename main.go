@@ -1,37 +1,63 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	"html/template"
 	"net/http"
 
 	"qlnv/database"
 	"qlnv/routes"
 )
 
+// Hiển thị trang chủ
 func home(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "QLNV Go dang chay!")
+	// Đọc file giao diện trang chủ
+	tmpl := template.Must(template.ParseFiles("templates/index.html"))
+
+	// Hiển thị giao diện
+	tmpl.Execute(w, nil)
 }
 
 func main() {
 
+	// Kết nối đến cơ sở dữ liệu MySQL
 	db, err := database.Connect()
 
+	// Kiểm tra lỗi kết nối
 	if err != nil {
-		fmt.Println("Loi ket noi MySQL:", err)
+		fmt.Println("Lỗi kết nối database:", err)
 		return
 	}
 
-	defer db.Close()
+	// Đóng kết nối database khi chương trình kết thúc
+	defer func(db *sql.DB) {
+		_ = db.Close()
+	}(db)
 
+	// Khai báo đường dẫn trang chủ
 	http.HandleFunc("/", home)
 
+	// Khai báo đường dẫn quản lý nhân viên
 	http.HandleFunc("/nhanvien", routes.DanhSachNhanVien(db))
 
-	fmt.Println("Server dang chay tai http://localhost:8080")
+	// Cho phép truy cập các file CSS, JavaScript, hình ảnh...
+	http.Handle(
+		"/static/",
+		http.StripPrefix(
+			"/static/",
+			http.FileServer(http.Dir("static")),
+		),
+	)
 
+	// Thông báo địa chỉ server
+	fmt.Println("Server đang chạy tại http://localhost:8080")
+
+	// Khởi động web server tại cổng 8080
 	err = http.ListenAndServe(":8080", nil)
 
+	// Kiểm tra lỗi khi khởi động server
 	if err != nil {
-		fmt.Println("Loi:", err)
+		fmt.Println("Lỗi:", err)
 	}
 }
