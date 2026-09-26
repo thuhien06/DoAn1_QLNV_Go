@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm nhân viên</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <h1>Thêm nhân viên</h1>
+
+    <form method="POST">
+
+        <label>Mã nhân viên:</label>
+        <input type="text" name="ma_nv" required>
+        <br><br>
+
+        <label>Họ tên:</label>
+        <input type="text" name="ho_ten" required>
+        <br><br>
+
+        <label>Ngày sinh:</label>
+        <input type="date" name="ngay_sinh">
+        <br><br>
+
+        <label>Giới tính:</label>
+        <select name="gioi_tinh">
+            <option value="">-- Chọn giới tính --</option>
+            <option value="Nam">Nam</option>
+            <option value="Nữ">Nữ</option>
+        </select>
+        <br><br>
+
+        <label>Số điện thoại:</label>
+        <input type="text" name="so_dien_thoai">
+        <br><br>
+
+        <label>Email:</label>
+        <input type="email" name="email">
+        <br><br>
+
+        <label>Địa chỉ:</label>
+        <input type="text" name="dia_chi">
+        <br><br>
+
+        <label>Ngày vào làm:</label>
+        <input type="date" name="ngay_vao_lam">
+        <br><br>
+
+        <label>Phòng ban:</label>
+        <input type="text" name="phong_ban">
+        <br><br>
+
+        <label>Chức vụ:</label>
+        <input type="text" name="chuc_vu">
+        <br><br>
+
+        <button type="submit">Thêm nhân viên</button>
+
+        <a href="{{ url_for('nhanvien.danh_sach_nhan_vien') }}">
+            Quay lại
+        </a>
+
+    </form>
+
+</body>
+
+</html>
