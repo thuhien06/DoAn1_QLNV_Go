@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh sach nhan vien</title>
+</head>
+<body>
+
+    <h1>Danh sach nhan vien</h1>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Ma NV</th>
+                <th>Ho ten</th>
+                <th>Ngay sinh</th>
+                <th>Gioi tinh</th>
+                <th>So dien thoai</th>
+                <th>Email</th>
+                <th>Dia chi</th>
+                <th>Ngay vao lam</th>
+                <th>Phong ban</th>
+                <th>Chuc vu</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {{range .}}
+            <tr>
+                <td>{{.ID}}</td>
+                <td>{{.MaNV}}</td>
+                <td>{{.HoTen}}</td>
+                <td>{{.NgaySinh}}</td>
+                <td>{{.GioiTinh}}</td>
+                <td>{{.SoDienThoai}}</td>
+                <td>{{.Email}}</td>
+                <td>{{.DiaChi}}</td>
+                <td>{{.NgayVaoLam}}</td>
+                <td>{{.PhongBan}}</td>
+                <td>{{.ChucVu}}</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+
+</body>
+</html>

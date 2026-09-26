@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Quản lý nhân sự</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>HỆ THỐNG QUẢN LÝ NHÂN SỰ</h1>
+
+        <div class="menu">
+
+            <!-- Chuyen den trang quan ly nhan vien -->
+            <a href="{{ url_for('nhanvien.danh_sach_nhan_vien') }}"
+               class="menu-item">
+                Nhân viên
+            </a>
+
+            <!-- Chua lam chuc nang -->
+            <div class="menu-item">
+                Hợp đồng
+            </div>
+
+            <!-- Chua lam chuc nang -->
+            <div class="menu-item">
+                Chấm công
+            </div>
+
+            <!-- Chua lam chuc nang -->
+            <div class="menu-item">
+                Nghỉ phép
+            </div>
+
+            <!-- Chua lam chuc nang -->
+            <div class="menu-item">
+                Bảng lương
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
