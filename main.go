@@ -50,6 +50,18 @@ func main() {
 	// Xóa nhân viên
 	http.HandleFunc("/nhanvien/xoa", routes.XoaNhanVien(db))
 
+	// Khai báo đường dẫn quản lý hợp đồng
+	http.HandleFunc("/hopdong", routes.DanhSachHopDong(db))
+
+	// Khai báo đường dẫn thêm hợp đồng
+	http.HandleFunc("/hopdong/them", routes.ThemHopDong(db))
+
+	// Khai báo đường dẫn sửa hợp đồng
+	http.HandleFunc("/hopdong/sua", routes.SuaHopDong(db))
+
+	// Khai báo đường dẫn xóa hợp đồng
+	http.HandleFunc("/hopdong/xoa", routes.XoaHopDong(db))
+
 	// Cho phép truy cập các file CSS, JavaScript, hình ảnh...
 	http.Handle(
 		"/static/",
