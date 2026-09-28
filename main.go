@@ -41,6 +41,12 @@ func main() {
 	// Khai báo đường dẫn quản lý nhân viên
 	http.HandleFunc("/nhanvien", routes.DanhSachNhanVien(db))
 
+	// Thêm nhân viên
+	http.HandleFunc("/nhanvien/them", routes.ThemNhanVien(db))
+
+	// Xóa nhân viên
+	http.HandleFunc("/nhanvien/xoa", routes.XoaNhanVien(db))
+
 	// Cho phép truy cập các file CSS, JavaScript, hình ảnh...
 	http.Handle(
 		"/static/",
