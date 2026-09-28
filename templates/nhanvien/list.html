@@ -1,19 +1,56 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
+
     <meta charset="UTF-8">
+
     <title>Danh sách nhân viên</title>
+
     <link rel="stylesheet" href="/static/css/style.css">
+
 </head>
+
 <body>
 
     <h1>Danh sách nhân viên</h1>
 
-    <a href="/nhanvien/them">Thêm nhân viên</a>
+    <!-- Nút thêm nhân viên -->
+    <a href="/nhanvien/them">
+        Thêm nhân viên
+    </a>
 
+    <br>
+    <br>
+
+    <!-- Form tìm kiếm -->
+    <form action="/nhanvien" method="GET">
+
+        <input
+            type="text"
+            name="ma_nv"
+            placeholder="Nhập mã nhân viên"
+        >
+
+        <button type="submit">
+            Tìm kiếm
+        </button>
+
+        <a href="/nhanvien">
+            Xem tất cả
+        </a>
+
+    </form>
+
+    <br>
+
+    <!-- Danh sách nhân viên -->
     <table border="1">
+
         <thead>
+
             <tr>
+
                 <th>ID</th>
                 <th>Mã NV</th>
                 <th>Họ tên</th>
@@ -25,27 +62,48 @@
                 <th>Ngày vào làm</th>
                 <th>Phòng ban</th>
                 <th>Chức vụ</th>
+                <th>Thao tác</th>
             </tr>
+
         </thead>
 
         <tbody>
+
             {{range .}}
+
             <tr>
+
                 <td>{{.ID}}</td>
                 <td>{{.MaNV}}</td>
                 <td>{{.HoTen}}</td>
-                <td>{{.NgaySinh}}</td>
+                <td>{{if .NgaySinh}}{{.NgaySinh.Format "02-01-2006"}}{{end}}</td>
                 <td>{{.GioiTinh}}</td>
                 <td>{{.SoDienThoai}}</td>
                 <td>{{.Email}}</td>
                 <td>{{.DiaChi}}</td>
-                <td>{{.NgayVaoLam}}</td>
+                <td>{{if .NgayVaoLam}}{{.NgayVaoLam.Format "02-01-2006"}}{{end}}</td>
                 <td>{{.PhongBan}}</td>
                 <td>{{.ChucVu}}</td>
+                <td>
+                    <a href="/nhanvien/sua?id={{.ID}}">
+                        Sửa
+                    </a>
+
+                    <a
+                        href="/nhanvien/xoa?id={{.ID}}"
+                        onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên {{.MaNV}} - {{.HoTen}} không?');"
+                    >
+                        Xóa
+                    </a>
+                </td>
             </tr>
+
             {{end}}
+
         </tbody>
+
     </table>
 
 </body>
+
 </html>

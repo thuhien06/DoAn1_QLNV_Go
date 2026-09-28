@@ -142,6 +142,107 @@ func ThemNhanVien(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+// Sửa thông tin nhân viên
+func SuaNhanVien(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		// Lấy ID nhân viên từ URL
+		id := r.URL.Query().Get("id")
+
+		// Nếu là GET thì hiển thị thông tin hiện tại
+		if r.Method == http.MethodGet {
+
+			var nv models.NhanVien
+
+			// Lấy thông tin nhân viên từ database
+			err := db.QueryRow(`
+				SELECT id, ma_nv, ho_ten, ngay_sinh, gioi_tinh,
+				       so_dien_thoai, email, dia_chi, ngay_vao_lam,
+				       phong_ban, chuc_vu
+				FROM nhanvien
+				WHERE id = ?
+			`, id).Scan(
+				&nv.ID,
+				&nv.MaNV,
+				&nv.HoTen,
+				&nv.NgaySinh,
+				&nv.GioiTinh,
+				&nv.SoDienThoai,
+				&nv.Email,
+				&nv.DiaChi,
+				&nv.NgayVaoLam,
+				&nv.PhongBan,
+				&nv.ChucVu,
+			)
+
+			// Kiểm tra lỗi
+			if err != nil {
+				http.Error(w, "Không tìm thấy nhân viên", http.StatusNotFound)
+				return
+			}
+
+			// Đọc giao diện sửa
+			tmpl := template.Must(template.ParseFiles(
+				"templates/nhanvien/sua.html",
+			))
+
+			// Hiển thị thông tin nhân viên
+			tmpl.Execute(w, nv)
+
+			return
+		}
+
+		// Lấy dữ liệu mới từ form
+		maNV := r.FormValue("ma_nv")
+		hoTen := r.FormValue("ho_ten")
+		ngaySinh := r.FormValue("ngay_sinh")
+		gioiTinh := r.FormValue("gioi_tinh")
+		soDienThoai := r.FormValue("so_dien_thoai")
+		email := r.FormValue("email")
+		diaChi := r.FormValue("dia_chi")
+		ngayVaoLam := r.FormValue("ngay_vao_lam")
+		phongBan := r.FormValue("phong_ban")
+		chucVu := r.FormValue("chuc_vu")
+
+		// Cập nhật thông tin nhân viên
+		_, err := db.Exec(`
+			UPDATE nhanvien
+			SET ma_nv = ?,
+			    ho_ten = ?,
+			    ngay_sinh = ?,
+			    gioi_tinh = ?,
+			    so_dien_thoai = ?,
+			    email = ?,
+			    dia_chi = ?,
+			    ngay_vao_lam = ?,
+			    phong_ban = ?,
+			    chuc_vu = ?
+			WHERE id = ?
+		`,
+			maNV,
+			hoTen,
+			ngaySinh,
+			gioiTinh,
+			soDienThoai,
+			email,
+			diaChi,
+			ngayVaoLam,
+			phongBan,
+			chucVu,
+			id,
+		)
+
+		// Kiểm tra lỗi
+		if err != nil {
+			http.Error(w, "Lỗi sửa nhân viên: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Sửa thành công thì quay lại danh sách
+		http.Redirect(w, r, "/nhanvien", http.StatusSeeOther)
+	}
+}
+
 // Xóa nhân viên
 func XoaNhanVien(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

@@ -44,6 +44,9 @@ func main() {
 	// Thêm nhân viên
 	http.HandleFunc("/nhanvien/them", routes.ThemNhanVien(db))
 
+	// Khai báo đường dẫn sửa nhân viên
+	http.HandleFunc("/nhanvien/sua", routes.SuaNhanVien(db))
+
 	// Xóa nhân viên
 	http.HandleFunc("/nhanvien/xoa", routes.XoaNhanVien(db))
 

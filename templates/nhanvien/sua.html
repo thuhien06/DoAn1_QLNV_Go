@@ -2,114 +2,132 @@
 <html lang="vi">
 
 <head>
+
     <meta charset="UTF-8">
+
     <title>Sửa nhân viên</title>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="/static/css/style.css">
+
 </head>
 
 <body>
 
-<div class="container">
-
     <h1>SỬA THÔNG TIN NHÂN VIÊN</h1>
 
-    <form method="POST">
+    <form action="/nhanvien/sua?id={{.ID}}" method="POST">
 
-        <label>Mã nhân viên:</label>
-        <input type="text"
-               name="ma_nv"
-               value="{{ nhan_vien.ma_nv }}"
-               required>
+        <p>
+            <label>Mã nhân viên:</label><br>
+            <input
+                type="text"
+                name="ma_nv"
+                value="{{.MaNV}}"
+                required
+            >
+        </p>
 
-        <br><br>
+        <p>
+            <label>Họ tên:</label><br>
+            <input
+                type="text"
+                name="ho_ten"
+                value="{{.HoTen}}"
+                required
+            >
+        </p>
 
-        <label>Họ tên:</label>
-        <input type="text"
-               name="ho_ten"
-               value="{{ nhan_vien.ho_ten }}"
-               required>
+        <p>
+            <label>Ngày sinh:</label><br>
+            <input
+                type="date"
+                name="ngay_sinh"
+                value="{{if .NgaySinh}}{{.NgaySinh.Format "2006-01-02"}}{{end}}"
+            >
+        </p>
 
-        <br><br>
+        <p>
+            <label>Giới tính:</label><br>
 
-        <label>Ngày sinh:</label>
-        <input type="date"
-               name="ngay_sinh"
-               value="{{ nhan_vien.ngay_sinh }}">
+            <select name="gioi_tinh">
 
-        <br><br>
+                <option value="Nam"
+                    {{if eq .GioiTinh "Nam"}}selected{{end}}>
+                    Nam
+                </option>
 
-        <label>Giới tính:</label>
-        <select name="gioi_tinh">
+                <option value="Nữ"
+                    {{if eq .GioiTinh "Nữ"}}selected{{end}}>
+                    Nữ
+                </option>
 
-            <option value="Nam"
-                {% if nhan_vien.gioi_tinh == "Nam" %}selected{% endif %}>
-                Nam
-            </option>
+            </select>
 
-            <option value="Nữ"
-                {% if nhan_vien.gioi_tinh == "Nữ" %}selected{% endif %}>
-                Nữ
-            </option>
+        </p>
 
-        </select>
+        <p>
+            <label>Số điện thoại:</label><br>
+            <input
+                type="text"
+                name="so_dien_thoai"
+                value="{{.SoDienThoai}}"
+            >
+        </p>
 
-        <br><br>
+        <p>
+            <label>Email:</label><br>
+            <input
+                type="email"
+                name="email"
+                value="{{.Email}}"
+            >
+        </p>
 
-        <label>Số điện thoại:</label>
-        <input type="text"
-               name="so_dien_thoai"
-               value="{{ nhan_vien.so_dien_thoai or '' }}">
+        <p>
+            <label>Địa chỉ:</label><br>
+            <input
+                type="text"
+                name="dia_chi"
+                value="{{.DiaChi}}"
+            >
+        </p>
 
-        <br><br>
+        <p>
+            <label>Ngày vào làm:</label><br>
+            <input
+                type="date"
+                name="ngay_vao_lam"
+                value="{{if .NgayVaoLam}}{{.NgayVaoLam.Format "2006-01-02"}}{{end}}"
+            >
+        </p>
 
-        <label>Email:</label>
-        <input type="email"
-               name="email"
-               value="{{ nhan_vien.email or '' }}">
+        <p>
+            <label>Phòng ban:</label><br>
+            <input
+                type="text"
+                name="phong_ban"
+                value="{{.PhongBan}}"
+            >
+        </p>
 
-        <br><br>
-
-        <label>Địa chỉ:</label>
-        <input type="text"
-               name="dia_chi"
-               value="{{ nhan_vien.dia_chi or '' }}">
-
-        <br><br>
-
-        <label>Ngày vào làm:</label>
-        <input type="date"
-               name="ngay_vao_lam"
-               value="{{ nhan_vien.ngay_vao_lam }}">
-
-        <br><br>
-
-        <label>Phòng ban:</label>
-        <input type="text"
-               name="phong_ban"
-               value="{{ nhan_vien.phong_ban or '' }}">
-
-        <br><br>
-
-        <label>Chức vụ:</label>
-        <input type="text"
-               name="chuc_vu"
-               value="{{ nhan_vien.chuc_vu or '' }}">
-
-        <br><br>
+        <p>
+            <label>Chức vụ:</label><br>
+            <input
+                type="text"
+                name="chuc_vu"
+                value="{{.ChucVu}}"
+            >
+        </p>
 
         <button type="submit">
             Lưu thay đổi
         </button>
 
-        <a href="{{ url_for('nhanvien.danh_sach_nhan_vien') }}">
+        <a href="/nhanvien">
             Quay lại
         </a>
 
     </form>
-
-</div>
 
 </body>
 
