@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh sách hợp đồng</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <h1>DANH SÁCH HỢP ĐỒNG</h1>
+
+    <a href="/">Trang chủ</a>
+
+    <br>
+    <br>
+
+    <a href="/hopdong/them">
+        Thêm hợp đồng
+    </a>
+
+    <br>
+    <br>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Mã hợp đồng</th>
+                <th>Mã nhân viên</th>
+                <th>Loại hợp đồng</th>
+                <th>Ngày bắt đầu</th>
+                <th>Ngày kết thúc</th>
+                <th>Lương cơ bản</th>
+                <th>Ghi chú</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {{range .}}
+            <tr>
+                <td>{{.ID}}</td>
+                <td>{{.MaHD}}</td>
+                <td>{{.MaNV}}</td>
+                <td>{{.LoaiHopDong}}</td>
+
+                <td>
+                    {{if .NgayBatDau}}
+                        {{.NgayBatDau.Format "02-01-2006"}}
+                    {{end}}
+                </td>
+
+                <td>
+                    {{if .NgayKetThuc}}
+                        {{.NgayKetThuc.Format "02-01-2006"}}
+                    {{end}}
+                </td>
+
+                <td>{{.LuongCoBan}}</td>
+                <td>{{.GhiChu}}</td>
+
+                <td>
+                    <a href="/hopdong/sua?id={{.ID}}">
+                        Sửa
+                    </a>
+
+                    <a
+                        href="/hopdong/xoa?id={{.ID}}"
+                        onclick="return confirm('Bạn có chắc chắn muốn xóa hợp đồng này không?');"
+                    >
+                        Xóa
+                    </a>
+                </td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+
+</body>
+</html>

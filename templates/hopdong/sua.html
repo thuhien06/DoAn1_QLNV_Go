@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Sửa hợp đồng</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <h1>SỬA HỢP ĐỒNG</h1>
+
+    <form action="/hopdong/sua?id={{.ID}}" method="POST">
+
+        <p>
+            <label>Mã hợp đồng:</label><br>
+            <input type="text"
+                   name="ma_hd"
+                   value="{{.MaHD}}"
+                   required>
+        </p>
+
+        <p>
+            <label>Mã nhân viên:</label><br>
+            <input type="text"
+                   name="ma_nv"
+                   value="{{.MaNV}}"
+                   required>
+        </p>
+
+        <p>
+            <label>Loại hợp đồng:</label><br>
+            <select name="loai_hop_dong">
+
+                <option value="Thử việc"
+                    {{if eq .LoaiHopDong "Thử việc"}}selected{{end}}>
+                    Thử việc
+                </option>
+
+                <option value="Xác định thời hạn"
+                    {{if eq .LoaiHopDong "Xác định thời hạn"}}selected{{end}}>
+                    Xác định thời hạn
+                </option>
+
+                <option value="Không xác định thời hạn"
+                    {{if eq .LoaiHopDong "Không xác định thời hạn"}}selected{{end}}>
+                    Không xác định thời hạn
+                </option>
+
+            </select>
+        </p>
+
+        <p>
+            <label>Ngày bắt đầu:</label><br>
+            <input type="date"
+                   name="ngay_bat_dau"
+                   value="{{if .NgayBatDau}}{{.NgayBatDau.Format "2006-01-02"}}{{end}}">
+        </p>
+
+        <p>
+            <label>Ngày kết thúc:</label><br>
+            <input type="date"
+                   name="ngay_ket_thuc"
+                   value="{{if .NgayKetThuc}}{{.NgayKetThuc.Format "2006-01-02"}}{{end}}">
+        </p>
+
+        <p>
+            <label>Lương cơ bản:</label><br>
+            <input type="number"
+                   name="luong_co_ban"
+                   step="0.01"
+                   value="{{.LuongCoBan}}">
+        </p>
+
+        <p>
+            <label>Ghi chú:</label><br>
+            <input type="text"
+                   name="ghi_chu"
+                   value="{{.GhiChu}}">
+        </p>
+
+        <button type="submit">
+            Lưu thay đổi
+        </button>
+
+        <a href="/hopdong">
+            Quay lại
+        </a>
+
+    </form>
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm hợp đồng</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <h1>THÊM HỢP ĐỒNG</h1>
+
+    <form action="/hopdong/them" method="POST">
+
+        <p>
+            <label>Mã hợp đồng:</label><br>
+            <input type="text" name="ma_hd" required>
+        </p>
+
+        <p>
+            <label>Mã nhân viên:</label><br>
+            <input type="text" name="ma_nv" required>
+        </p>
+
+        <p>
+            <label>Loại hợp đồng:</label><br>
+            <select name="loai_hop_dong">
+                <option value="">-- Chọn loại hợp đồng --</option>
+                <option value="Thử việc">Thử việc</option>
+                <option value="Xác định thời hạn">Xác định thời hạn</option>
+                <option value="Không xác định thời hạn">
+                    Không xác định thời hạn
+                </option>
+            </select>
+        </p>
+
+        <p>
+            <label>Ngày bắt đầu:</label><br>
+            <input type="date" name="ngay_bat_dau">
+        </p>
+
+        <p>
+            <label>Ngày kết thúc:</label><br>
+            <input type="date" name="ngay_ket_thuc">
+        </p>
+
+        <p>
+            <label>Lương cơ bản:</label><br>
+            <input type="number" name="luong_co_ban" step="0.01">
+        </p>
+
+        <p>
+            <label>Ghi chú:</label><br>
+            <input type="text" name="ghi_chu">
+        </p>
+
+        <button type="submit">
+            Thêm hợp đồng
+        </button>
+
+        <a href="/hopdong">
+            Quay lại
+        </a>
+
+    </form>
+
+</body>
+</html>
