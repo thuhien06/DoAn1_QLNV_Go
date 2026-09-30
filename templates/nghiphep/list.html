@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh sách nghỉ phép</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+    <h1>Danh sách nghỉ phép</h1>
+
+    <a href="/">Trang chủ</a>
+
+    <br>
+    <br>
+
+    <a href="/nghiphep/them">Thêm đơn nghỉ phép</a>
+
+    <br>
+    <br>
+
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Mã nhân viên</th>
+            <th>Ngày bắt đầu</th>
+            <th>Ngày kết thúc</th>
+            <th>Loại nghỉ</th>
+            <th>Lý do</th>
+            <th>Trạng thái</th>
+            <th>Ghi chú</th>
+            <th>Thao tác</th>
+        </tr>
+
+        {{range .}}
+        <tr>
+            <td>{{.ID}}</td>
+
+            <td>{{.MaNV}}</td>
+
+            <td>
+                {{if .NgayBatDau}}
+                    {{.NgayBatDau.Format "02-01-2006"}}
+                {{end}}
+            </td>
+
+            <td>
+                {{if .NgayKetThuc}}
+                    {{.NgayKetThuc.Format "02-01-2006"}}
+                {{end}}
+            </td>
+
+            <td>{{.LoaiNghi}}</td>
+
+            <td>{{.LyDo}}</td>
+
+            <td>{{.TrangThai}}</td>
+
+            <td>{{.GhiChu}}</td>
+
+            <td>
+                <a href="/nghiphep/sua?id={{.ID}}">
+                    Sửa
+                </a>
+
+                |
+
+                <a href="/nghiphep/xoa?id={{.ID}}"
+                   onclick="return confirm('Bạn có chắc chắn muốn xóa đơn nghỉ phép này không?');">
+                    Xóa
+                </a>
+            </td>
+        </tr>
+        {{end}}
+
+    </table>
+
+</body>
+</html>
