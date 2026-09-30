@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Sửa chấm công</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <h1>SỬA CHẤM CÔNG</h1>
+
+    <form action="/chamcong/sua?id={{.ID}}" method="POST">
+
+        <p>
+            <label>Mã nhân viên:</label><br>
+            <input
+                type="text"
+                name="ma_nv"
+                value="{{.MaNV}}"
+                required
+            >
+        </p>
+
+        <p>
+            <label>Ngày chấm công:</label><br>
+            <input
+                type="date"
+                name="ngay_cham_cong"
+                value="{{if .NgayChamCong}}{{.NgayChamCong.Format "2006-01-02"}}{{end}}"
+                required
+            >
+        </p>
+
+        <p>
+            <label>Giờ vào:</label><br>
+            <input
+                type="time"
+                name="gio_vao"
+                value="{{.GioVao}}"
+            >
+        </p>
+
+        <p>
+            <label>Giờ ra:</label><br>
+            <input
+                type="time"
+                name="gio_ra"
+                value="{{.GioRa}}"
+            >
+        </p>
+
+        <p>
+            <label>Trạng thái:</label><br>
+            <select name="trang_thai">
+
+                <option value="Có mặt"
+                    {{if eq .TrangThai "Có mặt"}}selected{{end}}>
+                    Có mặt
+                </option>
+
+                <option value="Đi muộn"
+                    {{if eq .TrangThai "Đi muộn"}}selected{{end}}>
+                    Đi muộn
+                </option>
+
+                <option value="Về sớm"
+                    {{if eq .TrangThai "Về sớm"}}selected{{end}}>
+                    Về sớm
+                </option>
+
+                <option value="Nghỉ"
+                    {{if eq .TrangThai "Nghỉ"}}selected{{end}}>
+                    Nghỉ
+                </option>
+
+            </select>
+        </p>
+
+        <p>
+            <label>Ghi chú:</label><br>
+            <input
+                type="text"
+                name="ghi_chu"
+                value="{{.GhiChu}}"
+            >
+        </p>
+
+        <button type="submit">
+            Lưu thay đổi
+        </button>
+
+        <a href="/chamcong">
+            Quay lại
+        </a>
+
+    </form>
+
+</body>
+</html>

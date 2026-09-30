@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh sách chấm công</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <h1>DANH SÁCH CHẤM CÔNG</h1>
+
+    <a href="/">Trang chủ</a>
+
+    <br>
+    <br>
+
+    <a href="/chamcong/them">
+        Thêm chấm công
+    </a>
+
+    <br>
+    <br>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Mã nhân viên</th>
+                <th>Ngày chấm công</th>
+                <th>Giờ vào</th>
+                <th>Giờ ra</th>
+                <th>Trạng thái</th>
+                <th>Ghi chú</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {{range .}}
+            <tr>
+                <td>{{.ID}}</td>
+                <td>{{.MaNV}}</td>
+
+                <td>
+                    {{if .NgayChamCong}}
+                        {{.NgayChamCong.Format "02-01-2006"}}
+                    {{end}}
+                </td>
+
+                <td>{{.GioVao}}</td>
+                <td>{{.GioRa}}</td>
+                <td>{{.TrangThai}}</td>
+                <td>{{.GhiChu}}</td>
+
+                <td>
+                    <a href="/chamcong/sua?id={{.ID}}">
+                        Sửa
+                    </a>
+
+                    <a
+                        href="/chamcong/xoa?id={{.ID}}"
+                        onclick="return confirm('Bạn có chắc chắn muốn xóa dữ liệu này không?');"
+                    >
+                        Xóa
+                    </a>
+                </td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm chấm công</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <h1>THÊM CHẤM CÔNG</h1>
+
+    <form action="/chamcong/them" method="POST">
+
+        <p>
+            <label>Mã nhân viên:</label><br>
+            <input type="text" name="ma_nv" required>
+        </p>
+
+        <p>
+            <label>Ngày chấm công:</label><br>
+            <input type="date" name="ngay_cham_cong" required>
+        </p>
+
+        <p>
+            <label>Giờ vào:</label><br>
+            <input type="time" name="gio_vao">
+        </p>
+
+        <p>
+            <label>Giờ ra:</label><br>
+            <input type="time" name="gio_ra">
+        </p>
+
+        <p>
+            <label>Trạng thái:</label><br>
+            <select name="trang_thai">
+                <option value="">-- Chọn trạng thái --</option>
+                <option value="Có mặt">Có mặt</option>
+                <option value="Đi muộn">Đi muộn</option>
+                <option value="Về sớm">Về sớm</option>
+                <option value="Nghỉ">Nghỉ</option>
+            </select>
+        </p>
+
+        <p>
+            <label>Ghi chú:</label><br>
+            <input type="text" name="ghi_chu">
+        </p>
+
+        <button type="submit">
+            Thêm chấm công
+        </button>
+
+        <a href="/chamcong">
+            Quay lại
+        </a>
+
+    </form>
+
+</body>
+</html>
