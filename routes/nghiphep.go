@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"html/template"
 	"net/http"
+	"strconv"
 
 	"qlnv/models"
 )
@@ -105,3 +106,112 @@ func ThemNghiPhep(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+// Sửa nghỉ phép
+func SuaNghiPhep(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		id, err := strconv.Atoi(r.URL.Query().Get("id"))
+
+		if err != nil {
+			http.Error(w, "ID không hợp lệ", http.StatusBadRequest)
+			return
+		}
+
+		if r.Method == "GET" {
+
+			var np models.NghiPhep
+
+			err := db.QueryRow(`
+				SELECT id, ma_nv, ngay_bat_dau, ngay_ket_thuc,
+				       loai_nghi, ly_do, trang_thai, ghi_chu
+				FROM nghiphep
+				WHERE id = ?
+			`, id).Scan(
+				&np.ID,
+				&np.MaNV,
+				&np.NgayBatDau,
+				&np.NgayKetThuc,
+				&np.LoaiNghi,
+				&np.LyDo,
+				&np.TrangThai,
+				&np.GhiChu,
+			)
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			tmpl := template.Must(
+				template.ParseFiles("templates/nghiphep/sua.html"),
+			)
+
+			tmpl.Execute(w, np)
+			return
+		}
+
+		if r.Method == "POST" {
+
+			maNV := r.FormValue("ma_nv")
+			ngayBatDau := r.FormValue("ngay_bat_dau")
+			ngayKetThuc := r.FormValue("ngay_ket_thuc")
+			loaiNghi := r.FormValue("loai_nghi")
+			lyDo := r.FormValue("ly_do")
+			trangThai := r.FormValue("trang_thai")
+			ghiChu := r.FormValue("ghi_chu")
+
+			_, err := db.Exec(`
+				UPDATE nghiphep
+				SET ma_nv = ?,
+				    ngay_bat_dau = ?,
+				    ngay_ket_thuc = ?,
+				    loai_nghi = ?,
+				    ly_do = ?,
+				    trang_thai = ?,
+				    ghi_chu = ?
+				WHERE id = ?
+			`,
+				maNV,
+				ngayBatDau,
+				ngayKetThuc,
+				loaiNghi,
+				lyDo,
+				trangThai,
+				ghiChu,
+				id,
+			)
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			http.Redirect(w, r, "/nghiphep", http.StatusSeeOther)
+		}
+	}
+}
+
+// Xóa nghỉ phép
+func XoaNghiPhep(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		id, err := strconv.Atoi(r.URL.Query().Get("id"))
+
+		if err != nil {
+			http.Error(w, "ID không hợp lệ", http.StatusBadRequest)
+			return
+		}
+
+		_, err = db.Exec(
+			"DELETE FROM nghiphep WHERE id = ?",
+			id,
+		)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, "/nghiphep", http.StatusSeeOther)
+	}
+}
