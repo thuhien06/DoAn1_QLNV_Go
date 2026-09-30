@@ -38,6 +38,8 @@ func main() {
 	// Khai báo đường dẫn trang chủ
 	http.HandleFunc("/", home)
 
+	//////////////////NHÂN VIÊN
+
 	// Khai báo đường dẫn quản lý nhân viên
 	http.HandleFunc("/nhanvien", routes.DanhSachNhanVien(db))
 
@@ -50,6 +52,8 @@ func main() {
 	// Xóa nhân viên
 	http.HandleFunc("/nhanvien/xoa", routes.XoaNhanVien(db))
 
+	//////////////////HỢP ĐỒNG
+
 	// Khai báo đường dẫn quản lý hợp đồng
 	http.HandleFunc("/hopdong", routes.DanhSachHopDong(db))
 
@@ -61,6 +65,20 @@ func main() {
 
 	// Khai báo đường dẫn xóa hợp đồng
 	http.HandleFunc("/hopdong/xoa", routes.XoaHopDong(db))
+
+	//////////////////CHẤM CÔNG
+
+	// Khai báo đường dẫn quản lý chấm công
+	http.HandleFunc("/chamcong", routes.DanhSachChamCong(db))
+
+	// Khai báo đường dẫn thêm chấm công
+	http.HandleFunc("/chamcong/them", routes.ThemChamCong(db))
+
+	// Khai báo đường dẫn sửa chấm công
+	http.HandleFunc("/chamcong/sua", routes.SuaChamCong(db))
+
+	// Khai báo đường dẫn xóa chấm công
+	http.HandleFunc("/chamcong/xoa", routes.XoaChamCong(db))
 
 	// Cho phép truy cập các file CSS, JavaScript, hình ảnh...
 	http.Handle(
