@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh sách bảng lương</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+    <h1>Danh sách bảng lương</h1>
+
+    <a href="/">Trang chủ</a>
+
+    <br><br>
+
+    <a href="/bangluong/them">Thêm bảng lương</a>
+
+    <br><br>
+
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Mã nhân viên</th>
+            <th>Tháng</th>
+            <th>Năm</th>
+            <th>Lương cơ bản</th>
+            <th>Ngày công</th>
+            <th>Phụ cấp</th>
+            <th>Khấu trừ</th>
+            <th>Tổng lương</th>
+            <th>Ghi chú</th>
+            <th>Thao tác</th>
+        </tr>
+
+        {{range .}}
+        <tr>
+            <td>{{.ID}}</td>
+            <td>{{.MaNV}}</td>
+            <td>{{.Thang}}</td>
+            <td>{{.Nam}}</td>
+
+            <td>{{.LuongCoBan}}</td>
+
+            <td>{{.SoNgayCong}}</td>
+
+            <td>{{.PhuCap}}</td>
+
+            <td>{{.KhauTru}}</td>
+
+            <td>{{.TongLuong}}</td>
+
+            <td>{{.GhiChu}}</td>
+
+            <td>
+                <a href="/bangluong/sua?id={{.ID}}">
+                    Sửa
+                </a>
+
+                |
+
+                <a href="/bangluong/xoa?id={{.ID}}"
+                   onclick="return confirm('Bạn có chắc chắn muốn xóa bảng lương này không?');">
+                    Xóa
+                </a>
+            </td>
+        </tr>
+        {{end}}
+
+    </table>
+
+</body>
+</html>

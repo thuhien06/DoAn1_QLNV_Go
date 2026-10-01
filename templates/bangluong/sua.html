@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Sửa bảng lương</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+    <h1>Sửa bảng lương</h1>
+
+    <a href="/bangluong">Danh sách bảng lương</a>
+
+    <br><br>
+
+    <form action="/bangluong/sua?id={{.ID}}" method="POST">
+
+        <label>Mã nhân viên:</label>
+        <br>
+        <input type="text"
+               name="ma_nv"
+               value="{{.MaNV}}"
+               required>
+
+        <br><br>
+
+        <label>Tháng:</label>
+        <br>
+        <input type="number"
+               name="thang"
+               min="1"
+               max="12"
+               value="{{.Thang}}"
+               required>
+
+        <br><br>
+
+        <label>Năm:</label>
+        <br>
+        <input type="number"
+               name="nam"
+               min="2000"
+               value="{{.Nam}}"
+               required>
+
+        <br><br>
+
+        <label>Lương cơ bản:</label>
+        <br>
+        <input type="number"
+               name="luong_co_ban"
+               min="0"
+               step="0.01"
+               value="{{.LuongCoBan}}"
+               required>
+
+        <br><br>
+
+        <label>Số ngày công:</label>
+        <br>
+        <input type="number"
+               name="so_ngay_cong"
+               min="0"
+               value="{{.SoNgayCong}}"
+               required>
+
+        <br><br>
+
+        <label>Phụ cấp:</label>
+        <br>
+        <input type="number"
+               name="phu_cap"
+               min="0"
+               step="0.01"
+               value="{{.PhuCap}}">
+
+        <br><br>
+
+        <label>Khấu trừ:</label>
+        <br>
+        <input type="number"
+               name="khau_tru"
+               min="0"
+               step="0.01"
+               value="{{.KhauTru}}">
+
+        <br><br>
+
+        <label>Ghi chú:</label>
+        <br>
+        <input type="text"
+               name="ghi_chu"
+               value="{{.GhiChu}}">
+
+        <br><br>
+
+        <button type="submit">Cập nhật</button>
+
+    </form>
+
+</body>
+</html>
