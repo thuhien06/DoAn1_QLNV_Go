@@ -9,6 +9,9 @@
 <body>
 
     <h1>Thêm đơn nghỉ phép</h1>
+    {{if .Error}}
+        <p style="color: red;">{{.Error}}</p>
+    {{end}}
 
     <a href="/nghiphep">Danh sách nghỉ phép</a>
 

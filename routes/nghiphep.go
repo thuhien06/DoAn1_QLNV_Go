@@ -81,10 +81,39 @@ func ThemNghiPhep(db *sql.DB) http.HandlerFunc {
 			trangThai := r.FormValue("trang_thai")
 			ghiChu := r.FormValue("ghi_chu")
 
-			_, err := db.Exec(`
+			// Kiểm tra mã nhân viên có tồn tại không
+			var count int
+
+			err := db.QueryRow(
+				"SELECT COUNT(*) FROM nhanvien WHERE ma_nv = ?",
+				maNV,
+			).Scan(&count)
+
+			if err != nil {
+				http.Error(w, "Lỗi kiểm tra mã nhân viên", http.StatusInternalServerError)
+				return
+			}
+
+			if count == 0 {
+				tmpl := template.Must(
+					template.ParseFiles("templates/nghiphep/them.html"),
+				)
+
+				data := struct {
+					Error string
+				}{
+					Error: "Mã nhân viên " + maNV + " không tồn tại!",
+				}
+
+				tmpl.Execute(w, data)
+				return
+			}
+
+			// Nếu mã nhân viên tồn tại thì mới thêm nghỉ phép
+			_, err = db.Exec(`
 				INSERT INTO nghiphep
 				(ma_nv, ngay_bat_dau, ngay_ket_thuc,
-				 loai_nghi, ly_do, trang_thai, ghi_chu)
+				loai_nghi, ly_do, trang_thai, ghi_chu)
 				VALUES (?, ?, ?, ?, ?, ?, ?)
 			`,
 				maNV,
@@ -95,6 +124,11 @@ func ThemNghiPhep(db *sql.DB) http.HandlerFunc {
 				trangThai,
 				ghiChu,
 			)
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
