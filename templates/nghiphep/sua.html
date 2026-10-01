@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Sửa nghỉ phép</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+    <h1>Sửa đơn nghỉ phép</h1>
+
+    <a href="/nghiphep">Danh sách nghỉ phép</a>
+
+    <br>
+    <br>
+
+    <form action="/nghiphep/sua?id={{.ID}}" method="POST">
+
+        <label>Mã nhân viên:</label>
+        <br>
+        <input type="text" name="ma_nv" value="{{.MaNV}}" required>
+
+        <br>
+        <br>
+
+        <label>Ngày bắt đầu:</label>
+        <br>
+        <input type="date"
+               name="ngay_bat_dau"
+               value="{{if .NgayBatDau}}{{.NgayBatDau.Format "2006-01-02"}}{{end}}"
+               required>
+
+        <br>
+        <br>
+
+        <label>Ngày kết thúc:</label>
+        <br>
+        <input type="date"
+               name="ngay_ket_thuc"
+               value="{{if .NgayKetThuc}}{{.NgayKetThuc.Format "2006-01-02"}}{{end}}"
+               required>
+
+        <br>
+        <br>
+
+        <label>Loại nghỉ:</label>
+        <br>
+        <select name="loai_nghi">
+            <option value="Nghỉ phép" {{if eq .LoaiNghi "Nghỉ phép"}}selected{{end}}>
+                Nghỉ phép
+            </option>
+
+            <option value="Nghỉ ốm" {{if eq .LoaiNghi "Nghỉ ốm"}}selected{{end}}>
+                Nghỉ ốm
+            </option>
+
+            <option value="Nghỉ việc riêng" {{if eq .LoaiNghi "Nghỉ việc riêng"}}selected{{end}}>
+                Nghỉ việc riêng
+            </option>
+
+            <option value="Nghỉ không lương" {{if eq .LoaiNghi "Nghỉ không lương"}}selected{{end}}>
+                Nghỉ không lương
+            </option>
+        </select>
+
+        <br>
+        <br>
+
+        <label>Lý do:</label>
+        <br>
+        <input type="text" name="ly_do" value="{{.LyDo}}">
+
+        <br>
+        <br>
+
+        <label>Trạng thái:</label>
+        <br>
+        <select name="trang_thai">
+            <option value="Chờ duyệt" {{if eq .TrangThai "Chờ duyệt"}}selected{{end}}>
+                Chờ duyệt
+            </option>
+
+            <option value="Đã duyệt" {{if eq .TrangThai "Đã duyệt"}}selected{{end}}>
+                Đã duyệt
+            </option>
+
+            <option value="Từ chối" {{if eq .TrangThai "Từ chối"}}selected{{end}}>
+                Từ chối
+            </option>
+        </select>
+
+        <br>
+        <br>
+
+        <label>Ghi chú:</label>
+        <br>
+        <input type="text" name="ghi_chu" value="{{.GhiChu}}">
+
+        <br>
+        <br>
+
+        <button type="submit">Cập nhật</button>
+
+    </form>
+
+</body>
+</html>

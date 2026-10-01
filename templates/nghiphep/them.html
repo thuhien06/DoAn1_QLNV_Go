@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm nghỉ phép</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+    <h1>Thêm đơn nghỉ phép</h1>
+
+    <a href="/nghiphep">Danh sách nghỉ phép</a>
+
+    <br>
+    <br>
+
+    <form action="/nghiphep/them" method="POST">
+
+        <label>Mã nhân viên:</label>
+        <br>
+        <input type="text" name="ma_nv" required>
+
+        <br>
+        <br>
+
+        <label>Ngày bắt đầu:</label>
+        <br>
+        <input type="date" name="ngay_bat_dau" required>
+
+        <br>
+        <br>
+
+        <label>Ngày kết thúc:</label>
+        <br>
+        <input type="date" name="ngay_ket_thuc" required>
+
+        <br>
+        <br>
+
+        <label>Loại nghỉ:</label>
+        <br>
+        <select name="loai_nghi">
+            <option value="Nghỉ phép">Nghỉ phép</option>
+            <option value="Nghỉ ốm">Nghỉ ốm</option>
+            <option value="Nghỉ việc riêng">Nghỉ việc riêng</option>
+            <option value="Nghỉ không lương">Nghỉ không lương</option>
+        </select>
+
+        <br>
+        <br>
+
+        <label>Lý do:</label>
+        <br>
+        <input type="text" name="ly_do">
+
+        <br>
+        <br>
+
+        <label>Trạng thái:</label>
+        <br>
+        <select name="trang_thai">
+            <option value="Chờ duyệt">Chờ duyệt</option>
+            <option value="Đã duyệt">Đã duyệt</option>
+            <option value="Từ chối">Từ chối</option>
+        </select>
+
+        <br>
+        <br>
+
+        <label>Ghi chú:</label>
+        <br>
+        <input type="text" name="ghi_chu">
+
+        <br>
+        <br>
+
+        <button type="submit">Lưu</button>
+
+    </form>
+
+</body>
+</html>
