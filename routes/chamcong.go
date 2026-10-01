@@ -78,7 +78,7 @@ func ThemChamCong(db *sql.DB) http.HandlerFunc {
 		// trangThai := r.FormValue("trang_thai")
 		// ghiChu := r.FormValue("ghi_chu")
 
-		if r.Method == "Post" {
+		if r.Method == "POST" {
 			maNV := r.FormValue("ma_nv")
 			ngayChamCong := r.FormValue("ngay_cham_cong")
 			gioVao := r.FormValue("gio_vao")

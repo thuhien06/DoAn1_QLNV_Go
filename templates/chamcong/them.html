@@ -8,6 +8,9 @@
 <body>
 
     <h1>THÊM CHẤM CÔNG</h1>
+    {{if .Error}}
+        <p style="color: red;">{{.Error}}</p>
+    {{end}}
 
     <form action="/chamcong/them" method="POST">
 
