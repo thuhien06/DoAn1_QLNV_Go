@@ -79,30 +79,23 @@ func ThemBangLuong(db *sql.DB) http.HandlerFunc {
 			maNV := r.FormValue("ma_nv")
 			thang := r.FormValue("thang")
 			nam := r.FormValue("nam")
-			luongCoBan := r.FormValue("luong_co_ban")
 			soNgayCong := r.FormValue("so_ngay_cong")
 			phuCap := r.FormValue("phu_cap")
 			khauTru := r.FormValue("khau_tru")
 			ghiChu := r.FormValue("ghi_chu")
 
-			// Kiểm tra mã nhân viên
-			var count int
+			// Lấy lương cơ bản từ hợp đồng
+			var luongCoBan float64
 
-			err := db.QueryRow(
-				"SELECT COUNT(*) FROM nhanvien WHERE ma_nv = ?",
-				maNV,
-			).Scan(&count)
+			err := db.QueryRow(`
+				SELECT luong_co_ban
+				FROM hopdong
+				WHERE ma_nv = ?
+				ORDER BY id DESC
+				LIMIT 1
+			`, maNV).Scan(&luongCoBan)
 
 			if err != nil {
-				http.Error(
-					w,
-					"Lỗi kiểm tra mã nhân viên",
-					http.StatusInternalServerError,
-				)
-				return
-			}
-
-			if count == 0 {
 				tmpl := template.Must(
 					template.ParseFiles(
 						"templates/bangluong/them.html",
@@ -112,19 +105,48 @@ func ThemBangLuong(db *sql.DB) http.HandlerFunc {
 				data := struct {
 					Error string
 				}{
-					Error: "Mã nhân viên " + maNV + " không tồn tại!",
+					Error: "Không tìm thấy hợp đồng hoặc lương cơ bản của nhân viên " + maNV,
 				}
 
 				tmpl.Execute(w, data)
 				return
 			}
 
-			// Tính tổng lương
-			luong, _ := strconv.ParseFloat(luongCoBan, 64)
-			phuCapValue, _ := strconv.ParseFloat(phuCap, 64)
-			khauTruValue, _ := strconv.ParseFloat(khauTru, 64)
+			// Chuyển dữ liệu sang số
+			thangValue, err := strconv.Atoi(thang)
+			if err != nil {
+				http.Error(w, "Tháng không hợp lệ", http.StatusBadRequest)
+				return
+			}
 
-			tongLuong := luong + phuCapValue - khauTruValue
+			namValue, err := strconv.Atoi(nam)
+			if err != nil {
+				http.Error(w, "Năm không hợp lệ", http.StatusBadRequest)
+				return
+			}
+
+			soNgayCongValue, err := strconv.Atoi(soNgayCong)
+			if err != nil {
+				http.Error(w, "Số ngày công không hợp lệ", http.StatusBadRequest)
+				return
+			}
+
+			phuCapValue, err := strconv.ParseFloat(phuCap, 64)
+			if err != nil {
+				phuCapValue = 0
+			}
+
+			khauTruValue, err := strconv.ParseFloat(khauTru, 64)
+			if err != nil {
+				khauTruValue = 0
+			}
+
+			// Tính lương theo ngày công
+			luongTheoNgay := luongCoBan / 26
+
+			tongLuong := luongTheoNgay*float64(soNgayCongValue) +
+				phuCapValue -
+				khauTruValue
 
 			_, err = db.Exec(`
 				INSERT INTO bangluong
@@ -134,12 +156,12 @@ func ThemBangLuong(db *sql.DB) http.HandlerFunc {
 				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 			`,
 				maNV,
-				thang,
-				nam,
+				thangValue,
+				namValue,
 				luongCoBan,
-				soNgayCong,
-				phuCap,
-				khauTru,
+				soNgayCongValue,
+				phuCapValue,
+				khauTruValue,
 				tongLuong,
 				ghiChu,
 			)
@@ -165,27 +187,94 @@ func SuaBangLuong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		if r.Method == http.MethodGet {
+		if r.Method == http.MethodPost {
 
-			var bl models.BangLuong
+			maNV := r.FormValue("ma_nv")
+			thang := r.FormValue("thang")
+			nam := r.FormValue("nam")
+			soNgayCong := r.FormValue("so_ngay_cong")
+			phuCap := r.FormValue("phu_cap")
+			khauTru := r.FormValue("khau_tru")
+			ghiChu := r.FormValue("ghi_chu")
+
+			// Lấy lương cơ bản từ hợp đồng
+			var luongCoBan float64
 
 			err := db.QueryRow(`
-				SELECT id, ma_nv, thang, nam, luong_co_ban,
-				       so_ngay_cong, phu_cap, khau_tru,
-				       tong_luong, ghi_chu
-				FROM bangluong
+				SELECT luong_co_ban
+				FROM hopdong
+				WHERE ma_nv = ?
+				ORDER BY id DESC
+				LIMIT 1
+			`, maNV).Scan(&luongCoBan)
+
+			if err != nil {
+				http.Error(
+					w,
+					"Không tìm thấy hợp đồng hoặc lương cơ bản của nhân viên",
+					http.StatusBadRequest,
+				)
+				return
+			}
+
+			thangValue, err := strconv.Atoi(thang)
+			if err != nil {
+				http.Error(w, "Tháng không hợp lệ", http.StatusBadRequest)
+				return
+			}
+
+			namValue, err := strconv.Atoi(nam)
+			if err != nil {
+				http.Error(w, "Năm không hợp lệ", http.StatusBadRequest)
+				return
+			}
+
+			soNgayCongValue, err := strconv.Atoi(soNgayCong)
+			if err != nil {
+				http.Error(w, "Số ngày công không hợp lệ", http.StatusBadRequest)
+				return
+			}
+
+			phuCapValue, err := strconv.ParseFloat(phuCap, 64)
+			if err != nil {
+				phuCapValue = 0
+			}
+
+			khauTruValue, err := strconv.ParseFloat(khauTru, 64)
+			if err != nil {
+				khauTruValue = 0
+			}
+
+			// Tính lại lương
+			luongTheoNgay := luongCoBan / 26
+
+			tongLuong := luongTheoNgay*float64(soNgayCongValue) +
+				phuCapValue -
+				khauTruValue
+
+			_, err = db.Exec(`
+				UPDATE bangluong
+				SET ma_nv = ?,
+					thang = ?,
+					nam = ?,
+					luong_co_ban = ?,
+					so_ngay_cong = ?,
+					phu_cap = ?,
+					khau_tru = ?,
+					tong_luong = ?,
+					ghi_chu = ?
 				WHERE id = ?
-			`, id).Scan(
-				&bl.ID,
-				&bl.MaNV,
-				&bl.Thang,
-				&bl.Nam,
-				&bl.LuongCoBan,
-				&bl.SoNgayCong,
-				&bl.PhuCap,
-				&bl.KhauTru,
-				&bl.TongLuong,
-				&bl.GhiChu,
+			`,
+				maNV,
+				thangValue,
+				namValue,
+				luongCoBan,
+				soNgayCongValue,
+				phuCapValue,
+				khauTruValue,
+				tongLuong,
+				ghiChu,
+				id,
 			)
 
 			if err != nil {
@@ -193,12 +282,7 @@ func SuaBangLuong(db *sql.DB) http.HandlerFunc {
 				return
 			}
 
-			tmpl := template.Must(
-				template.ParseFiles("templates/bangluong/sua.html"),
-			)
-
-			tmpl.Execute(w, bl)
-			return
+			http.Redirect(w, r, "/bangluong", http.StatusSeeOther)
 		}
 
 		if r.Method == http.MethodPost {
