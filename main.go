@@ -76,6 +76,13 @@ func main() {
 	http.HandleFunc("/nghiphep/sua", routes.SuaNghiPhep(db))
 	http.HandleFunc("/nghiphep/xoa", routes.XoaNghiPhep(db))
 
+	//////////////////BANG LUONG
+
+	// Khai báo đường dẫn quản lý bảng lương
+	http.HandleFunc("/bangluong", routes.DanhSachBangLuong(db))
+	http.HandleFunc("/bangluong/them", routes.ThemBangLuong(db))
+	http.HandleFunc("/bangluong/sua", routes.SuaBangLuong(db))
+	http.HandleFunc("/bangluong/xoa", routes.XoaBangLuong(db))
 
 	// Cho phép truy cập các file CSS, JavaScript, hình ảnh...
 	http.Handle(
