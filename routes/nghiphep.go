@@ -130,11 +130,6 @@ func ThemNghiPhep(db *sql.DB) http.HandlerFunc {
 				return
 			}
 
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
 			http.Redirect(w, r, "/nghiphep", http.StatusSeeOther)
 		}
 	}
