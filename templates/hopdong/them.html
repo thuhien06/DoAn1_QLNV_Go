@@ -8,6 +8,9 @@
 <body>
 
     <h1>THÊM HỢP ĐỒNG</h1>
+    {{if .Error}}
+        <p style="color: red;">{{.Error}}</p>
+    {{end}}
 
     <form action="/hopdong/them" method="POST">
 

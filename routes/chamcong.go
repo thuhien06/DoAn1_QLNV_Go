@@ -71,13 +71,6 @@ func ThemChamCong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		// maNV := r.FormValue("ma_nv")
-		// ngayChamCong := r.FormValue("ngay_cham_cong")
-		// gioVao := r.FormValue("gio_vao")
-		// gioRa := r.FormValue("gio_ra")
-		// trangThai := r.FormValue("trang_thai")
-		// ghiChu := r.FormValue("ghi_chu")
-
 		if r.Method == "POST" {
 			maNV := r.FormValue("ma_nv")
 			ngayChamCong := r.FormValue("ngay_cham_cong")
@@ -136,25 +129,6 @@ func ThemChamCong(db *sql.DB) http.HandlerFunc {
 			http.Redirect(w, r, "/chamcong", http.StatusSeeOther)
 		}
 
-		// _, err := db.Exec(`
-		// 	INSERT INTO chamcong
-		// 	(ma_nv, ngay_cham_cong, gio_vao, gio_ra, trang_thai, ghi_chu)
-		// 	VALUES (?, ?, ?, ?, ?, ?)
-		// `,
-		// 	maNV,
-		// 	ngayChamCong,
-		// 	gioVao,
-		// 	gioRa,
-		// 	trangThai,
-		// 	ghiChu,
-		// )
-
-		// if err != nil {
-		// 	http.Error(w, "Lỗi thêm chấm công: "+err.Error(), http.StatusInternalServerError)
-		// 	return
-		// }
-
-		// 	http.Redirect(w, r, "/chamcong", http.StatusSeeOther)
 	}
 }
 
