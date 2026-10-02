@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <h1>ĐĂNG NHẬP</h1>
+
+        {{if .Error}}
+            <p style="color: red;">{{.Error}}</p>
+        {{end}}
+
+        <form action="/dangnhap" method="POST">
+
+            <label>Tên đăng nhập:</label>
+            <br>
+            <input type="text" name="ten_dang_nhap" required>
+
+            <br><br>
+
+            <label>Mật khẩu:</label>
+            <br>
+            <input type="password" name="mat_khau" required>
+
+            <br><br>
+
+            <button type="submit">Đăng nhập</button>
+
+        </form>
+
+    </div>
+</body>
+</html>

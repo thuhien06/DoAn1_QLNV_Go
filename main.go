@@ -38,6 +38,8 @@ func main() {
 	// Khai báo đường dẫn trang chủ
 	http.HandleFunc("/", home)
 
+	http.HandleFunc("/dangnhap", routes.DangNhap(db))
+
 	//////////////////NHÂN VIÊN
 
 	// Khai báo đường dẫn quản lý nhân viên
