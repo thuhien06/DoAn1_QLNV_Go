@@ -50,6 +50,21 @@ func DangNhap(db *sql.DB) http.HandlerFunc {
 				return
 			}
 
+			var maNV string
+
+			if vaiTro == "nhanvien" {
+				err = db.QueryRow(`
+					SELECT ma_nv
+					FROM taikhoan
+					WHERE ten_dang_nhap = ?
+				`, tenDangNhap).Scan(&maNV)
+
+				if err != nil {
+					http.Error(w, "Tài khoản nhân viên chưa được liên kết", http.StatusInternalServerError)
+					return
+				}
+			}
+
 			// Tạo session
 			session, err := Store.Get(r, "qlnv-session")
 			if err != nil {
@@ -59,6 +74,7 @@ func DangNhap(db *sql.DB) http.HandlerFunc {
 
 			session.Values["ten_dang_nhap"] = tenDangNhap
 			session.Values["vai_tro"] = vaiTro
+			session.Values["ma_nv"] = maNV
 			session.Values["da_dang_nhap"] = true
 
 			err = session.Save(r, w)

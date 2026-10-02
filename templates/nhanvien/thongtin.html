@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông tin cá nhân</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <h1>THÔNG TIN CÁ NHÂN</h1>
+
+        <p><strong>Mã nhân viên:</strong> {{.MaNV}}</p>
+        <p><strong>Họ tên:</strong> {{.HoTen}}</p>
+        <p><strong>Ngày sinh:</strong> {{if .NgaySinh}}{{.NgaySinh.Format "02-01-2006"}}{{end}}</p>
+        <p><strong>Giới tính:</strong> {{.GioiTinh}}</p>
+        <p><strong>Số điện thoại:</strong> {{.SoDienThoai}}</p>
+        <p><strong>Email:</strong> {{.Email}}</p>
+        <p><strong>Địa chỉ:</strong> {{.DiaChi}}</p>
+        <p><strong>Ngày vào làm:</strong> {{if .NgayVaoLam}}{{.NgayVaoLam.Format "02-01-2006"}}{{end}}</p>
+        <p><strong>Phòng ban:</strong> {{.PhongBan}}</p>
+        <p><strong>Chức vụ:</strong> {{.ChucVu}}</p>
+
+        <br>
+
+        <a href="/">Trang chủ</a>
+        |
+        <a href="/dangxuat">Đăng xuất</a>
+
+    </div>
+</body>
+</html>

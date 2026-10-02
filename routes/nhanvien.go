@@ -273,3 +273,57 @@ func XoaNhanVien(db *sql.DB) http.HandlerFunc {
 		http.Redirect(w, r, "/nhanvien", http.StatusSeeOther)
 	}
 }
+
+// Thông tin cá nhân của nhân viên đang đăng nhập
+func ThongTinCaNhan(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		session, err := Store.Get(r, "qlnv-session")
+		if err != nil {
+			http.Redirect(w, r, "/dangnhap", http.StatusSeeOther)
+			return
+		}
+
+		maNV, ok := session.Values["ma_nv"].(string)
+		if !ok || maNV == "" {
+			http.Error(w, "Tài khoản chưa được liên kết với nhân viên", http.StatusForbidden)
+			return
+		}
+
+		var nv models.NhanVien
+
+		err = db.QueryRow(`
+			SELECT id, ma_nv, ho_ten, ngay_sinh, gioi_tinh,
+			       so_dien_thoai, email, dia_chi,
+			       ngay_vao_lam, phong_ban, chuc_vu
+			FROM nhanvien
+			WHERE ma_nv = ?
+		`, maNV).Scan(
+			&nv.ID,
+			&nv.MaNV,
+			&nv.HoTen,
+			&nv.NgaySinh,
+			&nv.GioiTinh,
+			&nv.SoDienThoai,
+			&nv.Email,
+			&nv.DiaChi,
+			&nv.NgayVaoLam,
+			&nv.PhongBan,
+			&nv.ChucVu,
+		)
+
+		if err != nil {
+			http.Error(w, "Không tìm thấy thông tin nhân viên", http.StatusNotFound)
+			return
+		}
+
+		tmpl := template.Must(
+			template.ParseFiles("templates/nhanvien/thongtin.html"),
+		)
+
+		err = tmpl.Execute(w, nv)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
+}
