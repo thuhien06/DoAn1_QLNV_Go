@@ -39,6 +39,7 @@ func main() {
 	http.HandleFunc("/", routes.DaDangNhap(home))
 
 	http.HandleFunc("/dangnhap", routes.DangNhap(db))
+	http.HandleFunc("/dangxuat", routes.DangXuat)
 
 	//////////////////NHÂN VIÊN
 
