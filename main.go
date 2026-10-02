@@ -42,49 +42,174 @@ func main() {
 
 	//////////////////NHÂN VIÊN
 
-	// Khai báo đường dẫn quản lý nhân viên sau đăng nhập
-	http.HandleFunc("/nhanvien", routes.DaDangNhap(routes.DanhSachNhanVien(db)))
+	http.HandleFunc("/nhanvien",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.DanhSachNhanVien(db),
+			),
+		),
+	)
 
-	// Thêm nhân viên
-	http.HandleFunc("/nhanvien/them", routes.DaDangNhap(routes.ThemNhanVien(db)))
+	http.HandleFunc("/nhanvien/them",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.ThemNhanVien(db),
+			),
+		),
+	)
 
-	// Khai báo đường dẫn sửa nhân viên
-	http.HandleFunc("/nhanvien/sua", routes.DaDangNhap(routes.SuaNhanVien(db)))
+	http.HandleFunc("/nhanvien/sua",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.SuaNhanVien(db),
+			),
+		),
+	)
 
-	// Xóa nhân viên
-	http.HandleFunc("/nhanvien/xoa", routes.DaDangNhap(routes.XoaNhanVien(db)))
+	http.HandleFunc("/nhanvien/xoa",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin")(
+				routes.XoaNhanVien(db),
+			),
+		),
+	)
 
 	//////////////////HỢP ĐỒNG
 
 	// Khai báo đường dẫn quản lý hợp đồng
-	http.HandleFunc("/hopdong", routes.DaDangNhap(routes.DanhSachHopDong(db)))
-	http.HandleFunc("/hopdong/them", routes.DaDangNhap(routes.ThemHopDong(db)))
-	http.HandleFunc("/hopdong/sua", routes.DaDangNhap(routes.SuaHopDong(db)))
-	http.HandleFunc("/hopdong/xoa", routes.DaDangNhap(routes.XoaHopDong(db)))
+	http.HandleFunc("/hopdong",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.DanhSachHopDong(db),
+			),
+		),
+	)
 
+	http.HandleFunc("/hopdong/them",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.ThemHopDong(db),
+			),
+		),
+	)
+
+	http.HandleFunc("/hopdong/sua",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.SuaHopDong(db),
+			),
+		),
+	)
+
+	http.HandleFunc("/hopdong/xoa",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin")(
+				routes.XoaHopDong(db),
+			),
+		),
+	)
 	//////////////////CHẤM CÔNG
 
 	// Khai báo đường dẫn quản lý chấm công
-	http.HandleFunc("/chamcong", routes.DaDangNhap(routes.DanhSachChamCong(db)))
-	http.HandleFunc("/chamcong/them", routes.DaDangNhap(routes.ThemChamCong(db)))
-	http.HandleFunc("/chamcong/sua", routes.DaDangNhap(routes.SuaChamCong(db)))
-	http.HandleFunc("/chamcong/xoa", routes.DaDangNhap(routes.XoaChamCong(db)))
+	http.HandleFunc("/chamcong",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.DanhSachChamCong(db),
+			),
+		),
+	)
+
+	http.HandleFunc("/chamcong/them",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.ThemChamCong(db),
+			),
+		),
+	)
+
+	http.HandleFunc("/chamcong/sua",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.SuaChamCong(db),
+			),
+		),
+	)
+
+	http.HandleFunc("/chamcong/xoa",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin")(
+				routes.XoaChamCong(db),
+			),
+		),
+	)
 
 	//////////////////NGHI PHEP
 
-	// Khai báo đường dẫn quản lý nghỉ phép
-	http.HandleFunc("/nghiphep", routes.DaDangNhap(routes.DanhSachNghiPhep(db)))
-	http.HandleFunc("/nghiphep/them", routes.DaDangNhap(routes.ThemNghiPhep(db)))
-	http.HandleFunc("/nghiphep/sua", routes.DaDangNhap(routes.SuaNghiPhep(db)))
-	http.HandleFunc("/nghiphep/xoa", routes.DaDangNhap(routes.XoaNghiPhep(db)))
+	http.HandleFunc("/nghiphep",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.DanhSachNghiPhep(db),
+			),
+		),
+	)
+
+	http.HandleFunc("/nghiphep/them",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.ThemNghiPhep(db),
+			),
+		),
+	)
+
+	http.HandleFunc("/nghiphep/sua",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.SuaNghiPhep(db),
+			),
+		),
+	)
+
+	http.HandleFunc("/nghiphep/xoa",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin")(
+				routes.XoaNghiPhep(db),
+			),
+		),
+	)
 
 	//////////////////BANG LUONG
 
-	// Khai báo đường dẫn quản lý bảng lương
-	http.HandleFunc("/bangluong", routes.DaDangNhap(routes.DanhSachBangLuong(db)))
-	http.HandleFunc("/bangluong/them", routes.DaDangNhap(routes.ThemBangLuong(db)))
-	http.HandleFunc("/bangluong/sua", routes.DaDangNhap(routes.SuaBangLuong(db)))
-	http.HandleFunc("/bangluong/xoa", routes.DaDangNhap(routes.XoaBangLuong(db)))
+	http.HandleFunc("/bangluong",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.DanhSachBangLuong(db),
+			),
+		),
+	)
+
+	http.HandleFunc("/bangluong/them",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.ThemBangLuong(db),
+			),
+		),
+	)
+
+	http.HandleFunc("/bangluong/sua",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.SuaBangLuong(db),
+			),
+		),
+	)
+
+	http.HandleFunc("/bangluong/xoa",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin")(
+				routes.XoaBangLuong(db),
+			),
+		),
+	)
 
 	// Cho phép truy cập các file CSS, JavaScript, hình ảnh...
 	http.Handle(
