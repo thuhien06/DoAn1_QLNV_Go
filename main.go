@@ -75,6 +75,7 @@ func main() {
 		),
 	)
 
+	// nhân viên chỉ xem được thông tin của bản thân
 	http.HandleFunc(
 		"/thongtin-ca-nhan",
 		routes.DaDangNhap(
@@ -118,6 +119,7 @@ func main() {
 			),
 		),
 	)
+
 	//////////////////CHẤM CÔNG
 
 	// Khai báo đường dẫn quản lý chấm công
@@ -153,6 +155,7 @@ func main() {
 		),
 	)
 
+	// nhân viên chỉ xem được công của bản thâ
 	http.HandleFunc(
 		"/chamcong-ca-nhan",
 		routes.DaDangNhap(
@@ -192,6 +195,16 @@ func main() {
 		routes.DaDangNhap(
 			routes.CoVaiTro("admin")(
 				routes.XoaNghiPhep(db),
+			),
+		),
+	)
+
+	// nhân viên chỉ xem được nghỉ phép của bản thân
+	http.HandleFunc(
+		"/nghiphep-ca-nhan",
+		routes.DaDangNhap(
+			routes.CoVaiTro("nhanvien")(
+				routes.NghiPhepCaNhan(db),
 			),
 		),
 	)

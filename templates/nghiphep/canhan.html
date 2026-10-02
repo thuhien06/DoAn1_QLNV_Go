@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nghỉ phép cá nhân</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+<div class="container">
+
+    <h1>NGHỈ PHÉP CÁ NHÂN</h1>
+
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>Ngày bắt đầu</th>
+            <th>Ngày kết thúc</th>
+            <th>Loại nghỉ</th>
+            <th>Lý do</th>
+            <th>Trạng thái</th>
+            <th>Ghi chú</th>
+        </tr>
+
+        {{range .}}
+        <tr>
+            <td>{{if .NgayBatDau}}{{.NgayBatDau.Format "02-01-2006"}}{{end}}</td>
+            <td>{{if .NgayKetThuc}}{{.NgayKetThuc.Format "02-01-2006"}}{{end}}</td>
+            <td>{{.LoaiNghi}}</td>
+            <td>{{.LyDo}}</td>
+            <td>{{.TrangThai}}</td>
+            <td>{{.GhiChu}}</td>
+        </tr>
+        {{else}}
+        <tr>
+            <td colspan="6">Chưa có dữ liệu nghỉ phép.</td>
+        </tr>
+        {{end}}
+    </table>
+
+    <br>
+
+    <a href="/thongtin-ca-nhan">Thông tin cá nhân</a>
+    |
+    <a href="/chamcong-ca-nhan">Chấm công cá nhân</a>
+    |
+    <a href="/">Trang chủ</a>
+    |
+    <a href="/dangxuat">Đăng xuất</a>
+
+</div>
+</body>
+</html>

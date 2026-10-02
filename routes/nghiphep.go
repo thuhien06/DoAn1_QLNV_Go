@@ -244,3 +244,68 @@ func XoaNghiPhep(db *sql.DB) http.HandlerFunc {
 		http.Redirect(w, r, "/nghiphep", http.StatusSeeOther)
 	}
 }
+
+func NghiPhepCaNhan(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		session, err := Store.Get(r, "qlnv-session")
+		if err != nil {
+			http.Redirect(w, r, "/dangnhap", http.StatusSeeOther)
+			return
+		}
+
+		maNV, ok := session.Values["ma_nv"].(string)
+		if !ok || maNV == "" {
+			http.Error(w, "Tài khoản chưa được liên kết với nhân viên", http.StatusForbidden)
+			return
+		}
+
+		rows, err := db.Query(`
+			SELECT id, ma_nv, ngay_bat_dau, ngay_ket_thuc,
+			       loai_nghi, ly_do, trang_thai, ghi_chu
+			FROM nghiphep
+			WHERE ma_nv = ?
+			ORDER BY ngay_bat_dau DESC
+		`, maNV)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+
+		var danhSach []models.NghiPhep
+
+		for rows.Next() {
+			var np models.NghiPhep
+
+			err := rows.Scan(
+				&np.ID,
+				&np.MaNV,
+				&np.NgayBatDau,
+				&np.NgayKetThuc,
+				&np.LoaiNghi,
+				&np.LyDo,
+				&np.TrangThai,
+				&np.GhiChu,
+			)
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			danhSach = append(danhSach, np)
+		}
+
+		tmpl := template.Must(
+			template.ParseFiles("templates/nghiphep/canhan.html"),
+		)
+
+		err = tmpl.Execute(w, danhSach)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+}
