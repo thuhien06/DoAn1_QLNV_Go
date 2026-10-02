@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chấm công cá nhân</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+<div class="container">
+
+    <h1>CHẤM CÔNG CÁ NHÂN</h1>
+
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>Ngày</th>
+            <th>Giờ vào</th>
+            <th>Giờ ra</th>
+            <th>Trạng thái</th>
+            <th>Ghi chú</th>
+        </tr>
+
+        {{range .}}
+        <tr>
+            <td>{{if .NgayChamCong}}{{.NgayChamCong.Format "02-01-2006"}}{{end}}</td>
+            <td>{{.GioVao}}</td>
+            <td>{{.GioRa}}</td>
+            <td>{{.TrangThai}}</td>
+            <td>{{.GhiChu}}</td>
+        </tr>
+        {{else}}
+        <tr>
+            <td colspan="5">Chưa có dữ liệu chấm công.</td>
+        </tr>
+        {{end}}
+    </table>
+
+    <br>
+
+    <a href="/thongtin-ca-nhan">Thông tin cá nhân</a>
+    |
+    <a href="/">Trang chủ</a>
+    |
+    <a href="/dangxuat">Đăng xuất</a>
+
+</div>
+</body>
+</html>

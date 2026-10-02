@@ -75,6 +75,15 @@ func main() {
 		),
 	)
 
+	http.HandleFunc(
+		"/thongtin-ca-nhan",
+		routes.DaDangNhap(
+			routes.CoVaiTro("nhanvien")(
+				routes.ThongTinCaNhan(db),
+			),
+		),
+	)
+
 	//////////////////HỢP ĐỒNG
 
 	// Khai báo đường dẫn quản lý hợp đồng
@@ -140,6 +149,15 @@ func main() {
 		routes.DaDangNhap(
 			routes.CoVaiTro("admin")(
 				routes.XoaChamCong(db),
+			),
+		),
+	)
+
+	http.HandleFunc(
+		"/chamcong-ca-nhan",
+		routes.DaDangNhap(
+			routes.CoVaiTro("nhanvien")(
+				routes.ChamCongCaNhan(db),
 			),
 		),
 	)

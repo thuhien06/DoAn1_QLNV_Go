@@ -231,3 +231,66 @@ func XoaChamCong(db *sql.DB) http.HandlerFunc {
 		http.Redirect(w, r, "/chamcong", http.StatusSeeOther)
 	}
 }
+
+func ChamCongCaNhan(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		session, err := Store.Get(r, "qlnv-session")
+		if err != nil {
+			http.Redirect(w, r, "/dangnhap", http.StatusSeeOther)
+			return
+		}
+
+		maNV, ok := session.Values["ma_nv"].(string)
+		if !ok || maNV == "" {
+			http.Error(w, "Tài khoản chưa được liên kết với nhân viên", http.StatusForbidden)
+			return
+		}
+
+		rows, err := db.Query(`
+			SELECT id, ma_nv, ngay_cham_cong,
+			       gio_vao, gio_ra, trang_thai, ghi_chu
+			FROM chamcong
+			WHERE ma_nv = ?
+			ORDER BY ngay_cham_cong DESC
+		`, maNV)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+
+		var danhSach []models.ChamCong
+
+		for rows.Next() {
+			var cc models.ChamCong
+
+			err := rows.Scan(
+				&cc.ID,
+				&cc.MaNV,
+				&cc.NgayChamCong,
+				&cc.GioVao,
+				&cc.GioRa,
+				&cc.TrangThai,
+				&cc.GhiChu,
+			)
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			danhSach = append(danhSach, cc)
+		}
+
+		tmpl := template.Must(
+			template.ParseFiles("templates/chamcong/canhan.html"),
+		)
+
+		err = tmpl.Execute(w, danhSach)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
+}
