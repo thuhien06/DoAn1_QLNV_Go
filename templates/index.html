@@ -11,46 +11,78 @@
 
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <h1>HỆ THỐNG QUẢN LÝ NHÂN SỰ</h1>
+    <h1>HỆ THỐNG QUẢN LÝ NHÂN SỰ</h1>
 
-        <div style="text-align: right;">
-            <a href="/dangxuat">Đăng xuất</a>
-        </div>
+    <p>
+        Xin chào,
+        <strong>{{.TenDangNhap}}</strong>
+        ({{.VaiTro}})
+    </p>
 
-        <br>
+    <hr>
 
-        <div class="menu">
+    <!-- ADMIN và HR -->
+    {{if or (eq .VaiTro "admin") (eq .VaiTro "hr")}}
 
-            <!-- Chuyen den trang quan ly nhan vien -->
-            <a href="/nhanvien" class="menu-item">
-                Nhân viên
-            </a>
+    <h2>QUẢN LÝ NHÂN SỰ</h2>
 
-             <!-- Chuyen den trang quan ly hop dong -->
-            <a href="/hopdong" class="menu-item">
-                Hợp đồng
-            </a>
+    <div class="menu">
 
-             <!-- Chuyen den trang quan ly CHAM CONG -->
-            <a href="/chamcong" class="menu-item">
-                Chấm công
-            </a>
+        <a href="/nhanvien" class="menu-item">
+            Nhân viên
+        </a>
 
-            <!-- Chuyen den trang quan ly hop dong -->
-            <a href="/nghiphep" class="menu-item">
-                Nghỉ phép
-            </a>
+        <a href="/hopdong" class="menu-item">
+            Hợp đồng
+        </a>
 
-            <!-- Chuyen den trang quan ly bang luong -->
-            <a href="/bangluong" class="menu-item">
-                Bảng lương
-            </a>
+        <a href="/chamcong" class="menu-item">
+            Chấm công
+        </a>
 
-        </div>
+        <a href="/nghiphep" class="menu-item">
+            Nghỉ phép
+        </a>
+
+        <a href="/bangluong" class="menu-item">
+            Bảng lương
+        </a>
 
     </div>
+
+    {{end}}
+
+
+    <!-- NHÂN VIÊN -->
+    {{if eq .VaiTro "nhanvien"}}
+
+    <h2>THÔNG TIN CÁ NHÂN</h2>
+
+    <div class="menu">
+
+        <a href="/thongtin-ca-nhan" class="menu-item">
+            Thông tin cá nhân
+        </a>
+
+        <a href="/chamcong-ca-nhan" class="menu-item">
+            Chấm công cá nhân
+        </a>
+
+        <a href="/nghiphep-ca-nhan" class="menu-item">
+            Nghỉ phép cá nhân
+        </a>
+
+    </div>
+
+    {{end}}
+
+    <br>
+
+    <a href="/dangxuat">Đăng xuất</a>
+
+</div>
 
 </body>
 </html>

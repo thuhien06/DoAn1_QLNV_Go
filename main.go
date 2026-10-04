@@ -10,13 +10,33 @@ import (
 	"qlnv/routes"
 )
 
-// Hiển thị trang chủ
+type HomeData struct {
+	TenDangNhap string
+	VaiTro      string
+}
+
+// Hiển thị trang chủ theo vai trò
 func home(w http.ResponseWriter, r *http.Request) {
-	// Đọc file giao diện trang chủ
+	session, err := routes.Store.Get(r, "qlnv-session")
+	if err != nil {
+		http.Redirect(w, r, "/dangnhap", http.StatusSeeOther)
+		return
+	}
+
+	tenDangNhap, _ := session.Values["ten_dang_nhap"].(string)
+	vaiTro, _ := session.Values["vai_tro"].(string)
+
+	data := HomeData{
+		TenDangNhap: tenDangNhap,
+		VaiTro:      vaiTro,
+	}
+
 	tmpl := template.Must(template.ParseFiles("templates/index.html"))
 
-	// Hiển thị giao diện
-	tmpl.Execute(w, nil)
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func main() {
