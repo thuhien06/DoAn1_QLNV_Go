@@ -50,6 +50,15 @@
             Bảng lương
         </a>
 
+        <!-- Chỉ Admin -->
+        {{if eq .VaiTro "admin"}}
+
+        <a href="/taikhoan" class="menu-item">
+            Quản lý tài khoản
+        </a>
+
+        {{end}}
+
     </div>
 
     {{end}}

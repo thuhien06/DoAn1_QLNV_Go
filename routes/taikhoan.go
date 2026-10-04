@@ -31,13 +31,26 @@ func DanhSachTaiKhoan(db *sql.DB) http.HandlerFunc {
 		for rows.Next() {
 			var tk models.TaiKhoan
 
+			var maNV sql.NullString
+
 			err := rows.Scan(
 				&tk.ID,
 				&tk.TenDangNhap,
 				&tk.MatKhau,
 				&tk.VaiTro,
-				&tk.MaNV,
+				&maNV,
 			)
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if maNV.Valid {
+				tk.MaNV = maNV.String
+			} else {
+				tk.MaNV = ""
+			}
 
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
