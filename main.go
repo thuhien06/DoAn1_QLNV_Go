@@ -263,6 +263,44 @@ func main() {
 		),
 	)
 
+	//////////////////QUAN LY TAI KHOAN- QUYỀN CỦA ADMIN
+
+	http.HandleFunc(
+		"/taikhoan",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin")(
+				routes.DanhSachTaiKhoan(db),
+			),
+		),
+	)
+
+	http.HandleFunc(
+		"/taikhoan/them",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin")(
+				routes.ThemTaiKhoan(db),
+			),
+		),
+	)
+
+	http.HandleFunc(
+		"/taikhoan/sua",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin")(
+				routes.SuaTaiKhoan(db),
+			),
+		),
+	)
+
+	http.HandleFunc(
+		"/taikhoan/xoa",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin")(
+				routes.XoaTaiKhoan(db),
+			),
+		),
+	)
+
 	// Cho phép truy cập các file CSS, JavaScript, hình ảnh...
 	http.Handle(
 		"/static/",

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sửa tài khoản</title>
+
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>SỬA TÀI KHOẢN</h1>
+
+    <form action="/taikhoan/sua?id={{.ID}}" method="POST">
+
+        <label>Tên đăng nhập:</label>
+        <br>
+
+        <input
+            type="text"
+            name="ten_dang_nhap"
+            value="{{.TenDangNhap}}"
+            required
+        >
+
+        <br><br>
+
+        <label>Mật khẩu:</label>
+        <br>
+
+        <input
+            type="text"
+            name="mat_khau"
+            value="{{.MatKhau}}"
+            required
+        >
+
+        <br><br>
+
+        <label>Vai trò:</label>
+        <br>
+
+        <select name="vai_tro">
+
+            <option value="nhanvien"
+                {{if eq .VaiTro "nhanvien"}}selected{{end}}>
+                Nhân viên
+            </option>
+
+            <option value="hr"
+                {{if eq .VaiTro "hr"}}selected{{end}}>
+                HR
+            </option>
+
+            <option value="admin"
+                {{if eq .VaiTro "admin"}}selected{{end}}>
+                Admin
+            </option>
+
+        </select>
+
+        <br><br>
+
+        <label>Mã nhân viên:</label>
+        <br>
+
+        <input
+            type="text"
+            name="ma_nv"
+            value="{{.MaNV}}"
+        >
+
+        <br><br>
+
+        <button type="submit">
+            Lưu thay đổi
+        </button>
+
+    </form>
+
+    <br>
+
+    <a href="/taikhoan">
+        Quay lại
+    </a>
+
+</div>
+
+</body>
+</html>

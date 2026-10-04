@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Quản lý tài khoản</title>
+
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>QUẢN LÝ TÀI KHOẢN</h1>
+
+    <a href="/taikhoan/them">
+        + Thêm tài khoản
+    </a>
+
+    <br><br>
+
+    <table border="1" cellpadding="8">
+
+        <tr>
+            <th>ID</th>
+            <th>Tên đăng nhập</th>
+            <th>Vai trò</th>
+            <th>Mã nhân viên</th>
+            <th>Thao tác</th>
+        </tr>
+
+        {{range .}}
+
+        <tr>
+
+            <td>{{.ID}}</td>
+
+            <td>{{.TenDangNhap}}</td>
+
+            <td>{{.VaiTro}}</td>
+
+            <td>{{.MaNV}}</td>
+
+            <td>
+
+                <a href="/taikhoan/sua?id={{.ID}}">
+                    Sửa
+                </a>
+
+                |
+
+                <a
+                    href="/taikhoan/xoa?id={{.ID}}"
+                    onclick="return confirm('Bạn có chắc muốn xóa tài khoản này?')"
+                >
+                    Xóa
+                </a>
+
+            </td>
+
+        </tr>
+
+        {{else}}
+
+        <tr>
+            <td colspan="5">
+                Chưa có tài khoản.
+            </td>
+        </tr>
+
+        {{end}}
+
+    </table>
+
+    <br>
+
+    <a href="/">Trang chủ</a>
+
+    |
+
+    <a href="/dangxuat">Đăng xuất</a>
+
+</div>
+
+</body>
+</html>

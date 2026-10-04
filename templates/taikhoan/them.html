@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Thêm tài khoản</title>
+
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>THÊM TÀI KHOẢN</h1>
+
+    <form action="/taikhoan/them" method="POST">
+
+        <label>Tên đăng nhập:</label>
+        <br>
+
+        <input
+            type="text"
+            name="ten_dang_nhap"
+            required
+        >
+
+        <br><br>
+
+        <label>Mật khẩu:</label>
+        <br>
+
+        <input
+            type="password"
+            name="mat_khau"
+            required
+        >
+
+        <br><br>
+
+        <label>Vai trò:</label>
+        <br>
+
+        <select name="vai_tro" required>
+
+            <option value="nhanvien">
+                Nhân viên
+            </option>
+
+            <option value="hr">
+                HR
+            </option>
+
+            <option value="admin">
+                Admin
+            </option>
+
+        </select>
+
+        <br><br>
+
+        <label>Mã nhân viên:</label>
+        <br>
+
+        <input
+            type="text"
+            name="ma_nv"
+            placeholder="Ví dụ: NV002"
+        >
+
+        <br><br>
+
+        <button type="submit">
+            Tạo tài khoản
+        </button>
+
+    </form>
+
+    <br>
+
+    <a href="/taikhoan">
+        Quay lại
+    </a>
+
+</div>
+
+</body>
+</html>
