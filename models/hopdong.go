@@ -27,4 +27,6 @@ type HopDong struct {
 
 	// Ghi chú
 	GhiChu string
+
+	TrangThai string
 }

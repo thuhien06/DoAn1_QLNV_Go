@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"qlnv/models"
+	"time"
 )
 
 // Danh sách hợp đồng
@@ -48,6 +49,35 @@ func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 				http.Error(w, "Lỗi đọc dữ liệu: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
+
+			if hd.NgayKetThuc == nil {
+				hd.TrangThai = "Không xác định"
+			} else {
+				homNay := time.Now()
+				homNay = time.Date(
+					homNay.Year(), homNay.Month(), homNay.Day(),
+					0, 0, 0, 0, homNay.Location(),
+				)
+
+				ngayKT := *hd.NgayKetThuc
+				ngayKT = time.Date(
+					ngayKT.Year(), ngayKT.Month(), ngayKT.Day(),
+					0, 0, 0, 0, homNay.Location(),
+				)
+
+				soNgay := int(ngayKT.Sub(homNay).Hours() / 24)
+
+				switch {
+				case soNgay < 0:
+					hd.TrangThai = "Đã hết hạn"
+				case soNgay <= 30:
+					hd.TrangThai = "Sắp hết hạn"
+				default:
+					hd.TrangThai = "Còn hạn"
+				}
+			}
+
+			danhSach = append(danhSach, hd)
 
 			danhSach = append(danhSach, hd)
 		}
