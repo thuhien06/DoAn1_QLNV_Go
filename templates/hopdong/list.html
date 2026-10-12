@@ -32,6 +32,7 @@
                 <th>Ngày kết thúc</th>
                 <th>Lương cơ bản</th>
                 <th>Ghi chú</th>
+                 <th>Trạng thái</th>
                 <th>Thao tác</th>
             </tr>
         </thead>
@@ -58,6 +59,8 @@
 
                 <td>{{printf "%.0f" .LuongCoBan}}</td>
                 <td>{{.GhiChu}}</td>
+
+                <td>{{.TrangThai}}</td>
 
                 <td>
                     <a href="/hopdong/sua?id={{.ID}}">

@@ -78,8 +78,6 @@ func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 			}
 
 			danhSach = append(danhSach, hd)
-
-			danhSach = append(danhSach, hd)
 		}
 
 		tmpl := template.Must(template.ParseFiles(
