@@ -258,69 +258,156 @@ func ThemHopDong(db *sql.DB) http.HandlerFunc {
 // Sửa hợp đồng
 func SuaHopDong(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		id := r.URL.Query().Get("id")
 
 		if r.Method == http.MethodGet {
-
 			var hd models.HopDong
 
+			var nhomHopDong, loaiHopDong sql.NullString
+			var luongCoBan sql.NullFloat64
+
 			err := db.QueryRow(`
-				SELECT id, ma_hd, ma_nv, loai_hop_dong,
-				       ngay_bat_dau, ngay_ket_thuc,
-				       luong_co_ban, ghi_chu
+				SELECT id, ma_hd, ma_nv, nhom_hop_dong,
+				       loai_hop_dong, ngay_bat_dau, ngay_ket_thuc,
+				       luong_co_ban, ghi_chu, doi_tac,
+				       nguoi_dai_dien, noi_dung, gia_tri,
+				       ngay_ky, dich_vu_thiet_bi, chi_phi
 				FROM hopdong
 				WHERE id = ?
 			`, id).Scan(
 				&hd.ID,
 				&hd.MaHD,
 				&hd.MaNV,
-				&hd.LoaiHopDong,
+				&nhomHopDong,
+				&loaiHopDong,
 				&hd.NgayBatDau,
 				&hd.NgayKetThuc,
-				&hd.LuongCoBan,
+				&luongCoBan,
 				&hd.GhiChu,
+				&hd.DoiTac,
+				&hd.NguoiDaiDien,
+				&hd.NoiDung,
+				&hd.GiaTri,
+				&hd.NgayKy,
+				&hd.DichVuThietBi,
+				&hd.ChiPhi,
 			)
 
 			if err != nil {
-				http.Error(w, "Không tìm thấy hợp đồng", http.StatusNotFound)
+				http.Error(w, "Không tìm thấy hợp đồng: "+err.Error(), http.StatusNotFound)
 				return
 			}
 
-			tmpl := template.Must(template.ParseFiles(
-				"templates/hopdong/sua.html",
-			))
+			hd.NhomHopDong = nhomHopDong.String
+			hd.LoaiHopDong = loaiHopDong.String
+			if luongCoBan.Valid {
+				hd.LuongCoBan = luongCoBan.Float64
+			}
 
-			tmpl.Execute(w, hd)
+			funcMap := template.FuncMap{
+				"deref": func(v *float64) float64 {
+					if v == nil {
+						return 0
+					}
+					return *v
+				},
+			}
+
+			tmpl := template.Must(
+				template.New("sua.html").
+					Funcs(funcMap).
+					ParseFiles("templates/hopdong/sua.html"),
+			)
+			if err := tmpl.Execute(w, hd); err != nil {
+				http.Error(w, "Lỗi hiển thị hợp đồng: "+err.Error(), http.StatusInternalServerError)
+			}
+			return
+		}
+
+		if r.Method != http.MethodPost {
+			http.Error(w, "Phương thức không được hỗ trợ", http.StatusMethodNotAllowed)
 			return
 		}
 
 		maHD := r.FormValue("ma_hd")
 		maNV := r.FormValue("ma_nv")
-		loaiHopDong := r.FormValue("loai_hop_dong")
+		nhom := r.FormValue("nhom_hop_dong")
+		loai := r.FormValue("loai_hop_dong")
 		ngayBatDau := r.FormValue("ngay_bat_dau")
 		ngayKetThuc := r.FormValue("ngay_ket_thuc")
 		luongCoBan := r.FormValue("luong_co_ban")
 		ghiChu := r.FormValue("ghi_chu")
 
+		doiTac := r.FormValue("doi_tac")
+		nguoiDaiDien := r.FormValue("nguoi_dai_dien")
+		noiDung := r.FormValue("noi_dung")
+		giaTri := r.FormValue("gia_tri")
+		ngayKy := r.FormValue("ngay_ky")
+		dichVuThietBi := r.FormValue("dich_vu_thiet_bi")
+		chiPhi := r.FormValue("chi_phi")
+
+		if nhom != "lao_dong" &&
+			nhom != "kinh_doanh" &&
+			nhom != "van_hanh" {
+			http.Error(w, "Nhóm hợp đồng không hợp lệ", http.StatusBadRequest)
+			return
+		}
+
+		// Chỉ giữ các trường phù hợp với nhóm hợp đồng.
+		if nhom == "lao_dong" {
+			doiTac, nguoiDaiDien, noiDung = "", "", ""
+			giaTri, ngayKy, dichVuThietBi, chiPhi = "", "", "", ""
+		} else {
+			loai, luongCoBan = "", ""
+			if nhom == "kinh_doanh" {
+				dichVuThietBi, chiPhi = "", ""
+			} else {
+				nguoiDaiDien, giaTri = "", ""
+			}
+		}
+
+		// Chuyển các trường tùy chọn rỗng thành NULL.
+		nullable := func(s string) interface{} {
+			if s == "" {
+				return nil
+			}
+			return s
+		}
+
 		_, err := db.Exec(`
 			UPDATE hopdong
 			SET ma_hd = ?,
 			    ma_nv = ?,
+			    nhom_hop_dong = ?,
 			    loai_hop_dong = ?,
 			    ngay_bat_dau = ?,
 			    ngay_ket_thuc = ?,
 			    luong_co_ban = ?,
-			    ghi_chu = ?
+			    ghi_chu = ?,
+			    doi_tac = ?,
+			    nguoi_dai_dien = ?,
+			    noi_dung = ?,
+			    gia_tri = ?,
+			    ngay_ky = ?,
+			    dich_vu_thiet_bi = ?,
+			    chi_phi = ?
 			WHERE id = ?
 		`,
 			maHD,
 			maNV,
-			loaiHopDong,
-			ngayBatDau,
-			ngayKetThuc,
-			luongCoBan,
+			nhom,
+			nullable(loai),
+			nullable(ngayBatDau),
+			nullable(ngayKetThuc),
+			nullable(luongCoBan),
 			ghiChu,
+			nullable(doiTac),
+			nullable(nguoiDaiDien),
+			nullable(noiDung),
+			nullable(giaTri),
+			nullable(ngayKy),
+			nullable(dichVuThietBi),
+			nullable(chiPhi),
 			id,
 		)
 

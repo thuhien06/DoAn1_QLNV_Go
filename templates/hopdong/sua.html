@@ -7,86 +7,189 @@
 </head>
 <body>
 
-    <h1>SỬA HỢP ĐỒNG</h1>
+<h1>SỬA HỢP ĐỒNG</h1>
 
-    <form action="/hopdong/sua?id={{.ID}}" method="POST">
+<form action="/hopdong/sua?id={{.ID}}" method="POST">
+
+    <p>
+        <label>Mã hợp đồng:</label><br>
+        <input type="text" name="ma_hd" value="{{.MaHD}}" required>
+    </p>
+
+    <p>
+        <label>Mã nhân viên phụ trách:</label><br>
+        <input type="text" name="ma_nv" value="{{.MaNV}}" required>
+    </p>
+
+    <p>
+        <label>Nhóm hợp đồng:</label><br>
+        <select name="nhom_hop_dong" id="nhom_hop_dong"
+                onchange="hienThiForm()" required>
+            <option value="lao_dong"
+                {{if eq .NhomHopDong "lao_dong"}}selected{{end}}>
+                Lao động
+            </option>
+            <option value="kinh_doanh"
+                {{if eq .NhomHopDong "kinh_doanh"}}selected{{end}}>
+                Kinh doanh
+            </option>
+            <option value="van_hanh"
+                {{if eq .NhomHopDong "van_hanh"}}selected{{end}}>
+                Vận hành
+            </option>
+        </select>
+    </p>
+
+    <!-- HỢP ĐỒNG LAO ĐỘNG -->
+    <div id="formLaoDong">
+        <h3>Thông tin hợp đồng lao động</h3>
 
         <p>
-            <label>Mã hợp đồng:</label><br>
-            <input type="text"
-                   name="ma_hd"
-                   value="{{.MaHD}}"
-                   required>
-        </p>
-
-        <p>
-            <label>Mã nhân viên:</label><br>
-            <input type="text"
-                   name="ma_nv"
-                   value="{{.MaNV}}"
-                   required>
-        </p>
-
-        <p>
-            <label>Loại hợp đồng:</label><br>
+            <label>Loại hợp đồng lao động:</label><br>
             <select name="loai_hop_dong">
-
                 <option value="Thử việc"
                     {{if eq .LoaiHopDong "Thử việc"}}selected{{end}}>
                     Thử việc
                 </option>
-
                 <option value="Xác định thời hạn"
                     {{if eq .LoaiHopDong "Xác định thời hạn"}}selected{{end}}>
                     Xác định thời hạn
                 </option>
-
                 <option value="Không xác định thời hạn"
                     {{if eq .LoaiHopDong "Không xác định thời hạn"}}selected{{end}}>
                     Không xác định thời hạn
                 </option>
-
             </select>
         </p>
 
         <p>
-            <label>Ngày bắt đầu:</label><br>
-            <input type="date"
-                   name="ngay_bat_dau"
-                   value="{{if .NgayBatDau}}{{.NgayBatDau.Format "2006-01-02"}}{{end}}">
-        </p>
-
-        <p>
-            <label>Ngày kết thúc:</label><br>
-            <input type="date"
-                   name="ngay_ket_thuc"
-                   value="{{if .NgayKetThuc}}{{.NgayKetThuc.Format "2006-01-02"}}{{end}}">
-        </p>
-
-        <p>
             <label>Lương cơ bản:</label><br>
-            <input type="number"
-                   name="luong_co_ban"
-                   step="0.01"
-                   value="{{.LuongCoBan}}">
+            <input type="number" name="luong_co_ban"
+                   step="0.01" min="0" value="{{.LuongCoBan}}">
+        </p>
+    </div>
+
+    <!-- HỢP ĐỒNG KINH DOANH -->
+    <div id="formKinhDoanh">
+        <h3>Thông tin hợp đồng kinh doanh</h3>
+
+        <p>
+            <label>Đối tác:</label><br>
+            <input type="text" name="doi_tac"
+                   value="{{if .DoiTac}}{{.DoiTac}}{{end}}">
         </p>
 
         <p>
-            <label>Ghi chú:</label><br>
-            <input type="text"
-                   name="ghi_chu"
-                   value="{{.GhiChu}}">
+            <label>Người đại diện:</label><br>
+            <input type="text" name="nguoi_dai_dien"
+                   value="{{if .NguoiDaiDien}}{{.NguoiDaiDien}}{{end}}">
         </p>
 
-        <button type="submit">
-            Lưu thay đổi
-        </button>
+        <p>
+            <label>Nội dung hợp đồng:</label><br>
+            <textarea name="noi_dung">{{if .NoiDung}}{{.NoiDung}}{{end}}</textarea>
+        </p>
 
-        <a href="/hopdong">
-            Quay lại
-        </a>
+        <p>
+            <label>Giá trị hợp đồng:</label><br>
+            <input type="number" name="gia_tri" min="0" step="0.01"
+                   value="{{if .GiaTri}}{{printf "%.0f" (deref .GiaTri)}}{{end}}">
+        </p>
 
-    </form>
+        <p>
+            <label>Ngày ký:</label><br>
+            <input type="date" name="ngay_ky"
+                   value="{{if .NgayKy}}{{.NgayKy.Format "2006-01-02"}}{{end}}">
+        </p>
+    </div>
+
+    <!-- HỢP ĐỒNG VẬN HÀNH -->
+    <div id="formVanHanh">
+        <h3>Thông tin hợp đồng vận hành</h3>
+
+        <p>
+            <label>Đối tác/Nhà cung cấp:</label><br>
+            <input type="text" name="doi_tac"
+                   value="{{if .DoiTac}}{{.DoiTac}}{{end}}">
+        </p>
+
+        <p>
+            <label>Dịch vụ/Thiết bị:</label><br>
+            <input type="text" name="dich_vu_thiet_bi"
+                   value="{{if .DichVuThietBi}}{{.DichVuThietBi}}{{end}}">
+        </p>
+
+        <p>
+            <label>Nội dung công việc:</label><br>
+            <textarea name="noi_dung">{{if .NoiDung}}{{.NoiDung}}{{end}}</textarea>
+        </p>
+
+        <p>
+            <label>Chi phí:</label><br>
+            <input type="number" name="chi_phi" min="0" step="0.01"
+                   value="{{if .ChiPhi}}{{printf "%.0f" (deref .ChiPhi)}}{{end}}">
+        </p>
+
+        <p>
+            <label>Ngày ký:</label><br>
+            <input type="date" name="ngay_ky"
+                   value="{{if .NgayKy}}{{.NgayKy.Format "2006-01-02"}}{{end}}">
+        </p>
+    </div>
+
+    <!-- THÔNG TIN CHUNG -->
+    <h3>Thông tin chung</h3>
+
+    <p>
+        <label>Ngày bắt đầu:</label><br>
+        <input type="date" name="ngay_bat_dau"
+               value="{{if .NgayBatDau}}{{.NgayBatDau.Format "2006-01-02"}}{{end}}">
+    </p>
+
+    <p>
+        <label>Ngày kết thúc:</label><br>
+        <input type="date" name="ngay_ket_thuc"
+               value="{{if .NgayKetThuc}}{{.NgayKetThuc.Format "2006-01-02"}}{{end}}">
+    </p>
+
+    <p>
+        <label>Ghi chú:</label><br>
+        <textarea name="ghi_chu">{{.GhiChu}}</textarea>
+    </p>
+
+    <button type="submit">Lưu thay đổi</button>
+    <a href="/hopdong">Quay lại</a>
+
+</form>
+
+<script>
+function hienThiForm() {
+    const nhom = document.getElementById("nhom_hop_dong").value;
+
+    document.getElementById("formLaoDong").style.display =
+        nhom === "lao_dong" ? "block" : "none";
+
+    document.getElementById("formKinhDoanh").style.display =
+        nhom === "kinh_doanh" ? "block" : "none";
+
+    document.getElementById("formVanHanh").style.display =
+        nhom === "van_hanh" ? "block" : "none";
+
+    document.querySelectorAll(
+        "#formLaoDong input, #formLaoDong select, #formLaoDong textarea"
+    ).forEach(el => el.disabled = nhom !== "lao_dong");
+
+    document.querySelectorAll(
+        "#formKinhDoanh input, #formKinhDoanh select, #formKinhDoanh textarea"
+    ).forEach(el => el.disabled = nhom !== "kinh_doanh");
+
+    document.querySelectorAll(
+        "#formVanHanh input, #formVanHanh select, #formVanHanh textarea"
+    ).forEach(el => el.disabled = nhom !== "van_hanh");
+}
+
+hienThiForm();
+</script>
 
 </body>
 </html>
