@@ -416,9 +416,20 @@ func ChiTietHopDong(db *sql.DB) http.HandlerFunc {
 			hd.ChiPhi = &chiPhi.Float64
 		}
 
-		tmpl := template.Must(template.ParseFiles(
-			"templates/hopdong/chitiet.html",
-		))
+		funcMap := template.FuncMap{
+			"deref": func(v *float64) float64 {
+				if v == nil {
+					return 0
+				}
+				return *v
+			},
+		}
+
+		tmpl := template.Must(
+			template.New("chitiet.html").
+				Funcs(funcMap).
+				ParseFiles("templates/hopdong/chitiet.html"),
+		)
 
 		if err := tmpl.Execute(w, hd); err != nil {
 			http.Error(w, "Lỗi hiển thị chi tiết hợp đồng",

@@ -9,7 +9,51 @@
 
     <p>Mã hợp đồng: {{.MaHD}}</p>
     <p>Mã nhân viên: {{.MaNV}}</p>
-    <p>Loại hợp đồng: {{.NhomHopDong}}</p>
+
+    <p>Nhóm hợp đồng:
+        {{if eq .NhomHopDong "lao_dong"}}
+            Lao động
+        {{else if eq .NhomHopDong "kinh_doanh"}}
+            Kinh doanh
+        {{else if eq .NhomHopDong "van_hanh"}}
+            Vận hành
+        {{else}}
+            Chưa phân loại
+        {{end}}
+    </p>
+
+    {{if eq .NhomHopDong "lao_dong"}}
+        <h3>Thông tin hợp đồng lao động</h3>
+        <p>Loại hợp đồng lao động: {{.LoaiHopDong}}</p>
+        <p>Lương cơ bản: {{printf "%.0f" .LuongCoBan}} VNĐ</p>
+    {{end}}
+
+    {{if eq .NhomHopDong "kinh_doanh"}}
+        <h3>Thông tin hợp đồng kinh doanh</h3>
+        <p>Đối tác: {{if .DoiTac}}{{.DoiTac}}{{end}}</p>
+        <p>Người đại diện: {{if .NguoiDaiDien}}{{.NguoiDaiDien}}{{end}}</p>
+        <p>Nội dung: {{if .NoiDung}}{{.NoiDung}}{{end}}</p>
+        <p>Giá trị: {{if .GiaTri}}{{printf "%.0f" (deref .GiaTri)}} VNĐ{{end}}</p>
+        <p>Ngày ký: {{if .NgayKy}}{{.NgayKy.Format "02-01-2006"}}{{end}}</p>
+    {{end}}
+
+    {{if eq .NhomHopDong "van_hanh"}}
+        <h3>Thông tin hợp đồng vận hành</h3>
+        <p>Đối tác/Nhà cung cấp: {{if .DoiTac}}{{.DoiTac}}{{end}}</p>
+        <p>Dịch vụ/Thiết bị: {{if .DichVuThietBi}}{{.DichVuThietBi}}{{end}}</p>
+        <p>Nội dung công việc: {{if .NoiDung}}{{.NoiDung}}{{end}}</p>
+        <p>Chi phí: {{if .ChiPhi}}{{printf "%.0f" (deref .ChiPhi)}} VNĐ{{end}}</p>
+        <p>Ngày ký: {{if .NgayKy}}{{.NgayKy.Format "02-01-2006"}}{{end}}</p>
+    {{end}}
+
+    <p>Ngày bắt đầu:
+        {{if .NgayBatDau}}{{.NgayBatDau.Format "02-01-2006"}}{{end}}
+    </p>
+
+    <p>Ngày kết thúc:
+        {{if .NgayKetThuc}}{{.NgayKetThuc.Format "02-01-2006"}}{{end}}
+    </p>
+
     <p>Ghi chú: {{.GhiChu}}</p>
 
     <a href="/hopdong">Quay lại danh sách</a>
