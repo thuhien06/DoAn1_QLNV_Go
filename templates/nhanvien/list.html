@@ -1,59 +1,48 @@
+
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
-
     <meta charset="UTF-8">
-
     <title>Danh sách nhân viên</title>
-
     <link rel="stylesheet" href="/static/css/style.css">
-
 </head>
-
 <body>
-
     <h1>Danh sách nhân viên</h1>
+
     <a href="/">Trang chủ</a>
-    <br>
-    <br>
+    <br><br>
 
-    <!-- Nút thêm nhân viên -->
-    <a href="/nhanvien/them">
-        Thêm nhân viên
-    </a>
+    <a href="/nhanvien/them">Thêm nhân viên</a>
+    <br><br>
 
-    <br>
-    <br>
+    <!-- Thống kê nhân viên -->
+    <div class="thong-ke">
+        <p>
+            Tổng số nhân viên trong hệ thống:
+            <strong>{{.TongSo}}</strong>
+        </p>
+
+    </div>
 
     <!-- Form tìm kiếm -->
     <form action="/nhanvien" method="GET">
-
         <input
             type="text"
             name="ma_nv"
             placeholder="Nhập mã nhân viên"
+            value="{{.TuKhoa}}"
         >
 
-        <button type="submit">
-            Tìm kiếm
-        </button>
-
-        <a href="/nhanvien">
-            Xem tất cả
-        </a>
-
+        <button type="submit">Tìm kiếm</button>
+        <a href="/nhanvien">Xem tất cả</a>
     </form>
 
     <br>
 
     <!-- Danh sách nhân viên -->
     <table border="1">
-
         <thead>
-
             <tr>
-
                 <th>ID</th>
                 <th>Mã NV</th>
                 <th>Họ tên</th>
@@ -67,15 +56,11 @@
                 <th>Chức vụ</th>
                 <th>Thao tác</th>
             </tr>
-
         </thead>
 
         <tbody>
-
-            {{range .}}
-
+            {{range .DanhSach}}
             <tr>
-
                 <td>{{.ID}}</td>
                 <td>{{.MaNV}}</td>
                 <td>{{.HoTen}}</td>
@@ -88,25 +73,20 @@
                 <td>{{.PhongBan}}</td>
                 <td>{{.ChucVu}}</td>
                 <td>
-                    <a href="/nhanvien/sua?id={{.ID}}">
-                        Sửa
-                    </a>
+                    <a href="/nhanvien/sua?id={{.ID}}">Sửa</a>
 
                     <a
                         href="/nhanvien/xoa?id={{.ID}}"
                         onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên {{.MaNV}} - {{.HoTen}} không?');"
-                    >
-                        Xóa
-                    </a>
+                    >Xóa</a>
                 </td>
             </tr>
-
+            {{else}}
+            <tr>
+                <td colspan="12">Không tìm thấy nhân viên phù hợp.</td>
+            </tr>
             {{end}}
-
         </tbody>
-
     </table>
-
 </body>
-
 </html>

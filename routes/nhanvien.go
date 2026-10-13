@@ -12,14 +12,18 @@ import (
 // Hiển thị danh sách nhân viên
 func DanhSachNhanVien(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
-		// Lấy từ khóa tìm kiếm
 		maNV := r.URL.Query().Get("ma_nv")
 
+		// Lấy tổng số nhân viên trong hệ thống
+		var tongSo int
+		err := db.QueryRow("SELECT COUNT(*) FROM nhanvien").Scan(&tongSo)
+		if err != nil {
+			http.Error(w, "Lỗi đếm số nhân viên", http.StatusInternalServerError)
+			return
+		}
+		// Lấy danh sách nhân viên
 		var rows *sql.Rows
-		var err error
 
-		// Nếu có mã nhân viên thì tìm kiếm
 		if maNV != "" {
 			rows, err = db.Query(`
 				SELECT id, ma_nv, ho_ten, ngay_sinh, gioi_tinh,
@@ -27,29 +31,26 @@ func DanhSachNhanVien(db *sql.DB) http.HandlerFunc {
 				       phong_ban, chuc_vu
 				FROM nhanvien
 				WHERE ma_nv LIKE ?
+				ORDER BY id
 			`, "%"+maNV+"%")
 		} else {
-			// Nếu không có từ khóa thì lấy toàn bộ nhân viên
 			rows, err = db.Query(`
 				SELECT id, ma_nv, ho_ten, ngay_sinh, gioi_tinh,
 				       so_dien_thoai, email, dia_chi, ngay_vao_lam,
 				       phong_ban, chuc_vu
 				FROM nhanvien
+				ORDER BY id
 			`)
 		}
 
-		// Kiểm tra lỗi truy vấn
 		if err != nil {
 			http.Error(w, "Lỗi truy vấn database", http.StatusInternalServerError)
 			return
 		}
-
 		defer rows.Close()
 
-		// Tạo danh sách nhân viên
 		var danhSach []models.NhanVien
 
-		// Duyệt dữ liệu
 		for rows.Next() {
 			var nv models.NhanVien
 
@@ -66,7 +67,6 @@ func DanhSachNhanVien(db *sql.DB) http.HandlerFunc {
 				&nv.PhongBan,
 				&nv.ChucVu,
 			)
-
 			if err != nil {
 				http.Error(w, "Lỗi đọc dữ liệu", http.StatusInternalServerError)
 				return
@@ -75,13 +75,29 @@ func DanhSachNhanVien(db *sql.DB) http.HandlerFunc {
 			danhSach = append(danhSach, nv)
 		}
 
-		// Đọc giao diện
+		if err = rows.Err(); err != nil {
+			http.Error(w, "Lỗi đọc danh sách nhân viên", http.StatusInternalServerError)
+			return
+		}
+
+		// Dữ liệu truyền sang giao diện
+		data := struct {
+			TongSo   int
+			TuKhoa   string
+			DanhSach []models.NhanVien
+		}{
+			TongSo:   len(danhSach),
+			TuKhoa:   maNV,
+			DanhSach: danhSach,
+		}
+
 		tmpl := template.Must(template.ParseFiles(
 			"templates/nhanvien/list.html",
 		))
 
-		// Hiển thị danh sách
-		tmpl.Execute(w, danhSach)
+		if err := tmpl.Execute(w, data); err != nil {
+			http.Error(w, "Lỗi hiển thị danh sách", http.StatusInternalServerError)
+		}
 	}
 }
 
