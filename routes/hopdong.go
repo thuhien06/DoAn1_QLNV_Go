@@ -31,16 +31,18 @@ func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 
 		for rows.Next() {
 			var hd models.HopDong
+			var luongCoBan sql.NullFloat64
 
+			var loaiHopDong sql.NullString
 			err := rows.Scan(
 				&hd.ID,
 				&hd.MaHD,
 				&hd.MaNV,
 				&hd.NhomHopDong,
-				&hd.LoaiHopDong,
+				&loaiHopDong,
 				&hd.NgayBatDau,
 				&hd.NgayKetThuc,
-				&hd.LuongCoBan,
+				&luongCoBan,
 				&hd.GhiChu,
 				&hd.DoiTac,
 				&hd.NguoiDaiDien,
@@ -53,6 +55,18 @@ func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 			if err != nil {
 				http.Error(w, "Lỗi đọc dữ liệu: "+err.Error(), http.StatusInternalServerError)
 				return
+			}
+
+			if loaiHopDong.Valid {
+				hd.LoaiHopDong = loaiHopDong.String
+			} else {
+				hd.LoaiHopDong = ""
+			}
+
+			if luongCoBan.Valid {
+				hd.LuongCoBan = luongCoBan.Float64
+			} else {
+				hd.LuongCoBan = 0
 			}
 
 			if hd.NgayKetThuc == nil {
@@ -105,81 +119,139 @@ func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 	}
 }
 
-// Thêm hợp đồng
 func ThemHopDong(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		tmpl := template.Must(template.ParseFiles("templates/hopdong/them.html"))
 
 		if r.Method == http.MethodGet {
-			tmpl := template.Must(template.ParseFiles(
-				"templates/hopdong/them.html",
-			))
-
 			tmpl.Execute(w, nil)
 			return
 		}
 
-		if r.Method == "POST" {
-			maHD := r.FormValue("ma_hd")
-			maNV := r.FormValue("ma_nv")
-			loaiHopDong := r.FormValue("loai_hop_dong")
-			ngayBatDau := r.FormValue("ngay_bat_dau")
-			ngayKetThuc := r.FormValue("ngay_ket_thuc")
-			luongCoBan := r.FormValue("luong_co_ban")
-			ghiChu := r.FormValue("ghi_chu")
-
-			// Kiểm tra mã nhân viên có tồn tại không
-			var count int
-
-			err := db.QueryRow(
-				"SELECT COUNT(*) FROM nhanvien WHERE ma_nv = ?",
-				maNV,
-			).Scan(&count)
-
-			if err != nil {
-				http.Error(w, "Lỗi kiểm tra mã nhân viên", http.StatusInternalServerError)
-				return
-			}
-
-			if count == 0 {
-				tmpl := template.Must(
-					template.ParseFiles("templates/hopdong/them.html"),
-				)
-
-				data := struct {
-					Error string
-				}{
-					Error: "Mã nhân viên " + maNV + " không tồn tại!",
-				}
-
-				tmpl.Execute(w, data)
-				return
-			}
-
-			// Nếu mã nhân viên tồn tại thì mới thêm hop dong
-			_, err = db.Exec(`
-					INSERT INTO hopdong
-					(ma_hd, ma_nv, loai_hop_dong, ngay_bat_dau,
-					ngay_ket_thuc, luong_co_ban, ghi_chu)
-					VALUES (?, ?, ?, ?, ?, ?, ?)
-				`,
-				maHD,
-				maNV,
-				loaiHopDong,
-				ngayBatDau,
-				ngayKetThuc,
-				luongCoBan,
-				ghiChu,
-			)
-
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			http.Redirect(w, r, "/hopdong", http.StatusSeeOther)
+		if r.Method != http.MethodPost {
+			http.Error(w, "Phương thức không hợp lệ", http.StatusMethodNotAllowed)
+			return
 		}
 
-		
+		maHD := r.FormValue("ma_hd")
+		maNV := r.FormValue("ma_nv")
+		nhom := r.FormValue("nhom_hop_dong")
+		loai := r.FormValue("loai_hop_dong")
+		ngayBatDau := r.FormValue("ngay_bat_dau")
+		ngayKetThuc := r.FormValue("ngay_ket_thuc")
+		ngayKy := r.FormValue("ngay_ky")
+		luongCoBan := r.FormValue("luong_co_ban")
+		ghiChu := r.FormValue("ghi_chu")
+
+		doiTac := r.FormValue("doi_tac")
+		nguoiDaiDien := r.FormValue("nguoi_dai_dien")
+		noiDung := r.FormValue("noi_dung")
+		giaTri := r.FormValue("gia_tri")
+		dichVuThietBi := r.FormValue("dich_vu_thiet_bi")
+		chiPhi := r.FormValue("chi_phi")
+
+		if nhom != "lao_dong" &&
+			nhom != "kinh_doanh" &&
+			nhom != "van_hanh" {
+			http.Error(w, "Nhóm hợp đồng không hợp lệ", http.StatusBadRequest)
+			return
+		}
+
+		// Kiểm tra nhân viên phụ trách
+		var count int
+		err := db.QueryRow(
+			"SELECT COUNT(*) FROM nhanvien WHERE ma_nv = ?",
+			maNV,
+		).Scan(&count)
+
+		if err != nil {
+			http.Error(w, "Lỗi kiểm tra mã nhân viên: "+err.Error(),
+				http.StatusInternalServerError)
+			return
+		}
+
+		if count == 0 {
+			tmpl.Execute(w, struct {
+				Error string
+			}{
+				Error: "Mã nhân viên " + maNV + " không tồn tại!",
+			})
+			return
+		}
+
+		// Đổi trường rỗng thành NULL để tránh lỗi với DATE và DECIMAL
+		nullable := func(s string) interface{} {
+			if s == "" {
+				return nil
+			}
+			return s
+		}
+
+		// Các trường dùng riêng cho từng nhóm
+		var loaiDB, ngayBatDauDB, ngayKetThucDB interface{}
+		var ngayKyDB, luongDB interface{}
+		var doiTacDB, nguoiDaiDienDB, noiDungDB interface{}
+		var giaTriDB, dichVuDB, chiPhiDB interface{}
+
+		ngayBatDauDB = nullable(ngayBatDau)
+		ngayKetThucDB = nullable(ngayKetThuc)
+		ngayKyDB = nullable(ngayKy)
+		loaiDB = nullable(loai)
+		luongDB = nullable(luongCoBan)
+		doiTacDB = nullable(doiTac)
+		nguoiDaiDienDB = nullable(nguoiDaiDien)
+		noiDungDB = nullable(noiDung)
+		giaTriDB = nullable(giaTri)
+		dichVuDB = nullable(dichVuThietBi)
+		chiPhiDB = nullable(chiPhi)
+
+		switch nhom {
+		case "lao_dong":
+			// Hợp đồng lao động không dùng thông tin đối tác.
+			doiTacDB = nil
+			nguoiDaiDienDB = nil
+			noiDungDB = nil
+			giaTriDB = nil
+			ngayKyDB = nil
+			dichVuDB = nil
+			chiPhiDB = nil
+
+		case "kinh_doanh":
+			// Hợp đồng kinh doanh không dùng lương cơ bản.
+			loaiDB = nil
+			luongDB = nil
+			dichVuDB = nil
+			chiPhiDB = nil
+
+		case "van_hanh":
+			// Hợp đồng vận hành dùng chi phí, không dùng lương.
+			loaiDB = nil
+			luongDB = nil
+			nguoiDaiDienDB = nil
+			giaTriDB = nil
+		}
+
+		_, err = db.Exec(`
+			INSERT INTO hopdong (
+				ma_hd, ma_nv, nhom_hop_dong, loai_hop_dong,
+				ngay_bat_dau, ngay_ket_thuc, luong_co_ban, ghi_chu,
+				doi_tac, nguoi_dai_dien, noi_dung, gia_tri,
+				ngay_ky, dich_vu_thiet_bi, chi_phi
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		`,
+			maHD, maNV, nhom, loaiDB,
+			ngayBatDauDB, ngayKetThucDB, luongDB, ghiChu,
+			doiTacDB, nguoiDaiDienDB, noiDungDB, giaTriDB,
+			ngayKyDB, dichVuDB, chiPhiDB,
+		)
+
+		if err != nil {
+			http.Error(w, "Lỗi thêm hợp đồng: "+err.Error(),
+				http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, "/hopdong", http.StatusSeeOther)
 	}
 }
 

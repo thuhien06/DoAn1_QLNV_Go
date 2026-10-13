@@ -6,22 +6,15 @@
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-
     <h1>DANH SÁCH HỢP ĐỒNG</h1>
 
     <a href="/">Trang chủ</a>
-
-    <br>
-    <br>
+    <br><br>
 
     <p>Tổng số hợp đồng: <strong>{{.TongSo}}</strong></p>
 
-    <a href="/hopdong/them">
-        Thêm hợp đồng
-    </a>
-
-    <br>
-    <br>
+    <a href="/hopdong/them">Thêm hợp đồng</a>
+    <br><br>
 
     <table border="1">
         <thead>
@@ -32,9 +25,8 @@
                 <th>Loại hợp đồng</th>
                 <th>Ngày bắt đầu</th>
                 <th>Ngày kết thúc</th>
-                <th>Lương cơ bản</th>
                 <th>Ghi chú</th>
-                 <th>Trạng thái</th>
+                <th>Trạng thái</th>
                 <th>Thao tác</th>
             </tr>
         </thead>
@@ -45,7 +37,18 @@
                 <td>{{.ID}}</td>
                 <td>{{.MaHD}}</td>
                 <td>{{.MaNV}}</td>
-                <td>{{.LoaiHopDong}}</td>
+
+                <td>
+                    {{if eq .NhomHopDong "lao_dong"}}
+                        Lao động
+                    {{else if eq .NhomHopDong "kinh_doanh"}}
+                        Kinh doanh
+                    {{else if eq .NhomHopDong "van_hanh"}}
+                        Vận hành
+                    {{else}}
+                        Chưa phân loại
+                    {{end}}
+                </td>
 
                 <td>
                     {{if .NgayBatDau}}
@@ -59,20 +62,16 @@
                     {{end}}
                 </td>
 
-                <td>{{printf "%.0f" .LuongCoBan}}</td>
                 <td>{{.GhiChu}}</td>
-
                 <td>{{.TrangThai}}</td>
 
                 <td>
-                    <a href="/hopdong/sua?id={{.ID}}">
-                        Sửa
-                    </a>
-
-                    <a
-                        href="/hopdong/xoa?id={{.ID}}"
-                        onclick="return confirm('Bạn có chắc chắn muốn xóa hợp đồng này không?');"
-                    >
+                    <a href="/hopdong/chi-tiet?id={{.ID}}">Chi tiết</a>
+                    |
+                    <a href="/hopdong/sua?id={{.ID}}">Sửa</a>
+                    |
+                    <a href="/hopdong/xoa?id={{.ID}}"
+                       onclick="return confirm('Bạn có chắc chắn muốn xóa hợp đồng này không?');">
                         Xóa
                     </a>
                 </td>
@@ -80,6 +79,6 @@
             {{end}}
         </tbody>
     </table>
-
 </body>
 </html>
+```

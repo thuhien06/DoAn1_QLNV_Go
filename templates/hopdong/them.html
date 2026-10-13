@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -6,13 +7,24 @@
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-
     <h1>THÊM HỢP ĐỒNG</h1>
+
     {{if .Error}}
         <p style="color: red;">{{.Error}}</p>
     {{end}}
 
-    <form action="/hopdong/them" method="POST">
+    <p>
+        <label>Nhóm hợp đồng:</label><br>
+        <select id="nhom_hop_dong" onchange="hienThiForm()" required>
+            <option value="">-- Chọn nhóm hợp đồng --</option>
+            <option value="lao_dong">Hợp đồng lao động</option>
+            <option value="kinh_doanh">Hợp đồng kinh doanh</option>
+            <option value="van_hanh">Hợp đồng vận hành</option>
+        </select>
+    </p>
+
+    <form action="/hopdong/them" method="POST" id="formHopDong" style="display:none;">
+        <input type="hidden" name="nhom_hop_dong" id="nhom_hidden">
 
         <p>
             <label>Mã hợp đồng:</label><br>
@@ -20,20 +32,64 @@
         </p>
 
         <p>
-            <label>Mã nhân viên:</label><br>
+            <label>Mã nhân viên phụ trách:</label><br>
             <input type="text" name="ma_nv" required>
         </p>
 
+        <div id="formLaoDong" style="display:none;">
+            <p>
+                <label>Loại hợp đồng:</label><br>
+                <select name="loai_hop_dong">
+                    <option value="">-- Chọn loại hợp đồng --</option>
+                    <option value="Thử việc">Thử việc</option>
+                    <option value="Xác định thời hạn">Xác định thời hạn</option>
+                    <option value="Không xác định thời hạn">Không xác định thời hạn</option>
+                </select>
+            </p>
+            <p>
+                <label>Lương cơ bản:</label><br>
+                <input type="number" name="luong_co_ban" min="0" step="0.01">
+            </p>
+        </div>
+
+        <div id="formKinhDoanh" style="display:none;">
+            <p>
+                <label>Đối tác:</label><br>
+                <input type="text" name="doi_tac">
+            </p>
+            <p>
+                <label>Người đại diện đối tác:</label><br>
+                <input type="text" name="nguoi_dai_dien">
+            </p>
+            <p>
+                <label>Giá trị hợp đồng:</label><br>
+                <input type="number" name="gia_tri" min="0" step="0.01">
+            </p>
+        </div>
+
+        <div id="formVanHanh" style="display:none;">
+            <p>
+                <label>Nhà cung cấp/đối tác:</label><br>
+                <input type="text" name="doi_tac">
+            </p>
+            <p>
+                <label>Dịch vụ hoặc thiết bị:</label><br>
+                <input type="text" name="dich_vu_thiet_bi">
+            </p>
+            <p>
+                <label>Chi phí:</label><br>
+                <input type="number" name="chi_phi" min="0" step="0.01">
+            </p>
+        </div>
+
         <p>
-            <label>Loại hợp đồng:</label><br>
-            <select name="loai_hop_dong">
-                <option value="">-- Chọn loại hợp đồng --</option>
-                <option value="Thử việc">Thử việc</option>
-                <option value="Xác định thời hạn">Xác định thời hạn</option>
-                <option value="Không xác định thời hạn">
-                    Không xác định thời hạn
-                </option>
-            </select>
+            <label>Nội dung hợp đồng:</label><br>
+            <textarea name="noi_dung" rows="3"></textarea>
+        </p>
+
+        <p>
+            <label>Ngày ký:</label><br>
+            <input type="date" name="ngay_ky">
         </p>
 
         <p>
@@ -47,24 +103,40 @@
         </p>
 
         <p>
-            <label>Lương cơ bản:</label><br>
-            <input type="number" name="luong_co_ban" step="0.01">
-        </p>
-
-        <p>
             <label>Ghi chú:</label><br>
             <input type="text" name="ghi_chu">
         </p>
 
-        <button type="submit">
-            Thêm hợp đồng
-        </button>
-
-        <a href="/hopdong">
-            Quay lại
-        </a>
-
+        <button type="submit">Thêm hợp đồng</button>
+        <a href="/hopdong">Quay lại</a>
     </form>
 
+    <p><a href="/hopdong">Quay lại danh sách</a></p>
+
+    <script>
+        function hienThiForm() {
+            const nhom = document.getElementById("nhom_hop_dong").value;
+            const form = document.getElementById("formHopDong");
+
+            document.getElementById("formLaoDong").style.display =
+                nhom === "lao_dong" ? "block" : "none";
+            document.getElementById("formKinhDoanh").style.display =
+                nhom === "kinh_doanh" ? "block" : "none";
+            document.getElementById("formVanHanh").style.display =
+                nhom === "van_hanh" ? "block" : "none";
+
+            form.style.display = nhom ? "block" : "none";
+            document.getElementById("nhom_hidden").value = nhom;
+
+            document.querySelectorAll("#formLaoDong input, #formLaoDong select, #formLaoDong textarea")
+                .forEach(el => el.disabled = nhom !== "lao_dong");
+
+            document.querySelectorAll("#formKinhDoanh input, #formKinhDoanh select, #formKinhDoanh textarea")
+                .forEach(el => el.disabled = nhom !== "kinh_doanh");
+
+            document.querySelectorAll("#formVanHanh input, #formVanHanh select, #formVanHanh textarea")
+                .forEach(el => el.disabled = nhom !== "van_hanh");
+        }
+    </script>
 </body>
 </html>
