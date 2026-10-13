@@ -2,31 +2,25 @@ package models
 
 import "time"
 
-// HopDong lưu thông tin hợp đồng lao động
+// HopDong lưu thông tin các nhóm hợp đồng
 type HopDong struct {
-	// ID của hợp đồng
-	ID int
-
-	// Mã hợp đồng
-	MaHD string
-
-	// Mã nhân viên
-	MaNV string
-
-	// Loại hợp đồng
+	ID          int
+	MaHD        string
+	MaNV        string
+	NhomHopDong string
 	LoaiHopDong string
-
-	// Ngày bắt đầu
-	NgayBatDau *time.Time
-
-	// Ngày kết thúc
+	NgayBatDau  *time.Time
 	NgayKetThuc *time.Time
+	LuongCoBan  float64
+	GhiChu      string
 
-	// Lương cơ bản
-	LuongCoBan float64
-
-	// Ghi chú
-	GhiChu string
+	DoiTac        *string
+	NguoiDaiDien  *string
+	NoiDung       *string
+	GiaTri        *float64
+	NgayKy        *time.Time
+	DichVuThietBi *string
+	ChiPhi        *float64
 
 	TrangThai string
 }

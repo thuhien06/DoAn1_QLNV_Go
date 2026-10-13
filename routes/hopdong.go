@@ -13,20 +13,18 @@ import (
 // Danh sách hợp đồng
 func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		rows, err := db.Query(`
-			SELECT id, ma_hd, ma_nv, loai_hop_dong,
-			       ngay_bat_dau, ngay_ket_thuc,
-			       luong_co_ban, ghi_chu
+			SELECT id, ma_hd, ma_nv, nhom_hop_dong, loai_hop_dong,
+			       ngay_bat_dau, ngay_ket_thuc, luong_co_ban,
+			       ghi_chu, doi_tac, nguoi_dai_dien, noi_dung,
+			       gia_tri, ngay_ky, dich_vu_thiet_bi, chi_phi
 			FROM hopdong
 			ORDER BY id DESC
 		`)
-
 		if err != nil {
 			http.Error(w, "Lỗi truy vấn database: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-
 		defer rows.Close()
 
 		var danhSach []models.HopDong
@@ -38,13 +36,20 @@ func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 				&hd.ID,
 				&hd.MaHD,
 				&hd.MaNV,
+				&hd.NhomHopDong,
 				&hd.LoaiHopDong,
 				&hd.NgayBatDau,
 				&hd.NgayKetThuc,
 				&hd.LuongCoBan,
 				&hd.GhiChu,
+				&hd.DoiTac,
+				&hd.NguoiDaiDien,
+				&hd.NoiDung,
+				&hd.GiaTri,
+				&hd.NgayKy,
+				&hd.DichVuThietBi,
+				&hd.ChiPhi,
 			)
-
 			if err != nil {
 				http.Error(w, "Lỗi đọc dữ liệu: "+err.Error(), http.StatusInternalServerError)
 				return
@@ -80,6 +85,11 @@ func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 			danhSach = append(danhSach, hd)
 		}
 
+		if err := rows.Err(); err != nil {
+			http.Error(w, "Lỗi đọc danh sách hợp đồng: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
 		data := struct {
 			TongSo   int
 			DanhSach []models.HopDong
@@ -88,10 +98,7 @@ func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 			DanhSach: danhSach,
 		}
 
-		tmpl := template.Must(template.ParseFiles(
-			"templates/hopdong/list.html",
-		))
-
+		tmpl := template.Must(template.ParseFiles("templates/hopdong/list.html"))
 		if err := tmpl.Execute(w, data); err != nil {
 			http.Error(w, "Lỗi hiển thị danh sách", http.StatusInternalServerError)
 		}
@@ -172,35 +179,7 @@ func ThemHopDong(db *sql.DB) http.HandlerFunc {
 			http.Redirect(w, r, "/hopdong", http.StatusSeeOther)
 		}
 
-		// 	maHD := r.FormValue("ma_hd")
-		// 	maNV := r.FormValue("ma_nv")
-		// 	loaiHopDong := r.FormValue("loai_hop_dong")
-		// 	ngayBatDau := r.FormValue("ngay_bat_dau")
-		// 	ngayKetThuc := r.FormValue("ngay_ket_thuc")
-		// 	luongCoBan := r.FormValue("luong_co_ban")
-		// 	ghiChu := r.FormValue("ghi_chu")
-
-		// 	_, err := db.Exec(`
-		// 		INSERT INTO hopdong
-		// 		(ma_hd, ma_nv, loai_hop_dong, ngay_bat_dau,
-		// 		 ngay_ket_thuc, luong_co_ban, ghi_chu)
-		// 		VALUES (?, ?, ?, ?, ?, ?, ?)
-		// 	`,
-		// 		maHD,
-		// 		maNV,
-		// 		loaiHopDong,
-		// 		ngayBatDau,
-		// 		ngayKetThuc,
-		// 		luongCoBan,
-		// 		ghiChu,
-		// 	)
-
-		// 	if err != nil {
-		// 		http.Error(w, "Lỗi thêm hợp đồng: "+err.Error(), http.StatusInternalServerError)
-		// 		return
-		// 	}
-
-		// 	http.Redirect(w, r, "/hopdong", http.StatusSeeOther)
+		
 	}
 }
 
