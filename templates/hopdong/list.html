@@ -14,6 +14,8 @@
     <br>
     <br>
 
+    <p>Tổng số hợp đồng: <strong>{{.TongSo}}</strong></p>
+
     <a href="/hopdong/them">
         Thêm hợp đồng
     </a>
@@ -38,7 +40,7 @@
         </thead>
 
         <tbody>
-            {{range .}}
+            {{range .DanhSach}}
             <tr>
                 <td>{{.ID}}</td>
                 <td>{{.MaHD}}</td>

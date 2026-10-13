@@ -80,11 +80,21 @@ func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 			danhSach = append(danhSach, hd)
 		}
 
+		data := struct {
+			TongSo   int
+			DanhSach []models.HopDong
+		}{
+			TongSo:   len(danhSach),
+			DanhSach: danhSach,
+		}
+
 		tmpl := template.Must(template.ParseFiles(
 			"templates/hopdong/list.html",
 		))
 
-		tmpl.Execute(w, danhSach)
+		if err := tmpl.Execute(w, data); err != nil {
+			http.Error(w, "Lỗi hiển thị danh sách", http.StatusInternalServerError)
+		}
 	}
 }
 
