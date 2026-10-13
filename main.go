@@ -140,6 +140,8 @@ func main() {
 		),
 	)
 
+	http.HandleFunc("/hopdong/chi-tiet", routes.ChiTietHopDong(db))
+
 	//////////////////CHẤM CÔNG
 
 	// Khai báo đường dẫn quản lý chấm công

@@ -359,3 +359,70 @@ func XoaHopDong(db *sql.DB) http.HandlerFunc {
 		http.Redirect(w, r, "/hopdong", http.StatusSeeOther)
 	}
 }
+
+// Chi tiết hợp đồng
+func ChiTietHopDong(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := r.URL.Query().Get("id")
+
+		var hd models.HopDong
+		var nhomHopDong, loaiHopDong sql.NullString
+		var luongCoBan, giaTri, chiPhi sql.NullFloat64
+
+		err := db.QueryRow(`
+            SELECT id, ma_hd, ma_nv, nhom_hop_dong,
+                   loai_hop_dong, ngay_bat_dau, ngay_ket_thuc,
+                   luong_co_ban, ghi_chu, doi_tac, nguoi_dai_dien,
+                   noi_dung, gia_tri, ngay_ky, dich_vu_thiet_bi, chi_phi
+            FROM hopdong
+            WHERE id = ?
+        `, id).Scan(
+			&hd.ID,
+			&hd.MaHD,
+			&hd.MaNV,
+			&nhomHopDong,
+			&loaiHopDong,
+			&hd.NgayBatDau,
+			&hd.NgayKetThuc,
+			&luongCoBan,
+			&hd.GhiChu,
+			&hd.DoiTac,
+			&hd.NguoiDaiDien,
+			&hd.NoiDung,
+			&giaTri,
+			&hd.NgayKy,
+			&hd.DichVuThietBi,
+			&chiPhi,
+		)
+
+		if err != nil {
+			http.Error(w, "Không tìm thấy hợp đồng", http.StatusNotFound)
+			return
+		}
+
+		if nhomHopDong.Valid {
+			hd.NhomHopDong = nhomHopDong.String
+		}
+		if loaiHopDong.Valid {
+			hd.LoaiHopDong = loaiHopDong.String
+		}
+		if luongCoBan.Valid {
+			hd.LuongCoBan = luongCoBan.Float64
+		}
+		if giaTri.Valid {
+			hd.GiaTri = &giaTri.Float64
+		}
+		if chiPhi.Valid {
+			hd.ChiPhi = &chiPhi.Float64
+		}
+
+		tmpl := template.Must(template.ParseFiles(
+			"templates/hopdong/chitiet.html",
+		))
+
+		if err := tmpl.Execute(w, hd); err != nil {
+			http.Error(w, "Lỗi hiển thị chi tiết hợp đồng",
+				http.StatusInternalServerError)
+		}
+	}
+}
