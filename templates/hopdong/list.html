@@ -16,6 +16,40 @@
     <a href="/hopdong/them">Thêm hợp đồng</a>
     <br><br>
 
+    <!-- Form tìm kiếm và lọc hợp đồng -->
+    <form method="GET" action="/hopdong">
+        <label for="ma_hd">Mã hợp đồng:</label>
+        <input
+            type="text"
+            id="ma_hd"
+            name="ma_hd"
+            placeholder="Nhập mã hợp đồng"
+            value="{{.MaHD}}"
+        >
+
+        <label for="ma_nv">Mã nhân viên:</label>
+        <input
+            type="text"
+            id="ma_nv"
+            name="ma_nv"
+            placeholder="Nhập mã nhân viên"
+            value="{{.MaNV}}"
+        >
+
+        <label for="nhom_hop_dong">Nhóm hợp đồng:</label>
+        <select id="nhom_hop_dong" name="nhom_hop_dong">
+            <option value="">Tất cả nhóm</option>
+            <option value="lao_dong" {{if eq .NhomHopDong "lao_dong"}}selected{{end}}>Lao động</option>
+            <option value="kinh_doanh" {{if eq .NhomHopDong "kinh_doanh"}}selected{{end}}>Kinh doanh</option>
+            <option value="van_hanh" {{if eq .NhomHopDong "van_hanh"}}selected{{end}}>Vận hành</option>
+        </select>
+
+        <button type="submit">Tìm kiếm</button>
+        <a href="/hopdong">Xóa bộ lọc</a>
+    </form>
+
+    <br>
+
     <table border="1">
         <thead>
             <tr>
@@ -70,15 +104,18 @@
                     |
                     <a href="/hopdong/sua?id={{.ID}}">Sửa</a>
                     |
-                    <a href="/hopdong/xoa?id={{.ID}}"
-                       onclick="return confirm('Bạn có chắc chắn muốn xóa hợp đồng này không?');">
-                        Xóa
-                    </a>
+                    <a
+                        href="/hopdong/xoa?id={{.ID}}"
+                        onclick="return confirm('Bạn có chắc chắn muốn xóa hợp đồng này không?');"
+                    >Xóa</a>
                 </td>
+            </tr>
+            {{else}}
+            <tr>
+                <td colspan="9">Không tìm thấy hợp đồng phù hợp.</td>
             </tr>
             {{end}}
         </tbody>
     </table>
 </body>
 </html>
-```

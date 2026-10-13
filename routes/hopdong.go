@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"qlnv/models"
 	"time"
@@ -13,16 +14,32 @@ import (
 // Danh sách hợp đồng
 func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		rows, err := db.Query(`
+
+		maHD := strings.TrimSpace(r.URL.Query().Get("ma_hd"))
+		maNV := strings.TrimSpace(r.URL.Query().Get("ma_nv"))
+		nhomHopDong := strings.TrimSpace(r.URL.Query().Get("nhom_hop_dong"))
+
+		query := `
 			SELECT id, ma_hd, ma_nv, nhom_hop_dong, loai_hop_dong,
-			       ngay_bat_dau, ngay_ket_thuc, luong_co_ban,
-			       ghi_chu, doi_tac, nguoi_dai_dien, noi_dung,
-			       gia_tri, ngay_ky, dich_vu_thiet_bi, chi_phi
+				ngay_bat_dau, ngay_ket_thuc, luong_co_ban, ghi_chu,
+				doi_tac, nguoi_dai_dien, noi_dung, gia_tri, ngay_ky,
+				dich_vu_thiet_bi, chi_phi
 			FROM hopdong
+			WHERE ma_hd LIKE ?
+			AND ma_nv LIKE ?
+			AND (? = '' OR nhom_hop_dong = ?)
 			ORDER BY id DESC
-		`)
+		`
+
+		rows, err := db.Query(
+			query,
+			"%"+maHD+"%",
+			"%"+maNV+"%",
+			nhomHopDong,
+			nhomHopDong,
+		)
 		if err != nil {
-			http.Error(w, "Lỗi truy vấn database: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Lỗi lấy danh sách hợp đồng: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 		defer rows.Close()
@@ -105,14 +122,23 @@ func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 		}
 
 		data := struct {
-			TongSo   int
-			DanhSach []models.HopDong
+			TongSo      int
+			DanhSach    []models.HopDong
+			MaHD        string
+			MaNV        string
+			NhomHopDong string
 		}{
-			TongSo:   len(danhSach),
-			DanhSach: danhSach,
+			TongSo:      len(danhSach),
+			DanhSach:    danhSach,
+			MaHD:        maHD,
+			MaNV:        maNV,
+			NhomHopDong: nhomHopDong,
 		}
 
-		tmpl := template.Must(template.ParseFiles("templates/hopdong/list.html"))
+		tmpl := template.Must(
+			template.ParseFiles("templates/hopdong/list.html"),
+		)
+
 		if err := tmpl.Execute(w, data); err != nil {
 			http.Error(w, "Lỗi hiển thị danh sách", http.StatusInternalServerError)
 		}
