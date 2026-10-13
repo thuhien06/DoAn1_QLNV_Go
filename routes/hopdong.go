@@ -2,6 +2,7 @@ package routes
 
 import (
 	"database/sql"
+	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -476,20 +477,71 @@ func XoaHopDong(db *sql.DB) http.HandlerFunc {
 // Chi tiết hợp đồng
 func ChiTietHopDong(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id := r.URL.Query().Get("id")
+		// Lấy thông tin đăng nhập
+		session, err := Store.Get(r, "qlnv-session")
+		if err != nil {
+			http.Error(w, "Không thể đọc phiên đăng nhập",
+				http.StatusInternalServerError)
+			return
+		}
 
+		vaiTro, _ := session.Values["vai_tro"].(string)
+		maNV, _ := session.Values["ma_nv"].(string)
+
+		// Lấy ID hợp đồng
+		id := r.URL.Query().Get("id")
+		if id == "" {
+			http.Error(w, "Thiếu mã hợp đồng", http.StatusBadRequest)
+			return
+		}
+
+		// Xây dựng truy vấn theo vai trò
+		var query string
+		var args []interface{}
+
+		switch vaiTro {
+		case "admin", "hr":
+			query = `
+				SELECT id, ma_hd, ma_nv, nhom_hop_dong,
+				       loai_hop_dong, ngay_bat_dau, ngay_ket_thuc,
+				       luong_co_ban, ghi_chu, doi_tac, nguoi_dai_dien,
+				       noi_dung, gia_tri, ngay_ky,
+				       dich_vu_thiet_bi, chi_phi
+				FROM hopdong
+				WHERE id = ?
+			`
+			args = []interface{}{id}
+
+		case "nhanvien":
+			if maNV == "" {
+				http.Error(w, "Không tìm thấy mã nhân viên",
+					http.StatusForbidden)
+				return
+			}
+
+			query = `
+				SELECT id, ma_hd, ma_nv, nhom_hop_dong,
+				       loai_hop_dong, ngay_bat_dau, ngay_ket_thuc,
+				       luong_co_ban, ghi_chu, doi_tac, nguoi_dai_dien,
+				       noi_dung, gia_tri, ngay_ky,
+				       dich_vu_thiet_bi, chi_phi
+				FROM hopdong
+				WHERE id = ? AND ma_nv = ?
+			`
+			args = []interface{}{id, maNV}
+
+		default:
+			http.Error(w, "Bạn không có quyền xem hợp đồng",
+				http.StatusForbidden)
+			return
+		}
+
+		// Đọc dữ liệu hợp đồng
 		var hd models.HopDong
 		var nhomHopDong, loaiHopDong sql.NullString
 		var luongCoBan, giaTri, chiPhi sql.NullFloat64
 
-		err := db.QueryRow(`
-            SELECT id, ma_hd, ma_nv, nhom_hop_dong,
-                   loai_hop_dong, ngay_bat_dau, ngay_ket_thuc,
-                   luong_co_ban, ghi_chu, doi_tac, nguoi_dai_dien,
-                   noi_dung, gia_tri, ngay_ky, dich_vu_thiet_bi, chi_phi
-            FROM hopdong
-            WHERE id = ?
-        `, id).Scan(
+		err = db.QueryRow(query, args...).Scan(
 			&hd.ID,
 			&hd.MaHD,
 			&hd.MaNV,
@@ -509,10 +561,13 @@ func ChiTietHopDong(db *sql.DB) http.HandlerFunc {
 		)
 
 		if err != nil {
-			http.Error(w, "Không tìm thấy hợp đồng", http.StatusNotFound)
+			http.Error(w,
+				"Không tìm thấy hợp đồng hoặc bạn không có quyền xem",
+				http.StatusNotFound)
 			return
 		}
 
+		// Chuyển các giá trị NULL về giá trị mặc định
 		if nhomHopDong.Valid {
 			hd.NhomHopDong = nhomHopDong.String
 		}
@@ -529,6 +584,7 @@ func ChiTietHopDong(db *sql.DB) http.HandlerFunc {
 			hd.ChiPhi = &chiPhi.Float64
 		}
 
+		// Hàm hỗ trợ hiển thị các trường con trỏ float64
 		funcMap := template.FuncMap{
 			"deref": func(v *float64) float64 {
 				if v == nil {
@@ -538,15 +594,92 @@ func ChiTietHopDong(db *sql.DB) http.HandlerFunc {
 			},
 		}
 
-		tmpl := template.Must(
-			template.New("chitiet.html").
-				Funcs(funcMap).
-				ParseFiles("templates/hopdong/chitiet.html"),
-		)
+		tmpl, err := template.New("chitiet.html").
+			Funcs(funcMap).
+			ParseFiles("templates/hopdong/chitiet.html")
+
+		if err != nil {
+			fmt.Println("Lỗi đọc template chi tiết hợp đồng:", err)
+			http.Error(w, "Không thể tải giao diện hợp đồng",
+				http.StatusInternalServerError)
+			return
+		}
 
 		if err := tmpl.Execute(w, hd); err != nil {
-			http.Error(w, "Lỗi hiển thị chi tiết hợp đồng",
-				http.StatusInternalServerError)
+			fmt.Println("Lỗi hiển thị chi tiết hợp đồng:", err)
 		}
 	}
 }
+
+// HopDongCaNhan: nhân viên chỉ xem hợp đồng của mình
+func HopDongCaNhan(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		session, err := Store.Get(r, "qlnv-session")
+		if err != nil {
+			http.Error(w, "Không thể lấy thông tin đăng nhập", http.StatusUnauthorized)
+			return
+		}
+
+		maNV, ok := session.Values["ma_nv"].(string)
+		if !ok || maNV == "" {
+			http.Error(w, "Tài khoản chưa được liên kết với nhân viên", http.StatusForbidden)
+			return
+		}
+
+		rows, err := db.Query(`
+			SELECT id, ma_hd, ma_nv, nhom_hop_dong,
+				COALESCE(loai_hop_dong, ''),
+				ngay_bat_dau, ngay_ket_thuc,
+				COALESCE(luong_co_ban, 0),
+				COALESCE(ghi_chu, '')
+			FROM hopdong
+			WHERE ma_nv = ?
+			ORDER BY id DESC
+		`, maNV)
+		if err != nil {
+			http.Error(w, "Không thể tải danh sách hợp đồng", http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+
+		var danhSach []models.HopDong
+
+		for rows.Next() {
+			var hd models.HopDong
+
+			err := rows.Scan(
+				&hd.ID,
+				&hd.MaHD,
+				&hd.MaNV,
+				&hd.NhomHopDong,
+				&hd.LoaiHopDong,
+				&hd.NgayBatDau,
+				&hd.NgayKetThuc,
+				&hd.LuongCoBan,
+				&hd.GhiChu,
+			)
+			if err != nil {
+				fmt.Println("Lỗi đọc dữ liệu hợp đồng:", err)
+				http.Error(w, "Không thể đọc dữ liệu hợp đồng", http.StatusInternalServerError)
+				return
+			}
+
+			danhSach = append(danhSach, hd)
+		}
+
+		if err := rows.Err(); err != nil {
+			http.Error(w, "Lỗi khi đọc danh sách hợp đồng", http.StatusInternalServerError)
+			return
+		}
+
+		tmpl := template.Must(
+			template.ParseFiles("templates/hopdong/ca-nhan.html"),
+		)
+
+		err = tmpl.Execute(w, danhSach)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
+}
+

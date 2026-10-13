@@ -140,7 +140,25 @@ func main() {
 		),
 	)
 
-	http.HandleFunc("/hopdong/chi-tiet", routes.ChiTietHopDong(db))
+	// Nhân viên chỉ xem được hợp đồng của bản thân
+	http.HandleFunc(
+		"/hopdong-ca-nhan",
+		routes.DaDangNhap(
+			routes.CoVaiTro("nhanvien")(
+				routes.HopDongCaNhan(db),
+			),
+		),
+	)
+
+	http.HandleFunc("/hopdong/chi-tiet",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr", "nhanvien")(
+				routes.ChiTietHopDong(db),
+			),
+		),
+	)
+
+	//http.HandleFunc("/hopdong/chi-tiet", routes.ChiTietHopDong(db))
 
 	//////////////////CHẤM CÔNG
 

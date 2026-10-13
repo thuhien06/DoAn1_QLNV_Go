@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hợp đồng cá nhân</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>HỢP ĐỒNG CỦA TÔI</h2>
+
+        <p>Danh sách các hợp đồng được liên kết với tài khoản của bạn.</p>
+
+        {{if .}}
+        <table>
+            <thead>
+                <tr>
+                    <th>Mã hợp đồng</th>
+                    <th>Nhóm hợp đồng</th>
+                    <th>Loại hợp đồng</th>
+                    <th>Ngày bắt đầu</th>
+                    <th>Ngày kết thúc</th>
+                    <th>Lương cơ bản</th>
+                    <th>Ghi chú</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .}}
+                <tr>
+                    <td>{{.MaHD}}</td>
+                    <td>{{.NhomHopDong}}</td>
+                    <td>{{.LoaiHopDong}}</td>
+                    <td>{{if .NgayBatDau}}{{.NgayBatDau.Format "02/01/2006"}}{{end}}</td>
+                    <td>{{if .NgayKetThuc}}{{.NgayKetThuc.Format "02/01/2006"}}{{end}}</td>
+                    <td>{{if eq .NhomHopDong "lao_dong"}}{{printf "%.0f" .LuongCoBan}}{{end}}</td>
+                    <td>{{.GhiChu}}</td>
+
+                    <td>
+                        <a href="/hopdong/chi-tiet?id={{.ID}}">Xem chi tiết</a>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+        {{else}}
+        <p>Bạn chưa có hợp đồng nào.</p>
+        {{end}}
+
+        <p><a href="/">Quay lại trang chủ</a></p>
+    </div>
+</body>
+</html>
