@@ -195,6 +195,16 @@ func main() {
 		),
 	)
 
+	http.HandleFunc("/chamcong/vao",
+		routes.DaDangNhap(
+			routes.CoVaiTro("nhanvien")(routes.ChamCongVao(db)),
+		))
+
+	http.HandleFunc("/chamcong/ra",
+		routes.DaDangNhap(
+			routes.CoVaiTro("nhanvien")(routes.ChamCongRa(db)),
+		))
+
 	// nhân viên chỉ xem được công của bản thâ
 	http.HandleFunc(
 		"/chamcong-ca-nhan",

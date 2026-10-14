@@ -12,28 +12,48 @@
 
     <h1>CHẤM CÔNG CÁ NHÂN</h1>
 
-    <table border="1" cellpadding="8">
-        <tr>
-            <th>Ngày</th>
-            <th>Giờ vào</th>
-            <th>Giờ ra</th>
-            <th>Trạng thái</th>
-            <th>Ghi chú</th>
-        </tr>
+    <div class="actions">
+        <form action="/chamcong/vao" method="POST">
+            <button type="submit">Chấm công vào</button>
+        </form>
 
-        {{range .}}
-        <tr>
-            <td>{{if .NgayChamCong}}{{.NgayChamCong.Format "02-01-2006"}}{{end}}</td>
-            <td>{{.GioVao}}</td>
-            <td>{{.GioRa}}</td>
-            <td>{{.TrangThai}}</td>
-            <td>{{.GhiChu}}</td>
-        </tr>
-        {{else}}
-        <tr>
-            <td colspan="5">Chưa có dữ liệu chấm công.</td>
-        </tr>
-        {{end}}
+        <form action="/chamcong/ra" method="POST">
+            <button type="submit">Chấm công ra</button>
+        </form>
+    </div>
+
+    <h2>Lịch sử chấm công</h2>
+
+    <table border="1" cellpadding="8">
+        <thead>
+            <tr>
+                <th>Ngày</th>
+                <th>Giờ vào</th>
+                <th>Giờ ra</th>
+                <th>Trạng thái</th>
+                <th>Ghi chú</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {{range .}}
+            <tr>
+                <td>
+                    {{if .NgayChamCong}}
+                        {{.NgayChamCong.Format "02-01-2006"}}
+                    {{end}}
+                </td>
+                <td>{{.GioVao}}</td>
+                <td>{{.GioRa}}</td>
+                <td>{{.TrangThai}}</td>
+                <td>{{.GhiChu}}</td>
+            </tr>
+            {{else}}
+            <tr>
+                <td colspan="5">Chưa có dữ liệu chấm công.</td>
+            </tr>
+            {{end}}
+        </tbody>
     </table>
 
     <br>

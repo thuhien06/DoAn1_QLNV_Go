@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+	"time"
 
 	"qlnv/models"
 )
@@ -31,23 +32,43 @@ func DanhSachChamCong(db *sql.DB) http.HandlerFunc {
 
 		for rows.Next() {
 			var cc models.ChamCong
+			var gioVao, gioRa, trangThai, ghiChu sql.NullString
 
 			err := rows.Scan(
 				&cc.ID,
 				&cc.MaNV,
 				&cc.NgayChamCong,
-				&cc.GioVao,
-				&cc.GioRa,
-				&cc.TrangThai,
-				&cc.GhiChu,
+				&gioVao,
+				&gioRa,
+				&trangThai,
+				&ghiChu,
 			)
-
 			if err != nil {
-				http.Error(w, "Lỗi đọc dữ liệu: "+err.Error(), http.StatusInternalServerError)
+				http.Error(w, "Lỗi đọc dữ liệu: "+err.Error(),
+					http.StatusInternalServerError)
 				return
 			}
 
+			if gioVao.Valid {
+				cc.GioVao = gioVao.String
+			}
+			if gioRa.Valid {
+				cc.GioRa = gioRa.String
+			}
+			if trangThai.Valid {
+				cc.TrangThai = trangThai.String
+			}
+			if ghiChu.Valid {
+				cc.GhiChu = ghiChu.String
+			}
+
 			danhSach = append(danhSach, cc)
+		}
+
+		if err := rows.Err(); err != nil {
+			http.Error(w, "Lỗi đọc dữ liệu: "+err.Error(),
+				http.StatusInternalServerError)
+			return
 		}
 
 		tmpl := template.Must(template.ParseFiles(
@@ -232,9 +253,9 @@ func XoaChamCong(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+// chấm công cá nhân
 func ChamCongCaNhan(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		session, err := Store.Get(r, "qlnv-session")
 		if err != nil {
 			http.Redirect(w, r, "/dangnhap", http.StatusSeeOther)
@@ -254,7 +275,6 @@ func ChamCongCaNhan(db *sql.DB) http.HandlerFunc {
 			WHERE ma_nv = ?
 			ORDER BY ngay_cham_cong DESC
 		`, maNV)
-
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -265,32 +285,153 @@ func ChamCongCaNhan(db *sql.DB) http.HandlerFunc {
 
 		for rows.Next() {
 			var cc models.ChamCong
+			var gioVao, gioRa, trangThai, ghiChu sql.NullString
 
 			err := rows.Scan(
 				&cc.ID,
 				&cc.MaNV,
 				&cc.NgayChamCong,
-				&cc.GioVao,
-				&cc.GioRa,
-				&cc.TrangThai,
-				&cc.GhiChu,
+				&gioVao,
+				&gioRa,
+				&trangThai,
+				&ghiChu,
 			)
-
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
+			if gioVao.Valid {
+				cc.GioVao = gioVao.String
+			}
+			if gioRa.Valid {
+				cc.GioRa = gioRa.String
+			}
+			if trangThai.Valid {
+				cc.TrangThai = trangThai.String
+			}
+			if ghiChu.Valid {
+				cc.GhiChu = ghiChu.String
+			}
+
 			danhSach = append(danhSach, cc)
+		}
+
+		if err = rows.Err(); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		tmpl := template.Must(
 			template.ParseFiles("templates/chamcong/canhan.html"),
 		)
 
-		err = tmpl.Execute(w, danhSach)
-		if err != nil {
+		if err = tmpl.Execute(w, danhSach); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
+	}
+}
+
+// Nhân viên chấm công vào
+func ChamCongVao(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Phương thức không hợp lệ", http.StatusMethodNotAllowed)
+			return
+		}
+
+		session, err := Store.Get(r, "qlnv-session")
+		if err != nil {
+			http.Redirect(w, r, "/dangnhap", http.StatusSeeOther)
+			return
+		}
+
+		maNV, ok := session.Values["ma_nv"].(string)
+		if !ok || maNV == "" {
+			http.Error(w, "Tài khoản chưa được liên kết với nhân viên", http.StatusForbidden)
+			return
+		}
+
+		ngay := time.Now().Format("2006-01-02")
+		gio := time.Now().Format("15:04:05")
+
+		var id int
+		err = db.QueryRow(`
+			SELECT id FROM chamcong
+			WHERE ma_nv = ? AND ngay_cham_cong = ?
+		`, maNV, ngay).Scan(&id)
+
+		if err == nil {
+			http.Error(w, "Hôm nay bạn đã có bản ghi chấm công", http.StatusConflict)
+			return
+		}
+		if err != sql.ErrNoRows {
+			http.Error(w, "Lỗi kiểm tra chấm công", http.StatusInternalServerError)
+			return
+		}
+
+		_, err = db.Exec(`
+			INSERT INTO chamcong
+				(ma_nv, ngay_cham_cong, gio_vao, trang_thai)
+			VALUES (?, ?, ?, ?)
+		`, maNV, ngay, gio, "Đã chấm công vào")
+
+		if err != nil {
+			http.Error(w, "Lỗi chấm công vào: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, "/chamcong-ca-nhan", http.StatusSeeOther)
+	}
+}
+
+// Nhân viên chấm công ra
+func ChamCongRa(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Phương thức không hợp lệ", http.StatusMethodNotAllowed)
+			return
+		}
+
+		session, err := Store.Get(r, "qlnv-session")
+		if err != nil {
+			http.Redirect(w, r, "/dangnhap", http.StatusSeeOther)
+			return
+		}
+
+		maNV, ok := session.Values["ma_nv"].(string)
+		if !ok || maNV == "" {
+			http.Error(w, "Tài khoản chưa được liên kết với nhân viên", http.StatusForbidden)
+			return
+		}
+
+		ngay := time.Now().Format("2006-01-02")
+		gio := time.Now().Format("15:04:05")
+
+		result, err := db.Exec(`
+			UPDATE chamcong
+			SET gio_ra = ?, trang_thai = 'Đã chấm công ra'
+			WHERE ma_nv = ?
+			  AND ngay_cham_cong = ?
+			  AND gio_vao IS NOT NULL
+			  AND gio_ra IS NULL
+		`, gio, maNV, ngay)
+
+		if err != nil {
+			http.Error(w, "Lỗi chấm công ra: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		n, err := result.RowsAffected()
+		if err != nil {
+			http.Error(w, "Không kiểm tra được kết quả chấm công", http.StatusInternalServerError)
+			return
+		}
+		if n == 0 {
+			http.Error(w, "Bạn chưa chấm công vào hoặc đã chấm công ra hôm nay", http.StatusConflict)
+			return
+		}
+
+		http.Redirect(w, r, "/chamcong-ca-nhan", http.StatusSeeOther)
 	}
 }
