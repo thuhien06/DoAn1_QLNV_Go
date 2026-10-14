@@ -5,30 +5,109 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"qlnv/models"
 )
 
-// Danh sách chấm công
+// Danh sách chấm công theo mã nhân viên và tháng
 func DanhSachChamCong(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		maNV := r.URL.Query().Get("ma_nv")
+		thang := r.URL.Query().Get("thang")
+		nam := r.URL.Query().Get("nam")
+
+		// Chưa tìm kiếm thì chỉ hiện biểu mẫu
+		tmpl := template.Must(template.ParseFiles(
+			"templates/chamcong/list.html",
+		))
+
+		type DongChamCong struct {
+			models.ChamCong
+			DanhGia string
+		}
+
+		type DuLieuTrang struct {
+			DanhSach []DongChamCong
+			MaNV     string
+			Thang    string
+			Nam      string
+			DaTim    bool
+			Error    string
+			SoCong   int
+		}
+
+		data := DuLieuTrang{
+			MaNV:  maNV,
+			Thang: thang,
+			Nam:   nam,
+		}
+
+		if maNV == "" && thang == "" && nam == "" {
+			if err := tmpl.Execute(w, data); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+			return
+		}
+
+		data.DaTim = true
+
+		// Kiểm tra dữ liệu tìm kiếm
+		thangSo, err := strconv.Atoi(thang)
+		if err != nil || thangSo < 1 || thangSo > 12 {
+			data.Error = "Tháng không hợp lệ."
+			tmpl.Execute(w, data)
+			return
+		}
+
+		namSo, err := strconv.Atoi(nam)
+		if err != nil || namSo < 2000 || namSo > 2100 {
+			data.Error = "Năm không hợp lệ."
+			tmpl.Execute(w, data)
+			return
+		}
+
+		// Kiểm tra mã nhân viên tồn tại
+		var count int
+		err = db.QueryRow(
+			"SELECT COUNT(*) FROM nhanvien WHERE ma_nv = ?",
+			maNV,
+		).Scan(&count)
+
+		if err != nil {
+			http.Error(w, "Lỗi kiểm tra nhân viên: "+err.Error(),
+				http.StatusInternalServerError)
+			return
+		}
+
+		if count == 0 {
+			data.Error = "Mã nhân viên không tồn tại."
+			tmpl.Execute(w, data)
+			return
+		}
+
+		// Lọc dữ liệu theo tháng và năm
+		tuNgay := time.Date(namSo, time.Month(thangSo), 1, 0, 0, 0, 0, time.Local)
+		denNgay := tuNgay.AddDate(0, 1, 0)
 
 		rows, err := db.Query(`
 			SELECT id, ma_nv, ngay_cham_cong,
 			       gio_vao, gio_ra, trang_thai, ghi_chu
 			FROM chamcong
+			WHERE ma_nv = ?
+			  AND ngay_cham_cong >= ?
+			  AND ngay_cham_cong < ?
 			ORDER BY ngay_cham_cong DESC, id DESC
-		`)
+		`, maNV, tuNgay.Format("2006-01-02"),
+			denNgay.Format("2006-01-02"))
 
 		if err != nil {
-			http.Error(w, "Lỗi truy vấn database: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Lỗi truy vấn database: "+err.Error(),
+				http.StatusInternalServerError)
 			return
 		}
-
 		defer rows.Close()
-
-		var danhSach []models.ChamCong
 
 		for rows.Next() {
 			var cc models.ChamCong
@@ -62,7 +141,46 @@ func DanhSachChamCong(db *sql.DB) http.HandlerFunc {
 				cc.GhiChu = ghiChu.String
 			}
 
-			danhSach = append(danhSach, cc)
+			// Đánh giá giờ làm
+			danhGia := "Chưa đủ dữ liệu"
+
+			if cc.GioVao != "" && cc.GioRa != "" {
+				gioVao, errVao := time.Parse("15:04:05", cc.GioVao)
+				if errVao != nil {
+					gioVao, errVao = time.Parse("15:04", cc.GioVao)
+				}
+
+				gioRa, errRa := time.Parse("15:04:05", cc.GioRa)
+				if errRa != nil {
+					gioRa, errRa = time.Parse("15:04", cc.GioRa)
+				}
+
+				if errVao == nil && errRa == nil {
+					var ketQua []string
+
+					mocVao := time.Date(0, 1, 1, 8, 0, 0, 0, time.UTC)
+					mocRa := time.Date(0, 1, 1, 17, 0, 0, 0, time.UTC)
+
+					if gioVao.After(mocVao) {
+						ketQua = append(ketQua, "Đi muộn")
+					}
+
+					if gioRa.Before(mocRa) {
+						ketQua = append(ketQua, "Về sớm")
+					}
+
+					if len(ketQua) == 0 {
+						danhGia = "Đủ giờ"
+					} else {
+						danhGia = strings.Join(ketQua, ", ")
+					}
+				}
+			}
+
+			data.DanhSach = append(data.DanhSach, DongChamCong{
+				ChamCong: cc,
+				DanhGia:  danhGia,
+			})
 		}
 
 		if err := rows.Err(); err != nil {
@@ -71,11 +189,21 @@ func DanhSachChamCong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		tmpl := template.Must(template.ParseFiles(
-			"templates/chamcong/list.html",
-		))
+		// Đếm số ngày có chấm công trong tháng
+		ngayDaDem := make(map[string]bool)
 
-		tmpl.Execute(w, danhSach)
+		for _, dong := range data.DanhSach {
+			if dong.NgayChamCong != nil {
+				ngay := dong.NgayChamCong.Format("2006-01-02")
+				ngayDaDem[ngay] = true
+			}
+		}
+
+		data.SoCong = len(ngayDaDem)
+
+		if err := tmpl.Execute(w, data); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	}
 }
 
