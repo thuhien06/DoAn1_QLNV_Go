@@ -288,28 +288,38 @@ func SuaChamCong(db *sql.DB) http.HandlerFunc {
 		id := r.URL.Query().Get("id")
 
 		if r.Method == http.MethodGet {
-
 			var cc models.ChamCong
 
+			var gioVao, gioRa, trangThai, ghiChu sql.NullString
+
 			err := db.QueryRow(`
-				SELECT id, ma_nv, ngay_cham_cong,
-				       gio_vao, gio_ra, trang_thai, ghi_chu
-				FROM chamcong
-				WHERE id = ?
-			`, id).Scan(
+        SELECT id, ma_nv, ngay_cham_cong,
+               gio_vao, gio_ra, trang_thai, ghi_chu
+        FROM chamcong
+        WHERE id = ?
+    `, id).Scan(
 				&cc.ID,
 				&cc.MaNV,
 				&cc.NgayChamCong,
-				&cc.GioVao,
-				&cc.GioRa,
-				&cc.TrangThai,
-				&cc.GhiChu,
+				&gioVao,
+				&gioRa,
+				&trangThai,
+				&ghiChu,
 			)
 
 			if err != nil {
-				http.Error(w, "Không tìm thấy dữ liệu chấm công", http.StatusNotFound)
+				http.Error(
+					w,
+					"Không đọc được dữ liệu chấm công: "+err.Error(),
+					http.StatusInternalServerError,
+				)
 				return
 			}
+
+			cc.GioVao = gioVao.String
+			cc.GioRa = gioRa.String
+			cc.TrangThai = trangThai.String
+			cc.GhiChu = ghiChu.String
 
 			tmpl := template.Must(template.ParseFiles(
 				"templates/chamcong/sua.html",

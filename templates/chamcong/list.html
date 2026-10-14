@@ -60,6 +60,11 @@
         {{if not .Error}}
             <h2>Danh sách chấm công tháng {{.Thang}}/{{.Nam}}</h2>
 
+            <h3>
+                Tổng số ngày có chấm công:
+                {{.SoCong}} ngày
+            </h3>
+
             <a href="/chamcong/them">Thêm chấm công</a>
             <br><br>
 
@@ -73,6 +78,7 @@
                         <th>Giờ vào</th>
                         <th>Giờ ra</th>
                         <th>Trạng thái</th>
+                        <th>Đánh giá giờ làm</th>
                         <th>Ghi chú</th>
                         <th>Thao tác</th>
                     </tr>
@@ -90,6 +96,7 @@
                         <td>{{.GioVao}}</td>
                         <td>{{.GioRa}}</td>
                         <td>{{.TrangThai}}</td>
+                        <td>{{.DanhGia}}</td>
                         <td>{{.GhiChu}}</td>
                         <td>
                             <a href="/chamcong/sua?id={{.ID}}">Sửa</a>
