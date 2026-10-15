@@ -78,10 +78,27 @@
             <td>{{.GhiChu}}</td>
 
             <td>
+                {{if eq .TrangThai "Chờ duyệt"}}
+                <form action="/nghiphep/duyet" method="POST">
+                    <input type="hidden" name="id" value="{{.ID}}">
+
+                    <label>Ghi chú xử lý:</label><br>
+                    <textarea name="ghi_chu" rows="2" cols="20"></textarea><br>
+
+                    <button type="submit" name="trang_thai" value="Đã duyệt">
+                        Duyệt
+                    </button>
+
+                    <button type="submit" name="trang_thai" value="Từ chối">
+                        Từ chối
+                    </button>
+                </form>
+                {{end}}
+
                 <a href="/nghiphep/sua?id={{.ID}}">Sửa</a>
                 |
                 <a href="/nghiphep/xoa?id={{.ID}}"
-                   onclick="return confirm('Bạn có chắc chắn muốn xóa đơn nghỉ phép này không?');">
+                onclick="return confirm('Bạn có chắc chắn muốn xóa đơn nghỉ phép này không?');">
                     Xóa
                 </a>
             </td>

@@ -259,6 +259,14 @@ func main() {
 		),
 	)
 
+	http.HandleFunc("/nghiphep/duyet",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.XuLyDuyetNghiPhep(db),
+			),
+		),
+	)
+
 	//////////////////BANG LUONG
 
 	http.HandleFunc("/bangluong",

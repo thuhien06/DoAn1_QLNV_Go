@@ -388,3 +388,71 @@ func NghiPhepCaNhan(db *sql.DB) http.HandlerFunc {
 		}
 	}
 }
+
+// Duyệt hoặc từ chối đơn nghỉ phép
+func XuLyDuyetNghiPhep(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Phương thức không được hỗ trợ", http.StatusMethodNotAllowed)
+			return
+		}
+
+		session, err := Store.Get(r, "qlnv-session")
+		if err != nil {
+			http.Redirect(w, r, "/dangnhap", http.StatusSeeOther)
+			return
+		}
+
+		vaiTro, _ := session.Values["vai_tro"].(string)
+		if vaiTro != "admin" && vaiTro != "hr" {
+			http.Error(w, "Bạn không có quyền xử lý đơn nghỉ phép", http.StatusForbidden)
+			return
+		}
+
+		if err := r.ParseForm(); err != nil {
+			http.Error(w, "Dữ liệu không hợp lệ", http.StatusBadRequest)
+			return
+		}
+
+		id, err := strconv.Atoi(r.FormValue("id"))
+		if err != nil || id <= 0 {
+			http.Error(w, "ID đơn nghỉ phép không hợp lệ", http.StatusBadRequest)
+			return
+		}
+
+		trangThai := r.FormValue("trang_thai")
+		ghiChu := strings.TrimSpace(r.FormValue("ghi_chu"))
+
+		if trangThai != "Đã duyệt" && trangThai != "Từ chối" {
+			http.Error(w, "Trạng thái xử lý không hợp lệ", http.StatusBadRequest)
+			return
+		}
+
+		result, err := db.Exec(`
+			UPDATE nghiphep
+			SET trang_thai = ?, ghi_chu = ?
+			WHERE id = ? AND trang_thai = ?
+		`, trangThai, ghiChu, id, "Chờ duyệt")
+
+		if err != nil {
+			http.Error(w, "Lỗi cập nhật đơn nghỉ phép: "+err.Error(),
+				http.StatusInternalServerError)
+			return
+		}
+
+		affected, err := result.RowsAffected()
+		if err != nil {
+			http.Error(w, "Không kiểm tra được kết quả cập nhật",
+				http.StatusInternalServerError)
+			return
+		}
+
+		if affected == 0 {
+			http.Error(w, "Đơn không tồn tại hoặc đã được xử lý trước đó",
+				http.StatusConflict)
+			return
+		}
+
+		http.Redirect(w, r, "/nghiphep", http.StatusSeeOther)
+	}
+}
