@@ -227,7 +227,7 @@ func main() {
 
 	http.HandleFunc("/nghiphep/them",
 		routes.DaDangNhap(
-			routes.CoVaiTro("admin", "hr")(
+			routes.CoVaiTro("admin", "hr", "nhanvien")(
 				routes.ThemNghiPhep(db),
 			),
 		),

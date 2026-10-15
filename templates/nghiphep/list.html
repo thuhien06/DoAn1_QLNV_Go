@@ -7,18 +7,40 @@
 </head>
 
 <body>
-
     <h1>Danh sách nghỉ phép</h1>
 
     <a href="/">Trang chủ</a>
-
-    <br>
-    <br>
+    <br><br>
 
     <a href="/nghiphep/them">Thêm đơn nghỉ phép</a>
+    <br><br>
+
+    <form action="/nghiphep" method="GET">
+        <label for="ma_nv">Mã nhân viên:</label>
+        <input
+            type="text"
+            id="ma_nv"
+            name="ma_nv"
+            value="{{.MaNV}}"
+            placeholder="Nhập mã nhân viên"
+        >
+
+        <button type="submit">Tìm kiếm</button>
+        <a href="/nghiphep">Xóa tìm kiếm</a>
+    </form>
 
     <br>
-    <br>
+
+    {{if .DaTim}}
+        <h3>
+            Tổng số đơn nghỉ phép của nhân viên {{.MaNV}}:
+            {{.SoDon}} đơn
+        </h3>
+    {{else}}
+        <h3>
+            Tổng số đơn đang chờ duyệt: {{.SoDon}} đơn
+        </h3>
+    {{end}}
 
     <table border="1">
         <tr>
@@ -33,10 +55,9 @@
             <th>Thao tác</th>
         </tr>
 
-        {{range .}}
+        {{range .DanhSach}}
         <tr>
             <td>{{.ID}}</td>
-
             <td>{{.MaNV}}</td>
 
             <td>
@@ -52,29 +73,30 @@
             </td>
 
             <td>{{.LoaiNghi}}</td>
-
             <td>{{.LyDo}}</td>
-
             <td>{{.TrangThai}}</td>
-
             <td>{{.GhiChu}}</td>
 
             <td>
-                <a href="/nghiphep/sua?id={{.ID}}">
-                    Sửa
-                </a>
-
+                <a href="/nghiphep/sua?id={{.ID}}">Sửa</a>
                 |
-
                 <a href="/nghiphep/xoa?id={{.ID}}"
                    onclick="return confirm('Bạn có chắc chắn muốn xóa đơn nghỉ phép này không?');">
                     Xóa
                 </a>
             </td>
         </tr>
+        {{else}}
+        <tr>
+            <td colspan="9">
+                {{if .DaTim}}
+                    Nhân viên này chưa có đơn nghỉ phép hoặc mã nhân viên không tồn tại.
+                {{else}}
+                    Hiện không có đơn nghỉ phép nào đang chờ duyệt.
+                {{end}}
+            </td>
+        </tr>
         {{end}}
-
     </table>
-
 </body>
 </html>

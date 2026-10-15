@@ -2,85 +2,55 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Thêm nghỉ phép</title>
+    <title>Đăng ký nghỉ phép</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 
 <body>
+    <h1>Đăng ký nghỉ phép</h1>
 
-    <h1>Thêm đơn nghỉ phép</h1>
     {{if .Error}}
         <p style="color: red;">{{.Error}}</p>
     {{end}}
 
-    <a href="/nghiphep">Danh sách nghỉ phép</a>
+    <a href="/nghiphep-ca-nhan">Đơn nghỉ phép của tôi</a>
 
-    <br>
-    <br>
+    <br><br>
 
     <form action="/nghiphep/them" method="POST">
-
-        <label>Mã nhân viên:</label>
-        <br>
-        <input type="text" name="ma_nv" required>
-
-        <br>
-        <br>
-
         <label>Ngày bắt đầu:</label>
         <br>
         <input type="date" name="ngay_bat_dau" required>
-
-        <br>
-        <br>
+        <br><br>
 
         <label>Ngày kết thúc:</label>
         <br>
         <input type="date" name="ngay_ket_thuc" required>
-
-        <br>
-        <br>
+        <br><br>
 
         <label>Loại nghỉ:</label>
         <br>
-        <select name="loai_nghi">
+        <select name="loai_nghi" required>
             <option value="Nghỉ phép">Nghỉ phép</option>
             <option value="Nghỉ ốm">Nghỉ ốm</option>
             <option value="Nghỉ việc riêng">Nghỉ việc riêng</option>
             <option value="Nghỉ không lương">Nghỉ không lương</option>
         </select>
-
-        <br>
-        <br>
+        <br><br>
 
         <label>Lý do:</label>
         <br>
-        <input type="text" name="ly_do">
-
-        <br>
-        <br>
-
-        <label>Trạng thái:</label>
-        <br>
-        <select name="trang_thai">
-            <option value="Chờ duyệt">Chờ duyệt</option>
-            <option value="Đã duyệt">Đã duyệt</option>
-            <option value="Từ chối">Từ chối</option>
-        </select>
-
-        <br>
-        <br>
+        <input type="text" name="ly_do" required>
+        <br><br>
 
         <label>Ghi chú:</label>
         <br>
-        <input type="text" name="ghi_chu">
+        <textarea name="ghi_chu" rows="3"></textarea>
+        <br><br>
 
-        <br>
-        <br>
+        <p>Trạng thái đơn: <strong>Chờ duyệt</strong></p>
 
-        <button type="submit">Lưu</button>
-
+        <button type="submit">Gửi đơn nghỉ phép</button>
     </form>
-
 </body>
 </html>
