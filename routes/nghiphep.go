@@ -110,15 +110,16 @@ func ThemNghiPhep(db *sql.DB) http.HandlerFunc {
 		}
 
 		if r.Method == http.MethodGet {
-			tmpl := template.Must(
-				template.ParseFiles("templates/nghiphep/them.html"),
-			)
-			tmpl.Execute(w, nil)
-			return
-		}
+			var file string
 
-		if err := r.ParseForm(); err != nil {
-			http.Error(w, "Dữ liệu biểu mẫu không hợp lệ", http.StatusBadRequest)
+			if vaiTro == "nhanvien" {
+				file = "templates/nghiphep/them.html"
+			} else {
+				file = "templates/nghiphep/them_admin.html"
+			}
+
+			tmpl := template.Must(template.ParseFiles(file))
+			tmpl.Execute(w, nil)
 			return
 		}
 

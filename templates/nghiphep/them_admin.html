@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm đơn nghỉ phép</title>
+</head>
+<body>
+    <h2>THÊM ĐƠN NGHỈ PHÉP</h2>
+
+    {{if .Error}}
+        <p style="color: red;">{{.Error}}</p>
+    {{end}}
+
+    <form action="/nghiphep/them" method="POST">
+        <div>
+            <label for="ma_nv">Mã nhân viên:</label><br>
+            <input type="text" id="ma_nv" name="ma_nv" required>
+        </div>
+        <br>
+
+        <div>
+            <label for="ngay_bat_dau">Ngày bắt đầu:</label><br>
+            <input type="date" id="ngay_bat_dau" name="ngay_bat_dau" required>
+        </div>
+        <br>
+
+        <div>
+            <label for="ngay_ket_thuc">Ngày kết thúc:</label><br>
+            <input type="date" id="ngay_ket_thuc" name="ngay_ket_thuc" required>
+        </div>
+        <br>
+
+        <div>
+            <label for="loai_nghi">Loại nghỉ:</label><br>
+            <input type="text" id="loai_nghi" name="loai_nghi" required>
+        </div>
+        <br>
+
+        <div>
+            <label for="ly_do">Lý do nghỉ:</label><br>
+            <textarea id="ly_do" name="ly_do" rows="3" cols="40" required></textarea>
+        </div>
+        <br>
+
+        <div>
+            <label for="ghi_chu">Ghi chú:</label><br>
+            <textarea id="ghi_chu" name="ghi_chu" rows="3" cols="40"></textarea>
+        </div>
+        <br>
+
+        <p>Trạng thái: Chờ duyệt</p>
+
+        <button type="submit">Thêm đơn</button>
+        <a href="/nghiphep">Quay lại</a>
+    </form>
+</body>
+</html>
