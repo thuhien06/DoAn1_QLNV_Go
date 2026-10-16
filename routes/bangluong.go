@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+	"time"
 
 	"qlnv/models"
 )
@@ -66,11 +67,27 @@ func ThemBangLuong(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method == http.MethodGet {
+
+			now := time.Now()
+
+			data := struct {
+				Error string
+				Thang int
+				Nam   int
+			}{
+				Error: "",
+				Thang: int(now.Month()),
+				Nam:   now.Year(),
+			}
+
 			tmpl := template.Must(
 				template.ParseFiles("templates/bangluong/them.html"),
 			)
 
-			tmpl.Execute(w, nil)
+			if err := tmpl.Execute(w, data); err != nil {
+				http.Error(w, "Lỗi hiển thị: "+err.Error(), http.StatusInternalServerError)
+			}
+
 			return
 		}
 
