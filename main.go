@@ -13,29 +13,69 @@ import (
 type HomeData struct {
 	TenDangNhap string
 	VaiTro      string
+	HetHan      int
+	SapHetHan   int
 }
 
 // Hiển thị trang chủ theo vai trò
-func home(w http.ResponseWriter, r *http.Request) {
-	session, err := routes.Store.Get(r, "qlnv-session")
-	if err != nil {
-		http.Redirect(w, r, "/dangnhap", http.StatusSeeOther)
-		return
-	}
+func home(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 
-	tenDangNhap, _ := session.Values["ten_dang_nhap"].(string)
-	vaiTro, _ := session.Values["vai_tro"].(string)
+		session, err := routes.Store.Get(r, "qlnv-session")
+		if err != nil {
+			http.Redirect(w, r, "/dangnhap", http.StatusSeeOther)
+			return
+		}
 
-	data := HomeData{
-		TenDangNhap: tenDangNhap,
-		VaiTro:      vaiTro,
-	}
+		tenDangNhap, _ := session.Values["ten_dang_nhap"].(string)
+		vaiTro, _ := session.Values["vai_tro"].(string)
 
-	tmpl := template.Must(template.ParseFiles("templates/index.html"))
+		// Đếm hợp đồng đã hết hạn
+		var hetHan int
 
-	err = tmpl.Execute(w, data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		err = db.QueryRow(`
+			SELECT COUNT(*)
+			FROM hopdong
+			WHERE ngay_ket_thuc IS NOT NULL
+			  AND ngay_ket_thuc < CURDATE()
+		`).Scan(&hetHan)
+
+		if err != nil {
+			http.Error(w, "Lỗi kiểm tra hợp đồng: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Đếm hợp đồng sắp hết hạn trong 30 ngày
+		var sapHetHan int
+
+		err = db.QueryRow(`
+			SELECT COUNT(*)
+			FROM hopdong
+			WHERE ngay_ket_thuc IS NOT NULL
+			  AND ngay_ket_thuc >= CURDATE()
+			  AND ngay_ket_thuc <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+		`).Scan(&sapHetHan)
+
+		if err != nil {
+			http.Error(w, "Lỗi kiểm tra hợp đồng: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		data := HomeData{
+			TenDangNhap: tenDangNhap,
+			VaiTro:      vaiTro,
+			HetHan:      hetHan,
+			SapHetHan:   sapHetHan,
+		}
+
+		tmpl := template.Must(
+			template.ParseFiles("templates/index.html"),
+		)
+
+		err = tmpl.Execute(w, data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	}
 }
 
@@ -56,7 +96,7 @@ func main() {
 	}(db)
 
 	// Khai báo đường đăng nhập  rồi vào trang chủ
-	http.HandleFunc("/", routes.DaDangNhap(home))
+	http.HandleFunc("/", routes.DaDangNhap(home(db)))
 
 	http.HandleFunc("/dangnhap", routes.DangNhap(db))
 	http.HandleFunc("/dangxuat", routes.DangXuat)
