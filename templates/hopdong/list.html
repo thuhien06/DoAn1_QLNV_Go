@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <h1>DANH SÁCH HỢP ĐỒNG</h1>
+    <h1>DANH SÁCH HỢP ĐỒNG</h1> 
 
     <a href="/">Trang chủ</a>
     <br><br>
@@ -67,7 +67,12 @@
 
         <tbody>
             {{range .DanhSach}}
-            <tr>
+           <tr
+                {{if eq .TrangThai "Sắp hết hạn"}}
+                    style="background-color: #ffcccc;"
+                {{end}}
+            >
+
                 <td>{{.ID}}</td>
                 <td>{{.MaHD}}</td>
                 <td>{{.MaNV}}</td>
