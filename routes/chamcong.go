@@ -2,6 +2,7 @@ package routes
 
 import (
 	"database/sql"
+	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -394,27 +395,46 @@ func XoaChamCong(db *sql.DB) http.HandlerFunc {
 // chấm công cá nhân
 func ChamCongCaNhan(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		session, err := Store.Get(r, "qlnv-session")
 		if err != nil {
-			http.Redirect(w, r, "/dangnhap", http.StatusSeeOther)
+			http.Error(w, "Lỗi session", http.StatusInternalServerError)
 			return
 		}
 
 		maNV, ok := session.Values["ma_nv"].(string)
 		if !ok || maNV == "" {
-			http.Error(w, "Tài khoản chưa được liên kết với nhân viên", http.StatusForbidden)
+			http.Error(w, "Không xác định được mã nhân viên", http.StatusUnauthorized)
 			return
 		}
 
-		rows, err := db.Query(`
-			SELECT id, ma_nv, ngay_cham_cong,
-			       gio_vao, gio_ra, trang_thai, ghi_chu
+		// Lấy thời gian hiện tại
+		now := time.Now()
+		thang := int(now.Month())
+		nam := now.Year()
+
+		// Nếu nhân viên chọn tháng/năm khác thì dùng giá trị đó
+		if r.URL.Query().Get("thang") != "" {
+			fmt.Sscanf(r.URL.Query().Get("thang"), "%d", &thang)
+		}
+
+		if r.URL.Query().Get("nam") != "" {
+			fmt.Sscanf(r.URL.Query().Get("nam"), "%d", &nam)
+		}
+
+		query := `
+			SELECT id, ma_nv, ngay_cham_cong, gio_vao, gio_ra,
+			       trang_thai, ghi_chu
 			FROM chamcong
 			WHERE ma_nv = ?
+			  AND MONTH(ngay_cham_cong) = ?
+			  AND YEAR(ngay_cham_cong) = ?
 			ORDER BY ngay_cham_cong DESC
-		`, maNV)
+		`
+
+		rows, err := db.Query(query, maNV, thang, nam)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Lỗi lấy dữ liệu chấm công: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 		defer rows.Close()
@@ -423,7 +443,11 @@ func ChamCongCaNhan(db *sql.DB) http.HandlerFunc {
 
 		for rows.Next() {
 			var cc models.ChamCong
-			var gioVao, gioRa, trangThai, ghiChu sql.NullString
+
+			var gioVao sql.NullString
+			var gioRa sql.NullString
+			var trangThai sql.NullString
+			var ghiChu sql.NullString
 
 			err := rows.Scan(
 				&cc.ID,
@@ -434,20 +458,24 @@ func ChamCongCaNhan(db *sql.DB) http.HandlerFunc {
 				&trangThai,
 				&ghiChu,
 			)
+
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				http.Error(w, "Lỗi đọc dữ liệu chấm công: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
 
 			if gioVao.Valid {
 				cc.GioVao = gioVao.String
 			}
+
 			if gioRa.Valid {
 				cc.GioRa = gioRa.String
 			}
+
 			if trangThai.Valid {
 				cc.TrangThai = trangThai.String
 			}
+
 			if ghiChu.Valid {
 				cc.GhiChu = ghiChu.String
 			}
@@ -455,17 +483,29 @@ func ChamCongCaNhan(db *sql.DB) http.HandlerFunc {
 			danhSach = append(danhSach, cc)
 		}
 
-		if err = rows.Err(); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+		if err := rows.Err(); err != nil {
+			http.Error(w, "Lỗi đọc dữ liệu: "+err.Error(), http.StatusInternalServerError)
 			return
+		}
+
+		data := struct {
+			DanhSach []models.ChamCong
+			Thang    int
+			Nam      int
+			TongSo   int
+		}{
+			DanhSach: danhSach,
+			Thang:    thang,
+			Nam:      nam,
+			TongSo:   len(danhSach),
 		}
 
 		tmpl := template.Must(
 			template.ParseFiles("templates/chamcong/canhan.html"),
 		)
 
-		if err = tmpl.Execute(w, danhSach); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+		if err := tmpl.Execute(w, data); err != nil {
+			http.Error(w, "Lỗi hiển thị trang chấm công cá nhân", http.StatusInternalServerError)
 		}
 	}
 }
