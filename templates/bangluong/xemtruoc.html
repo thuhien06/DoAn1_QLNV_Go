@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Xem trước bảng lương</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+    <h1>Xem trước bảng lương</h1>
+
+    <p><strong>Mã nhân viên:</strong> {{.MaNV}}</p>
+
+    <p><strong>Tháng:</strong> {{.Thang}}</p>
+
+    <p><strong>Năm:</strong> {{.Nam}}</p>
+
+    <p>
+        <strong>Lương cơ bản:</strong>
+        {{printf "%.0f" .LuongCoBan}}
+    </p>
+
+    <p>
+        <strong>Số ngày công:</strong>
+        {{.SoNgayCong}}
+    </p>
+
+    <p>
+        <strong>Thưởng:</strong>
+        {{printf "%.0f" .PhuCap}}
+    </p>
+
+    <p>
+        <strong>Khấu trừ:</strong>
+        {{printf "%.0f" .KhauTru}}
+    </p>
+
+    <p>
+        <strong>Tổng lương:</strong>
+        {{printf "%.0f" .TongLuong}}
+    </p>
+
+    <p>
+        <strong>Ghi chú:</strong>
+        {{.GhiChu}}
+    </p>
+
+    <br>
+
+    <form action="/bangluong/luu" method="POST">
+
+        <input type="hidden" name="ma_nv" value="{{.MaNV}}">
+        <input type="hidden" name="thang" value="{{.Thang}}">
+        <input type="hidden" name="nam" value="{{.Nam}}">
+        <input type="hidden" name="luong_co_ban" value="{{.LuongCoBan}}">
+        <input type="hidden" name="so_ngay_cong" value="{{.SoNgayCong}}">
+        <input type="hidden" name="phu_cap" value="{{.PhuCap}}">
+        <input type="hidden" name="khau_tru" value="{{.KhauTru}}">
+        <input type="hidden" name="tong_luong" value="{{.TongLuong}}">
+        <input type="hidden" name="ghi_chu" value="{{.GhiChu}}">
+
+        <button type="submit">Xác nhận lưu</button>
+
+    </form>
+
+    <br>
+
+    <a href="/bangluong/them">Quay lại</a>
+
+</body>
+</html>

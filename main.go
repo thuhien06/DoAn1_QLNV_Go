@@ -285,6 +285,14 @@ func main() {
 		),
 	)
 
+	http.HandleFunc("/bangluong/luu",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.LuuBangLuong(db),
+			),
+		),
+	)
+
 	http.HandleFunc("/bangluong/sua",
 		routes.DaDangNhap(
 			routes.CoVaiTro("admin", "hr")(
