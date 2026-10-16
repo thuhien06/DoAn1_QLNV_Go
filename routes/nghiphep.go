@@ -218,6 +218,20 @@ func ThemNghiPhep(db *sql.DB) http.HandlerFunc {
 func SuaNghiPhep(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
+		session, err := Store.Get(r, "qlnv-session")
+		if err != nil {
+			http.Redirect(w, r, "/dangnhap", http.StatusSeeOther)
+			return
+		}
+
+		vaiTro, _ := session.Values["vai_tro"].(string)
+
+		// Chỉ Admin và HR được sửa đơn nghỉ phép
+		if vaiTro != "admin" && vaiTro != "hr" {
+			http.Error(w, "Bạn không có quyền sửa đơn nghỉ phép", http.StatusForbidden)
+			return
+		}
+
 		id, err := strconv.Atoi(r.URL.Query().Get("id"))
 
 		if err != nil {
@@ -303,8 +317,21 @@ func SuaNghiPhep(db *sql.DB) http.HandlerFunc {
 func XoaNghiPhep(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		id, err := strconv.Atoi(r.URL.Query().Get("id"))
+		session, err := Store.Get(r, "qlnv-session")
+		if err != nil {
+			http.Redirect(w, r, "/dangnhap", http.StatusSeeOther)
+			return
+		}
 
+		vaiTro, _ := session.Values["vai_tro"].(string)
+
+		// Chỉ Admin được xóa đơn nghỉ phép
+		if vaiTro != "admin" {
+			http.Error(w, "Bạn không có quyền xóa đơn nghỉ phép", http.StatusForbidden)
+			return
+		}
+
+		id, err := strconv.Atoi(r.URL.Query().Get("id"))
 		if err != nil {
 			http.Error(w, "ID không hợp lệ", http.StatusBadRequest)
 			return
