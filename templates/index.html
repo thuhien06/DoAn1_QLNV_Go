@@ -24,27 +24,25 @@
     <hr>
 
     <!-- THÔNG BÁO HỢP ĐỒNG -->
-    {{if or (gt .SapHetHan 0) (gt .HetHan 0)}}
+    {{if or (eq .VaiTro "admin") (eq .VaiTro "hr")}}
 
-    <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px;">
+        {{if or (gt .SapHetHan 0) (gt .HetHan 0)}}
 
-        <h3>🔔 THÔNG BÁO</h3>
+            <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px;">
 
-        {{if gt .SapHetHan 0}}
-        <p style="color: #d97706;">
-            ⚠ Có <strong>{{.SapHetHan}}</strong>
-            hợp đồng sắp hết hạn trong 30 ngày.
-        </p>
+                <h3>🔔 THÔNG BÁO</h3>
+
+                {{if gt .SapHetHan 0}}
+                    <p>⚠ Có {{.SapHetHan}} hợp đồng sắp hết hạn trong 30 ngày.</p>
+                {{end}}
+
+                {{if gt .HetHan 0}}
+                    <p>⚠ Có {{.HetHan}} hợp đồng đã hết hạn.</p>
+                {{end}}
+
+            </div>
+
         {{end}}
-
-        {{if gt .HetHan 0}}
-        <p style="color: red;">
-            ⚠ Có <strong>{{.HetHan}}</strong>
-            hợp đồng đã hết hạn.
-        </p>
-        {{end}}
-
-    </div>
 
     {{end}}
 
