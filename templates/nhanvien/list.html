@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -6,87 +5,123 @@
     <title>Danh sách nhân viên</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
+
 <body>
-    <h1>Danh sách nhân viên</h1>
 
-    <a href="/">Trang chủ</a>
-    <br><br>
+    <div class="employee-page">
 
-    <a href="/nhanvien/them">Thêm nhân viên</a>
-    <br><br>
+        <!-- TIÊU ĐỀ -->
+        <h1 class="page-title">DANH SÁCH NHÂN VIÊN</h1>
 
-    <!-- Thống kê nhân viên -->
-    <div class="thong-ke">
-        <p>
-            Tổng số nhân viên trong hệ thống:
-            <strong>{{.TongSo}}</strong>
-        </p>
+        <!-- TÌM KIẾM + THỐNG KÊ -->
+        <div class="employee-toolbar">
+
+            <!-- Tìm kiếm bên trái -->
+            <form action="/nhanvien" method="GET" class="employee-search">
+                <input
+                    type="text"
+                    name="ma_nv"
+                    placeholder="Nhập mã nhân viên"
+                    value="{{.TuKhoa}}"
+                >
+
+                <button type="submit">Tìm kiếm</button>
+
+                <a href="/nhanvien">Xem tất cả</a>
+            </form>
+
+            <!-- Tổng số bên phải -->
+            <div class="employee-count">
+                Tổng số nhân viên:
+                <strong>{{.TongSo}}</strong>
+            </div>
+
+        </div>
+
+        <!-- THÊM NHÂN VIÊN -->
+        <div class="employee-actions">
+            <a href="/nhanvien/them" class="btn-add">
+                + Thêm nhân viên
+            </a>
+
+            <a href="/" class="btn-home">
+                Trang chủ
+            </a>
+        </div>
+
+        <!-- BẢNG -->
+        <div class="employee-table-wrapper">
+
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Mã NV</th>
+                        <th>Họ tên</th>
+                        <th>Ngày sinh</th>
+                        <th>Giới tính</th>
+                        <th>Số điện thoại</th>
+                        <th>Email</th>
+                        <th>Địa chỉ</th>
+                        <th>Ngày vào làm</th>
+                        <th>Phòng ban</th>
+                        <th>Chức vụ</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {{range .DanhSach}}
+                    <tr>
+                        <td>{{.ID}}</td>
+                        <td>{{.MaNV}}</td>
+                        <td>{{.HoTen}}</td>
+                        <td>
+                            {{if .NgaySinh}}
+                                {{.NgaySinh.Format "02-01-2006"}}
+                            {{end}}
+                        </td>
+                        <td>{{.GioiTinh}}</td>
+                        <td>{{.SoDienThoai}}</td>
+                        <td>{{.Email}}</td>
+                        <td>{{.DiaChi}}</td>
+                        <td>
+                            {{if .NgayVaoLam}}
+                                {{.NgayVaoLam.Format "02-01-2006"}}
+                            {{end}}
+                        </td>
+                        <td>{{.PhongBan}}</td>
+                        <td>{{.ChucVu}}</td>
+
+                        <td>
+                            <a href="/nhanvien/sua?id={{.ID}}">Sửa</a>
+
+                            <a
+                                href="/nhanvien/xoa?id={{.ID}}"
+                                onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên {{.MaNV}} - {{.HoTen}} không?');"
+                            >
+                                Xóa
+                            </a>
+                        </td>
+                    </tr>
+
+                    {{else}}
+
+                    <tr>
+                        <td colspan="12">
+                            Không tìm thấy nhân viên phù hợp.
+                        </td>
+                    </tr>
+
+                    {{end}}
+                </tbody>
+            </table>
+
+        </div>
+
+        <!-- TRANG CHỦ -->
 
     </div>
 
-    <!-- Form tìm kiếm -->
-    <form action="/nhanvien" method="GET">
-        <input
-            type="text"
-            name="ma_nv"
-            placeholder="Nhập mã nhân viên"
-            value="{{.TuKhoa}}"
-        >
-
-        <button type="submit">Tìm kiếm</button>
-        <a href="/nhanvien">Xem tất cả</a>
-    </form>
-
-    <br>
-
-    <!-- Danh sách nhân viên -->
-    <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Mã NV</th>
-                <th>Họ tên</th>
-                <th>Ngày sinh</th>
-                <th>Giới tính</th>
-                <th>Số điện thoại</th>
-                <th>Email</th>
-                <th>Địa chỉ</th>
-                <th>Ngày vào làm</th>
-                <th>Phòng ban</th>
-                <th>Chức vụ</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            {{range .DanhSach}}
-            <tr>
-                <td>{{.ID}}</td>
-                <td>{{.MaNV}}</td>
-                <td>{{.HoTen}}</td>
-                <td>{{if .NgaySinh}}{{.NgaySinh.Format "02-01-2006"}}{{end}}</td>
-                <td>{{.GioiTinh}}</td>
-                <td>{{.SoDienThoai}}</td>
-                <td>{{.Email}}</td>
-                <td>{{.DiaChi}}</td>
-                <td>{{if .NgayVaoLam}}{{.NgayVaoLam.Format "02-01-2006"}}{{end}}</td>
-                <td>{{.PhongBan}}</td>
-                <td>{{.ChucVu}}</td>
-                <td>
-                    <a href="/nhanvien/sua?id={{.ID}}">Sửa</a>
-
-                    <a
-                        href="/nhanvien/xoa?id={{.ID}}"
-                        onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên {{.MaNV}} - {{.HoTen}} không?');"
-                    >Xóa</a>
-                </td>
-            </tr>
-            {{else}}
-            <tr>
-                <td colspan="12">Không tìm thấy nhân viên phù hợp.</td>
-            </tr>
-            {{end}}
-        </tbody>
-    </table>
 </body>
 </html>

@@ -2,134 +2,143 @@
 <html lang="vi">
 
 <head>
-
     <meta charset="UTF-8">
-
     <title>Sửa nhân viên</title>
-
     <link rel="stylesheet" href="/static/css/style.css">
-
 </head>
 
 <body>
 
-    <h1>SỬA THÔNG TIN NHÂN VIÊN</h1>
+    <div class="employee-form-page">
 
-    <form action="/nhanvien/sua?id={{.ID}}" method="POST">
+        <h1>SỬA THÔNG TIN NHÂN VIÊN</h1>
 
-        <p>
-            <label>Mã nhân viên:</label><br>
-            <input
-                type="text"
-                name="ma_nv"
-                value="{{.MaNV}}"
-                required
-            >
-        </p>
+        <form
+            action="/nhanvien/sua?id={{.ID}}"
+            method="POST"
+            class="employee-form"
+        >
 
-        <p>
-            <label>Họ tên:</label><br>
-            <input
-                type="text"
-                name="ho_ten"
-                value="{{.HoTen}}"
-                required
-            >
-        </p>
+            <div class="form-group">
+                <label>Mã nhân viên:</label>
+                <input
+                    type="text"
+                    name="ma_nv"
+                    value="{{.MaNV}}"
+                    required
+                >
+            </div>
 
-        <p>
-            <label>Ngày sinh:</label><br>
-            <input
-                type="date"
-                name="ngay_sinh"
-                value="{{if .NgaySinh}}{{.NgaySinh.Format "2006-01-02"}}{{end}}"
-            >
-        </p>
+            <div class="form-group">
+                <label>Họ tên:</label>
+                <input
+                    type="text"
+                    name="ho_ten"
+                    value="{{.HoTen}}"
+                    required
+                >
+            </div>
 
-        <p>
-            <label>Giới tính:</label><br>
+            <div class="form-group">
+                <label>Ngày sinh:</label>
+                <input
+                    type="date"
+                    name="ngay_sinh"
+                    value="{{if .NgaySinh}}{{.NgaySinh.Format "2006-01-02"}}{{end}}"
+                >
+            </div>
 
-            <select name="gioi_tinh">
+            <div class="form-group">
+                <label>Giới tính:</label>
 
-                <option value="Nam"
-                    {{if eq .GioiTinh "Nam"}}selected{{end}}>
-                    Nam
-                </option>
+                <select name="gioi_tinh">
 
-                <option value="Nữ"
-                    {{if eq .GioiTinh "Nữ"}}selected{{end}}>
-                    Nữ
-                </option>
+                    <option value="Nam"
+                        {{if eq .GioiTinh "Nam"}}selected{{end}}>
+                        Nam
+                    </option>
 
-            </select>
+                    <option value="Nữ"
+                        {{if eq .GioiTinh "Nữ"}}selected{{end}}>
+                        Nữ
+                    </option>
 
-        </p>
+                </select>
+            </div>
 
-        <p>
-            <label>Số điện thoại:</label><br>
-            <input
-                type="text"
-                name="so_dien_thoai"
-                value="{{.SoDienThoai}}"
-            >
-        </p>
+            <div class="form-group">
+                <label>Số điện thoại:</label>
+                <input
+                    type="text"
+                    name="so_dien_thoai"
+                    value="{{.SoDienThoai}}"
+                >
+            </div>
 
-        <p>
-            <label>Email:</label><br>
-            <input
-                type="email"
-                name="email"
-                value="{{.Email}}"
-            >
-        </p>
+            <div class="form-group">
+                <label>Email:</label>
+                <input
+                    type="email"
+                    name="email"
+                    value="{{.Email}}"
+                >
+            </div>
 
-        <p>
-            <label>Địa chỉ:</label><br>
-            <input
-                type="text"
-                name="dia_chi"
-                value="{{.DiaChi}}"
-            >
-        </p>
+            <div class="form-group">
+                <label>Địa chỉ:</label>
+                <input
+                    type="text"
+                    name="dia_chi"
+                    value="{{.DiaChi}}"
+                >
+            </div>
 
-        <p>
-            <label>Ngày vào làm:</label><br>
-            <input
-                type="date"
-                name="ngay_vao_lam"
-                value="{{if .NgayVaoLam}}{{.NgayVaoLam.Format "2006-01-02"}}{{end}}"
-            >
-        </p>
+            <div class="form-group">
+                <label>Ngày vào làm:</label>
+                <input
+                    type="date"
+                    name="ngay_vao_lam"
+                    value="{{if .NgayVaoLam}}{{.NgayVaoLam.Format "2006-01-02"}}{{end}}"
+                >
+            </div>
 
-        <p>
-            <label>Phòng ban:</label><br>
-            <input
-                type="text"
-                name="phong_ban"
-                value="{{.PhongBan}}"
-            >
-        </p>
+            <div class="form-group">
+                <label>Phòng ban:</label>
+                <input
+                    type="text"
+                    name="phong_ban"
+                    value="{{.PhongBan}}"
+                >
+            </div>
 
-        <p>
-            <label>Chức vụ:</label><br>
-            <input
-                type="text"
-                name="chuc_vu"
-                value="{{.ChucVu}}"
-            >
-        </p>
+            <div class="form-group">
+                <label>Chức vụ:</label>
+                <input
+                    type="text"
+                    name="chuc_vu"
+                    value="{{.ChucVu}}"
+                >
+            </div>
 
-        <button type="submit">
-            Lưu thay đổi
-        </button>
+            <div class="form-actions">
 
-        <a href="/nhanvien">
-            Quay lại
-        </a>
-        <a href="/">Trang chủ</a>
+                <button type="submit" class="btn-save">
+                    Lưu thay đổi
+                </button>
 
-    </form>
+                <a href="/nhanvien" class="btn-back">
+                    Quay lại
+                </a>
+
+                <a href="/" class="btn-home">
+                    Trang chủ
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
 
 </body>
-
 </html>

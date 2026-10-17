@@ -4,6 +4,10 @@ body {
     background-color: #f5f5f5;
 }
 
+body {
+    background-color: #f8f8f8;
+}
+
 .container {
     width: 80%;
     margin: 50px auto;
@@ -36,3 +40,550 @@ h1 {
     cursor: pointer;
 }
 
+/* Thông báo hợp đồng trên trang chủ ad*/
+.contract-notification {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+
+    width: 190px;
+    padding: 10px 12px;
+
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.notification-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+/* giao diện trang nhân viên */
+.employee-page {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    padding: 0 20px;
+}
+
+.employee-page .page-title {
+    width: 100%;
+    text-align: center;
+    margin: 0 0 50px 0;
+    margin-top: 10px;
+}
+
+.employee-toolbar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 80px;
+    margin-bottom: 35px;
+    box-sizing: border-box;
+}
+
+.employee-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.employee-count {
+    font-size: 16px;
+    white-space: nowrap;
+}
+
+.employee-table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    box-sizing: border-box;
+}
+
+.employee-table-wrapper table {
+    width: max-content;
+    min-width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+}
+
+.btn-add {
+    display: inline-block;
+    padding: 10px 18px;
+
+    background-color: #ffffff;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+
+    color: #222;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.employee-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 60px;
+}   
+
+.btn-add:hover {
+    background-color: #f5f5f5;
+}
+
+.employee-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 60px;
+}
+
+.employee-actions .btn-home {
+    display: inline-block;
+    padding: 10px 18px;
+
+    background-color: #ffffff;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+
+    color: #222;
+    text-decoration: none;
+
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.employee-actions .btn-home:hover {
+    background-color: #f5f5f5;
+}
+
+
+/* giao diện trang nhân viên- thêm- sửa */
+.employee-form-page {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.employee-form-page h1 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.employee-form {
+    background-color: #ffffff;
+    padding: 22px 28px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    font-size: 14px;
+}
+
+.form-group {
+    margin-bottom: 14px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px 9px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.btn-save,
+.btn-back,
+.btn-home {
+    display: inline-block;
+    padding: 8px 15px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #222;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.btn-save:hover,
+.btn-back:hover,
+.btn-home:hover {
+    background-color: #f5f5f5;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 7px;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+
+    border: 1px solid #ccc;
+    border-radius: 5px;
+
+    font-size: 14px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+
+    margin-top: 35px;
+}
+
+.btn-save,
+.btn-back,
+.btn-home {
+    display: inline-block;
+
+    padding: 10px 18px;
+
+    border: 1px solid #bbb;
+    border-radius: 6px;
+
+    background-color: #ffffff;
+    color: #222;
+
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.btn-save:hover,
+.btn-back:hover,
+.btn-home:hover {
+    background-color: #f5f5f5;
+}
+
+
+/* giao diện trang hợp đồng */
+.contract-page {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 35px;
+    box-sizing: border-box;
+}
+
+/* Tiêu đề */
+.contract-page .page-title {
+    text-align: center;
+    margin: 0 0 45px 0;
+}
+
+/* Bộ lọc */
+.contract-filter {
+    width: 100%;
+    padding: 18px 20px;
+    margin-bottom: 30px;
+
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+
+    box-sizing: border-box;
+}
+
+.contract-filter form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.contract-filter input,
+.contract-filter select {
+    padding: 9px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.contract-filter button {
+    padding: 9px 15px;
+}
+
+.contract-filter a {
+    margin-left: 5px;
+}
+
+/* Thêm + tổng + trang chủ */
+.contract-actions {
+    display: flex;
+    align-items: center;
+    margin-bottom: 60px;
+}
+
+.contract-count {
+    font-size: 16px;
+    white-space: nowrap;
+    margin-left: 40px;
+}
+
+.contract-actions .btn-home {
+    margin-left: auto;
+}
+
+.contract-count {
+    font-size: 16px;
+    white-space: nowrap;
+}
+
+/* Nút */
+.contract-actions .btn-add,
+.contract-actions .btn-home {
+    display: inline-block;
+
+    padding: 10px 18px;
+
+    background-color: #ffffff;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+
+    color: #222;
+    text-decoration: none;
+
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.contract-actions .btn-add:hover,
+.contract-actions .btn-home:hover {
+    background-color: #f5f5f5;
+}
+
+/* Bảng */
+.contract-table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    box-sizing: border-box;
+}
+
+.contract-table-wrapper table {
+    width: max-content;
+    min-width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    font-size: 14px;
+}
+
+.contract-table-wrapper th,
+.contract-table-wrapper td {
+    padding: 7px 8px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.contract-table-wrapper th {
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.contract-table-wrapper td {
+    white-space: nowrap;
+}
+
+.contract-table-wrapper td a {
+    margin: 0 3px;
+}   
+
+/* giao diện trang hợp đồng- thêm- sửa */
+.contract-form-page {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.contract-form-page h1 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.contract-group-select {
+    background-color: #ffffff;
+    padding: 18px 28px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    margin-bottom: 15px;
+}
+
+.contract-form {
+    background-color: #ffffff;
+    padding: 22px 28px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    font-size: 14px;
+}
+
+.contract-form .form-group,
+.contract-group-select .form-group {
+    margin-bottom: 14px;
+}
+
+.contract-form label,
+.contract-group-select label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.contract-form input,
+.contract-form select,
+.contract-form textarea,
+.contract-group-select select {
+    width: 100%;
+    padding: 8px 9px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.contract-form textarea {
+    resize: vertical;
+}
+
+.contract-form .form-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.contract-form .btn-save,
+.contract-form .btn-back {
+    display: inline-block;
+    padding: 8px 15px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #222;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.contract-form .btn-save:hover,
+.contract-form .btn-back:hover {
+    background-color: #f5f5f5;
+}
+
+.contract-error {
+    color: red;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+/* giao diện trang hợp đồng- chi tiết */
+.contract-detail-page {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.contract-detail-page h1 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.contract-detail {
+    background-color: #ffffff;
+    padding: 22px 28px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    font-size: 14px;
+}
+
+.detail-group {
+    margin-bottom: 20px;
+}
+
+.detail-group p,
+.detail-section p {
+    margin: 0 0 10px 0;
+    line-height: 1.5;
+}
+
+.detail-section {
+    padding-top: 15px;
+    margin-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.detail-section h3 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+}
+
+.detail-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+}
+
+.detail-actions .btn-back {
+    display: inline-block;
+    padding: 8px 15px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #222;
+    text-decoration: none;
+    font-size: 14px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.detail-actions .btn-back:hover {
+    background-color: #f5f5f5;
+}

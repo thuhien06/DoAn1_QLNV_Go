@@ -1,126 +1,193 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Danh sách hợp đồng</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
+
 <body>
-    <h1>DANH SÁCH HỢP ĐỒNG</h1> 
 
-    <a href="/">Trang chủ</a>
-    <br><br>
+    <div class="contract-page">
 
-    <p>Tổng số hợp đồng: <strong>{{.TongSo}}</strong></p>
+        <!-- TIÊU ĐỀ -->
+        <h1 class="page-title">DANH SÁCH HỢP ĐỒNG</h1>
 
-    <a href="/hopdong/them">Thêm hợp đồng</a>
-    <br><br>
+        <!-- BỘ LỌC -->
+        <div class="contract-filter">
 
-    <!-- Form tìm kiếm và lọc hợp đồng -->
-    <form method="GET" action="/hopdong">
-        <label for="ma_hd">Mã hợp đồng:</label>
-        <input
-            type="text"
-            id="ma_hd"
-            name="ma_hd"
-            placeholder="Nhập mã hợp đồng"
-            value="{{.MaHD}}"
-        >
+            <form method="GET" action="/hopdong">
 
-        <label for="ma_nv">Mã nhân viên:</label>
-        <input
-            type="text"
-            id="ma_nv"
-            name="ma_nv"
-            placeholder="Nhập mã nhân viên"
-            value="{{.MaNV}}"
-        >
+                <label for="ma_hd">Mã hợp đồng:</label>
+                <input
+                    type="text"
+                    id="ma_hd"
+                    name="ma_hd"
+                    placeholder="Nhập mã hợp đồng"
+                    value="{{.MaHD}}"
+                >
 
-        <label for="nhom_hop_dong">Nhóm hợp đồng:</label>
-        <select id="nhom_hop_dong" name="nhom_hop_dong">
-            <option value="">Tất cả nhóm</option>
-            <option value="lao_dong" {{if eq .NhomHopDong "lao_dong"}}selected{{end}}>Lao động</option>
-            <option value="kinh_doanh" {{if eq .NhomHopDong "kinh_doanh"}}selected{{end}}>Kinh doanh</option>
-            <option value="van_hanh" {{if eq .NhomHopDong "van_hanh"}}selected{{end}}>Vận hành</option>
-        </select>
+                <label for="ma_nv">Mã nhân viên:</label>
+                <input
+                    type="text"
+                    id="ma_nv"
+                    name="ma_nv"
+                    placeholder="Nhập mã nhân viên"
+                    value="{{.MaNV}}"
+                >
 
-        <button type="submit">Tìm kiếm</button>
-        <a href="/hopdong">Xóa bộ lọc</a>
-    </form>
+                <label for="nhom_hop_dong">Nhóm hợp đồng:</label>
+                <select id="nhom_hop_dong" name="nhom_hop_dong">
+                    <option value="">Tất cả nhóm</option>
 
-    <br>
-
-    <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Mã hợp đồng</th>
-                <th>Mã nhân viên</th>
-                <th>Nhóm hợp đồng</th>
-                <th>Ngày bắt đầu</th>
-                <th>Ngày kết thúc</th>
-                <th>Ghi chú</th>
-                <th>Trạng thái</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            {{range .DanhSach}}
-           <tr
-                {{if eq .TrangThai "Sắp hết hạn"}}
-                    style="background-color: #ffcccc;"
-                {{end}}
-            >
-
-                <td>{{.ID}}</td>
-                <td>{{.MaHD}}</td>
-                <td>{{.MaNV}}</td>
-
-                <td>
-                    {{if eq .NhomHopDong "lao_dong"}}
+                    <option value="lao_dong"
+                        {{if eq .NhomHopDong "lao_dong"}}selected{{end}}>
                         Lao động
-                    {{else if eq .NhomHopDong "kinh_doanh"}}
+                    </option>
+
+                    <option value="kinh_doanh"
+                        {{if eq .NhomHopDong "kinh_doanh"}}selected{{end}}>
                         Kinh doanh
-                    {{else if eq .NhomHopDong "van_hanh"}}
+                    </option>
+
+                    <option value="van_hanh"
+                        {{if eq .NhomHopDong "van_hanh"}}selected{{end}}>
                         Vận hành
+                    </option>
+                </select>
+
+                <button type="submit">Tìm kiếm</button>
+
+                <a href="/hopdong">Xóa bộ lọc</a>
+
+            </form>
+
+        </div>
+
+        <!-- NÚT THÊM + TỔNG SỐ + TRANG CHỦ -->
+        <div class="contract-actions">
+
+            <a href="/hopdong/them" class="btn-add">
+                + Thêm hợp đồng
+            </a>
+
+            <div class="contract-count">
+                Tổng số hợp đồng:
+                <strong>{{.TongSo}}</strong>
+            </div>
+
+            <a href="/" class="btn-home">
+                Trang chủ
+            </a>
+
+        </div>
+
+        <!-- BẢNG -->
+        <div class="contract-table-wrapper">
+
+            <table border="1">
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Mã hợp đồng</th>
+                        <th>Mã nhân viên</th>
+                        <th>Nhóm hợp đồng</th>
+                        <th>Ngày bắt đầu</th>
+                        <th>Ngày kết thúc</th>
+                        <th>Ghi chú</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {{range .DanhSach}}
+
+                    <tr
+                        {{if eq .TrangThai "Sắp hết hạn"}}
+                            style="background-color: #ffcccc;"
+                        {{else if eq .TrangThai "Đã hết hạn"}}
+                            style="background-color: #e0e0e0;"
+                        {{end}}
+                    >
+
+                        <td>{{.ID}}</td>
+
+                        <td>{{.MaHD}}</td>
+
+                        <td>{{.MaNV}}</td>
+
+                        <td>
+                            {{if eq .NhomHopDong "lao_dong"}}
+                                Lao động
+                            {{else if eq .NhomHopDong "kinh_doanh"}}
+                                Kinh doanh
+                            {{else if eq .NhomHopDong "van_hanh"}}
+                                Vận hành
+                            {{else}}
+                                Chưa phân loại
+                            {{end}}
+                        </td>
+
+                        <td>
+                            {{if .NgayBatDau}}
+                                {{.NgayBatDau.Format "02-01-2006"}}
+                            {{end}}
+                        </td>
+
+                        <td>
+                            {{if .NgayKetThuc}}
+                                {{.NgayKetThuc.Format "02-01-2006"}}
+                            {{end}}
+                        </td>
+
+                        <td>{{.GhiChu}}</td>
+
+                        <td>{{.TrangThai}}</td>
+
+                        <td>
+                            <a href="/hopdong/chi-tiet?id={{.ID}}">
+                                Chi tiết
+                            </a>
+
+                            |
+
+                            <a href="/hopdong/sua?id={{.ID}}">
+                                Sửa
+                            </a>
+
+                            |
+
+                            <a
+                                href="/hopdong/xoa?id={{.ID}}"
+                                onclick="return confirm('Bạn có chắc chắn muốn xóa hợp đồng này không?');"
+                            >
+                                Xóa
+                            </a>
+                        </td>
+
+                    </tr>
+
                     {{else}}
-                        Chưa phân loại
+
+                    <tr>
+                        <td colspan="9">
+                            Không tìm thấy hợp đồng phù hợp.
+                        </td>
+                    </tr>
+
                     {{end}}
-                </td>
 
-                <td>
-                    {{if .NgayBatDau}}
-                        {{.NgayBatDau.Format "02-01-2006"}}
-                    {{end}}
-                </td>
+                </tbody>
 
-                <td>
-                    {{if .NgayKetThuc}}
-                        {{.NgayKetThuc.Format "02-01-2006"}}
-                    {{end}}
-                </td>
+            </table>
 
-                <td>{{.GhiChu}}</td>
-                <td>{{.TrangThai}}</td>
+        </div>
 
-                <td>
-                    <a href="/hopdong/chi-tiet?id={{.ID}}">Chi tiết</a>
-                    |
-                    <a href="/hopdong/sua?id={{.ID}}">Sửa</a>
-                    |
-                    <a
-                        href="/hopdong/xoa?id={{.ID}}"
-                        onclick="return confirm('Bạn có chắc chắn muốn xóa hợp đồng này không?');"
-                    >Xóa</a>
-                </td>
-            </tr>
-            {{else}}
-            <tr>
-                <td colspan="9">Không tìm thấy hợp đồng phù hợp.</td>
-            </tr>
-            {{end}}
-        </tbody>
-    </table>
+    </div>
+
 </body>
 </html>
