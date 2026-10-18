@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Danh sách nghỉ phép</title>
@@ -7,113 +8,216 @@
 </head>
 
 <body>
-    <h1>Danh sách nghỉ phép</h1>
 
-    <a href="/">Trang chủ</a>
-    <br><br>
+    <div class="leave-page">
 
-    <a href="/nghiphep/them">Thêm đơn nghỉ phép</a>
-    <br><br>
+        <h1 class="page-title">DANH SÁCH NGHỈ PHÉP</h1>
 
-    <form action="/nghiphep" method="GET">
-        <label for="ma_nv">Mã nhân viên:</label>
-        <input
-            type="text"
-            id="ma_nv"
-            name="ma_nv"
-            value="{{.MaNV}}"
-            placeholder="Nhập mã nhân viên"
-        >
+        <!-- Bộ lọc -->
+        <div class="leave-filter">
 
-        <button type="submit">Tìm kiếm</button>
-        <a href="/nghiphep">Xóa tìm kiếm</a>
-    </form>
+            <form action="/nghiphep" method="GET">
 
-    <br>
+                <label for="ma_nv">Mã nhân viên:</label>
 
-    {{if .DaTim}}
-        <h3>
-            Tổng số đơn nghỉ phép của nhân viên {{.MaNV}}:
-            {{.SoDon}} đơn
-        </h3>
-    {{else}}
-        <h3>
-            Tổng số đơn đang chờ duyệt: {{.SoDon}} đơn
-        </h3>
-    {{end}}
+                <input
+                    type="text"
+                    id="ma_nv"
+                    name="ma_nv"
+                    value="{{.MaNV}}"
+                    placeholder="Nhập mã nhân viên"
+                >
 
-    <table border="1">
-        <tr>
-            <th>ID</th>
-            <th>Mã nhân viên</th>
-            <th>Ngày bắt đầu</th>
-            <th>Ngày kết thúc</th>
-            <th>Loại nghỉ</th>
-            <th>Lý do</th>
-            <th>Trạng thái</th>
-            <th>Ghi chú</th>
-            <th>Thao tác</th>
-        </tr>
+                <button type="submit">
+                    Tìm kiếm
+                </button>
 
-        {{range .DanhSach}}
-        <tr>
-            <td>{{.ID}}</td>
-            <td>{{.MaNV}}</td>
-
-            <td>
-                {{if .NgayBatDau}}
-                    {{.NgayBatDau.Format "02-01-2006"}}
-                {{end}}
-            </td>
-
-            <td>
-                {{if .NgayKetThuc}}
-                    {{.NgayKetThuc.Format "02-01-2006"}}
-                {{end}}
-            </td>
-
-            <td>{{.LoaiNghi}}</td>
-            <td>{{.LyDo}}</td>
-            <td>{{.TrangThai}}</td>
-            <td>{{.GhiChu}}</td>
-
-            <td>
-                {{if eq .TrangThai "Chờ duyệt"}}
-                <form action="/nghiphep/duyet" method="POST">
-                    <input type="hidden" name="id" value="{{.ID}}">
-
-                    <label>Ghi chú xử lý:</label><br>
-                    <textarea name="ghi_chu" rows="2" cols="20"></textarea><br>
-
-                    <button type="submit" name="trang_thai" value="Đã duyệt">
-                        Duyệt
-                    </button>
-
-                    <button type="submit" name="trang_thai" value="Từ chối">
-                        Từ chối
-                    </button>
-                </form>
-                {{end}}
-
-                <a href="/nghiphep/sua?id={{.ID}}">Sửa</a>
-                |
-                <a href="/nghiphep/xoa?id={{.ID}}"
-                onclick="return confirm('Bạn có chắc chắn muốn xóa đơn nghỉ phép này không?');">
-                    Xóa
+                <a href="/nghiphep">
+                    Xóa tìm kiếm
                 </a>
-            </td>
-        </tr>
-        {{else}}
-        <tr>
-            <td colspan="9">
+
+            </form>
+
+        </div>
+
+        <!-- Khu vực chức năng -->
+        <div class="leave-actions">
+
+            <div class="leave-left">
+
+                <a href="/nghiphep/them" class="btn-add">
+                    + Thêm đơn nghỉ phép
+                </a>
+
                 {{if .DaTim}}
-                    Nhân viên này chưa có đơn nghỉ phép hoặc mã nhân viên không tồn tại.
+
+                    <div class="leave-count">
+                        Tổng số đơn nghỉ phép của nhân viên
+                        {{.MaNV}}:
+                        <strong>{{.SoDon}}</strong> đơn
+                    </div>
+
                 {{else}}
-                    Hiện không có đơn nghỉ phép nào đang chờ duyệt.
+
+                    <div class="leave-count">
+                        Tổng số đơn đang chờ duyệt:
+                        <strong>{{.SoDon}}</strong> đơn
+                    </div>
+
                 {{end}}
-            </td>
-        </tr>
-        {{end}}
-    </table>
+
+            </div>
+
+            <a href="/" class="btn-home">
+                Trang chủ
+            </a>
+
+        </div>
+
+        <!-- Bảng dữ liệu -->
+        <div class="leave-table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Mã nhân viên</th>
+                        <th>Ngày bắt đầu</th>
+                        <th>Ngày kết thúc</th>
+                        <th>Loại nghỉ</th>
+                        <th>Lý do</th>
+                        <th>Trạng thái</th>
+                        <th>Ghi chú</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {{range .DanhSach}}
+
+                    <tr>
+
+                        <td>{{.ID}}</td>
+
+                        <td>{{.MaNV}}</td>
+
+                        <td>
+                            {{if .NgayBatDau}}
+                                {{.NgayBatDau.Format "02-01-2006"}}
+                            {{end}}
+                        </td>
+
+                        <td>
+                            {{if .NgayKetThuc}}
+                                {{.NgayKetThuc.Format "02-01-2006"}}
+                            {{end}}
+                        </td>
+
+                        <td>{{.LoaiNghi}}</td>
+
+                        <td>{{.LyDo}}</td>
+
+                        <td>{{.TrangThai}}</td>
+
+                        <td>{{.GhiChu}}</td>
+
+                        <td>
+
+                            {{if eq .TrangThai "Chờ duyệt"}}
+
+                            <form
+                                action="/nghiphep/duyet"
+                                method="POST"
+                                class="leave-approve-form"
+                            >
+
+                                <input
+                                    type="hidden"
+                                    name="id"
+                                    value="{{.ID}}"
+                                >
+
+                                <label>Ghi chú xử lý:</label>
+
+                                <textarea
+                                    name="ghi_chu"
+                                    rows="2"
+                                ></textarea>
+
+                                <div class="leave-buttons">
+
+                                    <button
+                                        type="submit"
+                                        name="trang_thai"
+                                        value="Đã duyệt"
+                                    >
+                                        Duyệt
+                                    </button>
+
+                                    <button
+                                        type="submit"
+                                        name="trang_thai"
+                                        value="Từ chối"
+                                    >
+                                        Từ chối
+                                    </button>
+
+                                </div>
+
+                            </form>
+
+                            {{end}}
+
+                            <div class="leave-links">
+
+                                <a href="/nghiphep/sua?id={{.ID}}">
+                                    Sửa
+                                </a>
+
+                                <a
+                                    href="/nghiphep/xoa?id={{.ID}}"
+                                    onclick="return confirm('Bạn có chắc chắn muốn xóa đơn nghỉ phép này không?');"
+                                >
+                                    Xóa
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {{else}}
+
+                    <tr>
+
+                        <td colspan="9">
+
+                            {{if .DaTim}}
+
+                                Nhân viên này chưa có đơn nghỉ phép hoặc mã nhân viên không tồn tại.
+
+                            {{else}}
+
+                                Hiện không có đơn nghỉ phép nào đang chờ duyệt.
+
+                            {{end}}
+
+                        </td>
+
+                    </tr>
+
+                    {{end}}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
 </body>
 </html>

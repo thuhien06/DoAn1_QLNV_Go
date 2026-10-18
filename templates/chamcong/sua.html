@@ -1,99 +1,115 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Sửa chấm công</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
+
 <body>
 
-    <h1>SỬA CHẤM CÔNG</h1>
+    <div class="attendance-form-page">
 
-    <form action="/chamcong/sua?id={{.ID}}" method="POST">
+        <h1>SỬA CHẤM CÔNG</h1>
 
-        <p>
-            <label>Mã nhân viên:</label><br>
-            <input
-                type="text"
-                name="ma_nv"
-                value="{{.MaNV}}"
-                required
-            >
-        </p>
+        <form action="/chamcong/sua?id={{.ID}}" method="POST" class="attendance-form">
 
-        <p>
-            <label>Ngày chấm công:</label><br>
-            <input
-                type="date"
-                name="ngay_cham_cong"
-                value="{{if .NgayChamCong}}{{.NgayChamCong.Format "2006-01-02"}}{{end}}"
-                required
-            >
-        </p>
+            <div class="form-group">
+                <label>Mã nhân viên:</label>
+                <input
+                    type="text"
+                    name="ma_nv"
+                    value="{{.MaNV}}"
+                    required
+                >
+            </div>
 
-        <p>
-            <label>Giờ vào:</label><br>
-            <input
-                type="time"
-                name="gio_vao"
-                value="{{.GioVao}}"
-            >
-        </p>
+            <div class="form-group">
+                <label>Ngày chấm công:</label>
+                <input
+                    type="date"
+                    name="ngay_cham_cong"
+                    value="{{if .NgayChamCong}}{{.NgayChamCong.Format "2006-01-02"}}{{end}}"
+                    required
+                >
+            </div>
 
-        <p>
-            <label>Giờ ra:</label><br>
-            <input
-                type="time"
-                name="gio_ra"
-                value="{{.GioRa}}"
-            >
-        </p>
+            <div class="form-group">
+                <label>Giờ vào:</label>
+                <input
+                    type="time"
+                    name="gio_vao"
+                    value="{{.GioVao}}"
+                >
+            </div>
 
-        <p>
-            <label>Trạng thái:</label><br>
-            <select name="trang_thai">
+            <div class="form-group">
+                <label>Giờ ra:</label>
+                <input
+                    type="time"
+                    name="gio_ra"
+                    value="{{.GioRa}}"
+                >
+            </div>
 
-                <option value="Có mặt"
-                    {{if eq .TrangThai "Có mặt"}}selected{{end}}>
-                    Có mặt
-                </option>
+            <div class="form-group">
+                <label>Trạng thái:</label>
 
-                <option value="Đi muộn"
-                    {{if eq .TrangThai "Đi muộn"}}selected{{end}}>
-                    Đi muộn
-                </option>
+                <select name="trang_thai">
 
-                <option value="Về sớm"
-                    {{if eq .TrangThai "Về sớm"}}selected{{end}}>
-                    Về sớm
-                </option>
+                    <option value="Có mặt"
+                        {{if eq .TrangThai "Có mặt"}}selected{{end}}>
+                        Có mặt
+                    </option>
 
-                <option value="Nghỉ"
-                    {{if eq .TrangThai "Nghỉ"}}selected{{end}}>
-                    Nghỉ
-                </option>
+                    <option value="Đi muộn"
+                        {{if eq .TrangThai "Đi muộn"}}selected{{end}}>
+                        Đi muộn
+                    </option>
 
-            </select>
-        </p>
+                    <option value="Về sớm"
+                        {{if eq .TrangThai "Về sớm"}}selected{{end}}>
+                        Về sớm
+                    </option>
 
-        <p>
-            <label>Ghi chú:</label><br>
-            <input
-                type="text"
-                name="ghi_chu"
-                value="{{.GhiChu}}"
-            >
-        </p>
+                    <option value="Nghỉ"
+                        {{if eq .TrangThai "Nghỉ"}}selected{{end}}>
+                        Nghỉ
+                    </option>
 
-        <button type="submit">
-            Lưu thay đổi
-        </button>
+                </select>
+            </div>
 
-        <a href="/chamcong">
-            Quay lại
-        </a>
+            <div class="form-group">
+                <label>Ghi chú:</label>
 
-    </form>
+                <input
+                    type="text"
+                    name="ghi_chu"
+                    value="{{.GhiChu}}"
+                >
+            </div>
+
+            <div class="form-actions">
+
+                <button type="submit" class="btn-save">
+                    Lưu thay đổi
+                </button>
+
+                <a href="/chamcong" class="btn-back">
+                    Quay lại
+                </a>
+
+                <a href="/" class="btn-home">
+                    Trang chủ
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
 
 </body>
 </html>

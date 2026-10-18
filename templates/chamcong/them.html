@@ -1,64 +1,77 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Thêm chấm công</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
+
 <body>
 
-    <h1>THÊM CHẤM CÔNG</h1>
-    {{if .Error}}
-        <p style="color: red;">{{.Error}}</p>
-    {{end}}
+    <div class="attendance-form-page">
 
-    <form action="/chamcong/them" method="POST">
+        <h1>THÊM CHẤM CÔNG</h1>
 
-        <p>
-            <label>Mã nhân viên:</label><br>
-            <input type="text" name="ma_nv" required>
-        </p>
+        {{if .Error}}
+            <p class="attendance-form-error">{{.Error}}</p>
+        {{end}}
 
-        <p>
-            <label>Ngày chấm công:</label><br>
-            <input type="date" name="ngay_cham_cong" required>
-        </p>
+        <form action="/chamcong/them" method="POST" class="attendance-form">
 
-        <p>
-            <label>Giờ vào:</label><br>
-            <input type="time" name="gio_vao">
-        </p>
+            <div class="form-group">
+                <label>Mã nhân viên:</label>
+                <input type="text" name="ma_nv" required>
+            </div>
 
-        <p>
-            <label>Giờ ra:</label><br>
-            <input type="time" name="gio_ra">
-        </p>
+            <div class="form-group">
+                <label>Ngày chấm công:</label>
+                <input type="date" name="ngay_cham_cong" required>
+            </div>
 
-        <p>
-            <label>Trạng thái:</label><br>
-            <select name="trang_thai">
-                <option value="">-- Chọn trạng thái --</option>
-                <option value="Có mặt">Có mặt</option>
-                <option value="Đi muộn">Đi muộn</option>
-                <option value="Về sớm">Về sớm</option>
-                <option value="Nghỉ">Nghỉ</option>
-            </select>
-        </p>
+            <div class="form-group">
+                <label>Giờ vào:</label>
+                <input type="time" name="gio_vao">
+            </div>
 
-        <p>
-            <label>Ghi chú:</label><br>
-            <input type="text" name="ghi_chu">
-        </p>
+            <div class="form-group">
+                <label>Giờ ra:</label>
+                <input type="time" name="gio_ra">
+            </div>
 
-        <button type="submit">
-            Thêm chấm công
-        </button>
+            <div class="form-group">
+                <label>Trạng thái:</label>
+                <select name="trang_thai">
+                    <option value="">-- Chọn trạng thái --</option>
+                    <option value="Có mặt">Có mặt</option>
+                    <option value="Đi muộn">Đi muộn</option>
+                    <option value="Về sớm">Về sớm</option>
+                    <option value="Nghỉ">Nghỉ</option>
+                </select>
+            </div>
 
-        <a href="/chamcong">
-            Quay lại
-        </a>
+            <div class="form-group">
+                <label>Ghi chú:</label>
+                <input type="text" name="ghi_chu">
+            </div>
 
-    </form>
+            <div class="form-actions">
+                <button type="submit" class="btn-save">
+                    Thêm chấm công
+                </button>
+
+                <a href="/chamcong" class="btn-back">
+                    Quay lại
+                </a>
+
+                <a href="/" class="btn-home">
+                    Trang chủ
+                </a>
+            </div>
+
+        </form>
+
+    </div>
 
 </body>
 </html>

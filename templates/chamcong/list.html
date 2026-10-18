@@ -1,119 +1,188 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Quản lý chấm công</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
+
 <body>
 
-    <h1>QUẢN LÝ CHẤM CÔNG</h1>
+    <div class="attendance-page">
 
-    <a href="/">Trang chủ</a>
-    <br><br>
+        <h1 class="page-title">QUẢN LÝ CHẤM CÔNG</h1>
 
-    <form action="/chamcong" method="GET">
-        <label>Mã nhân viên:</label>
-        <input
-            type="text"
-            name="ma_nv"
-            value="{{.MaNV}}"
-            placeholder="Nhập mã nhân viên"
-            required
-        >
+      
+        <!-- Bộ lọc -->
+        <div class="attendance-filter">
 
-        <label>Tháng:</label>
-        <select name="thang" required>
-            <option value="">-- Chọn tháng --</option>
-            <option value="1" {{if eq .Thang "1"}}selected{{end}}>Tháng 1</option>
-            <option value="2" {{if eq .Thang "2"}}selected{{end}}>Tháng 2</option>
-            <option value="3" {{if eq .Thang "3"}}selected{{end}}>Tháng 3</option>
-            <option value="4" {{if eq .Thang "4"}}selected{{end}}>Tháng 4</option>
-            <option value="5" {{if eq .Thang "5"}}selected{{end}}>Tháng 5</option>
-            <option value="6" {{if eq .Thang "6"}}selected{{end}}>Tháng 6</option>
-            <option value="7" {{if eq .Thang "7"}}selected{{end}}>Tháng 7</option>
-            <option value="8" {{if eq .Thang "8"}}selected{{end}}>Tháng 8</option>
-            <option value="9" {{if eq .Thang "9"}}selected{{end}}>Tháng 9</option>
-            <option value="10" {{if eq .Thang "10"}}selected{{end}}>Tháng 10</option>
-            <option value="11" {{if eq .Thang "11"}}selected{{end}}>Tháng 11</option>
-            <option value="12" {{if eq .Thang "12"}}selected{{end}}>Tháng 12</option>
-        </select>
+            <form action="/chamcong" method="GET">
 
-        <label>Năm:</label>
-        <input
-            type="number"
-            name="nam"
-            value="{{if .Nam}}{{.Nam}}{{else}}2026{{end}}"
-            min="2000"
-            max="2100"
-            required
-        >
+                <label for="ma_nv">Mã nhân viên:</label>
+                <input
+                    type="text"
+                    id="ma_nv"
+                    name="ma_nv"
+                    value="{{.MaNV}}"
+                    placeholder="Nhập mã nhân viên"
+                    required
+                >
 
-        <button type="submit">Tra cứu</button>
-    </form>
+                <label for="thang">Tháng:</label>
+                <select name="thang" id="thang" required>
+                    <option value="">-- Chọn tháng --</option>
+                    <option value="1" {{if eq .Thang "1"}}selected{{end}}>Tháng 1</option>
+                    <option value="2" {{if eq .Thang "2"}}selected{{end}}>Tháng 2</option>
+                    <option value="3" {{if eq .Thang "3"}}selected{{end}}>Tháng 3</option>
+                    <option value="4" {{if eq .Thang "4"}}selected{{end}}>Tháng 4</option>
+                    <option value="5" {{if eq .Thang "5"}}selected{{end}}>Tháng 5</option>
+                    <option value="6" {{if eq .Thang "6"}}selected{{end}}>Tháng 6</option>
+                    <option value="7" {{if eq .Thang "7"}}selected{{end}}>Tháng 7</option>
+                    <option value="8" {{if eq .Thang "8"}}selected{{end}}>Tháng 8</option>
+                    <option value="9" {{if eq .Thang "9"}}selected{{end}}>Tháng 9</option>
+                    <option value="10" {{if eq .Thang "10"}}selected{{end}}>Tháng 10</option>
+                    <option value="11" {{if eq .Thang "11"}}selected{{end}}>Tháng 11</option>
+                    <option value="12" {{if eq .Thang "12"}}selected{{end}}>Tháng 12</option>
+                </select>
 
-    {{if .Error}}
-        <p style="color:red">{{.Error}}</p>
-    {{end}}
+                <label for="nam">Năm:</label>
+                <input
+                    type="number"
+                    id="nam"
+                    name="nam"
+                    value="{{if .Nam}}{{.Nam}}{{else}}2026{{end}}"
+                    min="2000"
+                    max="2100"
+                    required
+                >
 
-    {{if .DaTim}}
-        {{if not .Error}}
-            <h2>Danh sách chấm công tháng {{.Thang}}/{{.Nam}}</h2>
+                <button type="submit">Tra cứu</button>
 
-            <h3>
-                Tổng số ngày có chấm công:
-                {{.SoCong}} ngày
-            </h3>
+            </form>
 
-            <a href="/chamcong/them">Thêm chấm công</a>
-            <br><br>
+        </div>
 
-            {{if .DanhSach}}
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Mã nhân viên</th>
-                        <th>Ngày chấm công</th>
-                        <th>Giờ vào</th>
-                        <th>Giờ ra</th>
-                        <th>Trạng thái</th>
-                        <th>Đánh giá giờ làm</th>
-                        <th>Ghi chú</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{range .DanhSach}}
-                    <tr>
-                        <td>{{.ID}}</td>
-                        <td>{{.MaNV}}</td>
-                        <td>
-                            {{if .NgayChamCong}}
-                                {{.NgayChamCong.Format "02-01-2006"}}
-                            {{end}}
-                        </td>
-                        <td>{{.GioVao}}</td>
-                        <td>{{.GioRa}}</td>
-                        <td>{{.TrangThai}}</td>
-                        <td>{{.DanhGia}}</td>
-                        <td>{{.GhiChu}}</td>
-                        <td>
-                            <a href="/chamcong/sua?id={{.ID}}">Sửa</a>
-                            <a href="/chamcong/xoa?id={{.ID}}"
-                               onclick="return confirm('Bạn có chắc chắn muốn xóa dữ liệu này không?');">
-                                Xóa
-                            </a>
-                        </td>
-                    </tr>
+                      <!-- Các nút chức năng -->
+        <div class="attendance-actions">
+
+            <div class="attendance-left">
+
+                {{if .DaTim}}
+                    {{if not .Error}}
+                        <a href="/chamcong/them" class="btn-add">
+                            + Thêm chấm công
+                        </a>
+
+                        <div class="attendance-count">
+                            Tổng số ngày có chấm công:
+                            <strong>{{.SoCong}}</strong>
+                        </div>
                     {{end}}
-                </tbody>
-            </table>
-            {{else}}
-                <p>Không có dữ liệu chấm công trong tháng này.</p>
+                {{end}}
+
+            </div>
+
+            <a href="/" class="btn-home">
+                Trang chủ
+            </a>
+
+        </div>
+
+
+        {{if .Error}}
+            <p class="attendance-error">{{.Error}}</p>
+        {{end}}
+
+        {{if .DaTim}}
+            {{if not .Error}}
+
+                <h2 class="attendance-title">
+                    Danh sách chấm công tháng {{.Thang}}/{{.Nam}}
+                </h2>
+
+
+                <div class="attendance-table-wrapper">
+
+                    {{if .DanhSach}}
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Mã nhân viên</th>
+                                <th>Ngày chấm công</th>
+                                <th>Giờ vào</th>
+                                <th>Giờ ra</th>
+                                <th>Trạng thái</th>
+                                <th>Đánh giá giờ làm</th>
+                                <th>Ghi chú</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {{range .DanhSach}}
+
+                            <tr>
+
+                                <td>{{.ID}}</td>
+
+                                <td>{{.MaNV}}</td>
+
+                                <td>
+                                    {{if .NgayChamCong}}
+                                        {{.NgayChamCong.Format "02-01-2006"}}
+                                    {{end}}
+                                </td>
+
+                                <td>{{.GioVao}}</td>
+
+                                <td>{{.GioRa}}</td>
+
+                                <td>{{.TrangThai}}</td>
+
+                                <td>{{.DanhGia}}</td>
+
+                                <td>{{.GhiChu}}</td>
+
+                                <td>
+                                    <a href="/chamcong/sua?id={{.ID}}">
+                                        Sửa
+                                    </a>
+
+                                    <a
+                                        href="/chamcong/xoa?id={{.ID}}"
+                                        onclick="return confirm('Bạn có chắc chắn muốn xóa dữ liệu này không?');"
+                                    >
+                                        Xóa
+                                    </a>
+                                </td>
+
+                            </tr>
+
+                            {{end}}
+
+                        </tbody>
+
+                    </table>
+
+                    {{else}}
+
+                        <p class="attendance-empty">
+                            Không có dữ liệu chấm công trong tháng này.
+                        </p>
+
+                    {{end}}
+
+                </div>
+
             {{end}}
         {{end}}
-    {{end}}
+
+    </div>
 
 </body>
 </html>

@@ -30,23 +30,24 @@
                 <a href="/nhanvien">Xem tất cả</a>
             </form>
 
-            <!-- Tổng số bên phải -->
-            <div class="employee-count">
-                Tổng số nhân viên:
-                <strong>{{.TongSo}}</strong>
-            </div>
-
         </div>
 
         <!-- THÊM NHÂN VIÊN -->
         <div class="employee-actions">
-            <a href="/nhanvien/them" class="btn-add">
-                + Thêm nhân viên
-            </a>
 
-            <a href="/" class="btn-home">
-                Trang chủ
-            </a>
+            <div class="employee-left">
+                <a href="/nhanvien/them" class="btn-add">
+                    + Thêm nhân viên
+                </a>
+
+                <div class="employee-count">
+                    Tổng số nhân viên:
+                    <strong>{{.TongSo}}</strong>
+                </div>
+            </div>
+
+            <a href="/" class="btn-home">Trang chủ</a>
+
         </div>
 
         <!-- BẢNG -->

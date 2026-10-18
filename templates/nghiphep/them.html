@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Đăng ký nghỉ phép</title>
@@ -7,50 +8,61 @@
 </head>
 
 <body>
-    <h1>Đăng ký nghỉ phép</h1>
+    <div class="leave-form-page">
 
-    {{if .Error}}
-        <p style="color: red;">{{.Error}}</p>
-    {{end}}
+        <h1>ĐĂNG KÝ NGHỈ PHÉP</h1>
 
-    <a href="/nghiphep-ca-nhan">Đơn nghỉ phép của tôi</a>
+        {{if .Error}}
+            <p class="leave-form-error">{{.Error}}</p>
+        {{end}}
 
-    <br><br>
+        <div class="leave-personal-link">
+            <a href="/nghiphep-ca-nhan">Đơn nghỉ phép của tôi</a>
+        </div>
 
-    <form action="/nghiphep/them" method="POST">
-        <label>Ngày bắt đầu:</label>
-        <br>
-        <input type="date" name="ngay_bat_dau" required>
-        <br><br>
+        <form action="/nghiphep/them" method="POST" class="leave-form">
 
-        <label>Ngày kết thúc:</label>
-        <br>
-        <input type="date" name="ngay_ket_thuc" required>
-        <br><br>
+            <div class="form-group">
+                <label for="ngay_bat_dau">Ngày bắt đầu:</label>
+                <input type="date" id="ngay_bat_dau" name="ngay_bat_dau" required>
+            </div>
 
-        <label>Loại nghỉ:</label>
-        <br>
-        <select name="loai_nghi" required>
-            <option value="Nghỉ phép">Nghỉ phép</option>
-            <option value="Nghỉ ốm">Nghỉ ốm</option>
-            <option value="Nghỉ việc riêng">Nghỉ việc riêng</option>
-            <option value="Nghỉ không lương">Nghỉ không lương</option>
-        </select>
-        <br><br>
+            <div class="form-group">
+                <label for="ngay_ket_thuc">Ngày kết thúc:</label>
+                <input type="date" id="ngay_ket_thuc" name="ngay_ket_thuc" required>
+            </div>
 
-        <label>Lý do:</label>
-        <br>
-        <input type="text" name="ly_do" required>
-        <br><br>
+            <div class="form-group">
+                <label for="loai_nghi">Loại nghỉ:</label>
+                <select id="loai_nghi" name="loai_nghi" required>
+                    <option value="Nghỉ phép">Nghỉ phép</option>
+                    <option value="Nghỉ ốm">Nghỉ ốm</option>
+                    <option value="Nghỉ việc riêng">Nghỉ việc riêng</option>
+                    <option value="Nghỉ không lương">Nghỉ không lương</option>
+                </select>
+            </div>
 
-        <label>Ghi chú:</label>
-        <br>
-        <textarea name="ghi_chu" rows="3"></textarea>
-        <br><br>
+            <div class="form-group">
+                <label for="ly_do">Lý do:</label>
+                <input type="text" id="ly_do" name="ly_do" required>
+            </div>
 
-        <p>Trạng thái đơn: <strong>Chờ duyệt</strong></p>
+            <div class="form-group">
+                <label for="ghi_chu">Ghi chú:</label>
+                <textarea id="ghi_chu" name="ghi_chu" rows="3"></textarea>
+            </div>
 
-        <button type="submit">Gửi đơn nghỉ phép</button>
-    </form>
+            <div class="leave-status">
+                Trạng thái đơn: <strong>Chờ duyệt</strong>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-save">Gửi đơn nghỉ phép</button>
+                <a href="/" class="btn-home">Trang chủ</a>
+            </div>
+
+        </form>
+    </div>
 </body>
+
 </html>

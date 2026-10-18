@@ -3,55 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <title>Thêm đơn nghỉ phép</title>
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
+
 <body>
-    <h2>THÊM ĐƠN NGHỈ PHÉP</h2>
+    <div class="leave-form-page">
 
-    {{if .Error}}
-        <p style="color: red;">{{.Error}}</p>
-    {{end}}
+        <h1>THÊM ĐƠN NGHỈ PHÉP</h1>
 
-    <form action="/nghiphep/them" method="POST">
-        <div>
-            <label for="ma_nv">Mã nhân viên:</label><br>
-            <input type="text" id="ma_nv" name="ma_nv" required>
-        </div>
-        <br>
+        {{if .Error}}
+            <p class="leave-form-error">{{.Error}}</p>
+        {{end}}
 
-        <div>
-            <label for="ngay_bat_dau">Ngày bắt đầu:</label><br>
-            <input type="date" id="ngay_bat_dau" name="ngay_bat_dau" required>
-        </div>
-        <br>
+        <form action="/nghiphep/them" method="POST" class="leave-form">
 
-        <div>
-            <label for="ngay_ket_thuc">Ngày kết thúc:</label><br>
-            <input type="date" id="ngay_ket_thuc" name="ngay_ket_thuc" required>
-        </div>
-        <br>
+            <div class="form-group">
+                <label for="ma_nv">Mã nhân viên:</label>
+                <input type="text" id="ma_nv" name="ma_nv" required>
+            </div>
 
-        <div>
-            <label for="loai_nghi">Loại nghỉ:</label><br>
-            <input type="text" id="loai_nghi" name="loai_nghi" required>
-        </div>
-        <br>
+            <div class="form-group">
+                <label for="ngay_bat_dau">Ngày bắt đầu:</label>
+                <input type="date" id="ngay_bat_dau" name="ngay_bat_dau" required>
+            </div>
 
-        <div>
-            <label for="ly_do">Lý do nghỉ:</label><br>
-            <textarea id="ly_do" name="ly_do" rows="3" cols="40" required></textarea>
-        </div>
-        <br>
+            <div class="form-group">
+                <label for="ngay_ket_thuc">Ngày kết thúc:</label>
+                <input type="date" id="ngay_ket_thuc" name="ngay_ket_thuc" required>
+            </div>
 
-        <div>
-            <label for="ghi_chu">Ghi chú:</label><br>
-            <textarea id="ghi_chu" name="ghi_chu" rows="3" cols="40"></textarea>
-        </div>
-        <br>
+            <div class="form-group">
+                <label for="loai_nghi">Loại nghỉ:</label>
+                <input type="text" id="loai_nghi" name="loai_nghi" required>
+            </div>
 
-        <p>Trạng thái: Chờ duyệt</p>
+            <div class="form-group">
+                <label for="ly_do">Lý do nghỉ:</label>
+                <textarea id="ly_do" name="ly_do" rows="3" required></textarea>
+            </div>
 
-        <button type="submit">Thêm đơn</button>
-        <a href="/nghiphep">Quay lại</a>
-    </form>
+            <div class="form-group">
+                <label for="ghi_chu">Ghi chú:</label>
+                <textarea id="ghi_chu" name="ghi_chu" rows="3"></textarea>
+            </div>
+
+            <div class="leave-status">
+                Trạng thái: <strong>Chờ duyệt</strong>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-save">Thêm đơn</button>
+                <a href="/nghiphep" class="btn-back">Quay lại</a>
+                <a href="/" class="btn-home">Trang chủ</a>
+            </div>
+
+        </form>
+    </div>
 </body>
 </html>

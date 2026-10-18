@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Sửa nghỉ phép</title>
@@ -7,102 +8,109 @@
 </head>
 
 <body>
+    <div class="leave-form-page">
 
-    <h1>Sửa đơn nghỉ phép</h1>
+        <h1>SỬA ĐƠN NGHỈ PHÉP</h1>
 
-    <a href="/nghiphep">Danh sách nghỉ phép</a>
+        <form action="/nghiphep/sua?id={{.ID}}" method="POST" class="leave-form">
 
-    <br>
-    <br>
+            <div class="form-group">
+                <label for="ma_nv">Mã nhân viên:</label>
+                <input type="text"
+                       id="ma_nv"
+                       name="ma_nv"
+                       value="{{.MaNV}}"
+                       required>
+            </div>
 
-    <form action="/nghiphep/sua?id={{.ID}}" method="POST">
+            <div class="form-group">
+                <label for="ngay_bat_dau">Ngày bắt đầu:</label>
+                <input type="date"
+                       id="ngay_bat_dau"
+                       name="ngay_bat_dau"
+                       value="{{if .NgayBatDau}}{{.NgayBatDau.Format "2006-01-02"}}{{end}}"
+                       required>
+            </div>
 
-        <label>Mã nhân viên:</label>
-        <br>
-        <input type="text" name="ma_nv" value="{{.MaNV}}" required>
+            <div class="form-group">
+                <label for="ngay_ket_thuc">Ngày kết thúc:</label>
+                <input type="date"
+                       id="ngay_ket_thuc"
+                       name="ngay_ket_thuc"
+                       value="{{if .NgayKetThuc}}{{.NgayKetThuc.Format "2006-01-02"}}{{end}}"
+                       required>
+            </div>
 
-        <br>
-        <br>
+            <div class="form-group">
+                <label for="loai_nghi">Loại nghỉ:</label>
+                <select id="loai_nghi" name="loai_nghi" required>
+                    <option value="Nghỉ phép"
+                        {{if eq .LoaiNghi "Nghỉ phép"}}selected{{end}}>
+                        Nghỉ phép
+                    </option>
 
-        <label>Ngày bắt đầu:</label>
-        <br>
-        <input type="date"
-               name="ngay_bat_dau"
-               value="{{if .NgayBatDau}}{{.NgayBatDau.Format "2006-01-02"}}{{end}}"
-               required>
+                    <option value="Nghỉ ốm"
+                        {{if eq .LoaiNghi "Nghỉ ốm"}}selected{{end}}>
+                        Nghỉ ốm
+                    </option>
 
-        <br>
-        <br>
+                    <option value="Nghỉ việc riêng"
+                        {{if eq .LoaiNghi "Nghỉ việc riêng"}}selected{{end}}>
+                        Nghỉ việc riêng
+                    </option>
 
-        <label>Ngày kết thúc:</label>
-        <br>
-        <input type="date"
-               name="ngay_ket_thuc"
-               value="{{if .NgayKetThuc}}{{.NgayKetThuc.Format "2006-01-02"}}{{end}}"
-               required>
+                    <option value="Nghỉ không lương"
+                        {{if eq .LoaiNghi "Nghỉ không lương"}}selected{{end}}>
+                        Nghỉ không lương
+                    </option>
+                </select>
+            </div>
 
-        <br>
-        <br>
+            <div class="form-group">
+                <label for="ly_do">Lý do:</label>
+                <input type="text"
+                       id="ly_do"
+                       name="ly_do"
+                       value="{{.LyDo}}"
+                       required>
+            </div>
 
-        <label>Loại nghỉ:</label>
-        <br>
-        <select name="loai_nghi">
-            <option value="Nghỉ phép" {{if eq .LoaiNghi "Nghỉ phép"}}selected{{end}}>
-                Nghỉ phép
-            </option>
+            <div class="form-group">
+                <label for="trang_thai">Trạng thái:</label>
+                <select id="trang_thai" name="trang_thai" required>
+                    <option value="Chờ duyệt"
+                        {{if eq .TrangThai "Chờ duyệt"}}selected{{end}}>
+                        Chờ duyệt
+                    </option>
 
-            <option value="Nghỉ ốm" {{if eq .LoaiNghi "Nghỉ ốm"}}selected{{end}}>
-                Nghỉ ốm
-            </option>
+                    <option value="Đã duyệt"
+                        {{if eq .TrangThai "Đã duyệt"}}selected{{end}}>
+                        Đã duyệt
+                    </option>
 
-            <option value="Nghỉ việc riêng" {{if eq .LoaiNghi "Nghỉ việc riêng"}}selected{{end}}>
-                Nghỉ việc riêng
-            </option>
+                    <option value="Từ chối"
+                        {{if eq .TrangThai "Từ chối"}}selected{{end}}>
+                        Từ chối
+                    </option>
+                </select>
+            </div>
 
-            <option value="Nghỉ không lương" {{if eq .LoaiNghi "Nghỉ không lương"}}selected{{end}}>
-                Nghỉ không lương
-            </option>
-        </select>
+            <div class="form-group">
+                <label for="ghi_chu">Ghi chú:</label>
+                <input type="text"
+                       id="ghi_chu"
+                       name="ghi_chu"
+                       value="{{.GhiChu}}">
+            </div>
 
-        <br>
-        <br>
+            <div class="form-actions">
+                <button type="submit" class="btn-save">Cập nhật</button>
+                <a href="/nghiphep" class="btn-back">Quay lại</a>
+                <a href="/" class="btn-home">Trang chủ</a>
+            </div>
 
-        <label>Lý do:</label>
-        <br>
-        <input type="text" name="ly_do" value="{{.LyDo}}">
-
-        <br>
-        <br>
-
-        <label>Trạng thái:</label>
-        <br>
-        <select name="trang_thai">
-            <option value="Chờ duyệt" {{if eq .TrangThai "Chờ duyệt"}}selected{{end}}>
-                Chờ duyệt
-            </option>
-
-            <option value="Đã duyệt" {{if eq .TrangThai "Đã duyệt"}}selected{{end}}>
-                Đã duyệt
-            </option>
-
-            <option value="Từ chối" {{if eq .TrangThai "Từ chối"}}selected{{end}}>
-                Từ chối
-            </option>
-        </select>
-
-        <br>
-        <br>
-
-        <label>Ghi chú:</label>
-        <br>
-        <input type="text" name="ghi_chu" value="{{.GhiChu}}">
-
-        <br>
-        <br>
-
-        <button type="submit">Cập nhật</button>
-
-    </form>
-
+        </form>
+    </div>
 </body>
+
 </html>
