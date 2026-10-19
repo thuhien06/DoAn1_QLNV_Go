@@ -8,48 +8,75 @@
 </head>
 
 <body>
-<div class="container">
 
-    <h1>NGHỈ PHÉP CÁ NHÂN</h1>
+    <div class="personal-leave-page">
 
-    <a href="/nghiphep/them">+ Đăng ký nghỉ phép</a>
+        <h1 class="page-title">NGHỈ PHÉP CÁ NHÂN</h1>
 
-    <table border="1" cellpadding="8">
-        <tr>
-            <th>Ngày bắt đầu</th>
-            <th>Ngày kết thúc</th>
-            <th>Loại nghỉ</th>
-            <th>Lý do</th>
-            <th>Trạng thái</th>
-            <th>Ghi chú</th>
-        </tr>
+        <div class="personal-leave-actions">
+            <a href="/nghiphep/them" class="btn-add">
+                + Đăng ký nghỉ phép
+            </a>
 
-        {{range .}}
-        <tr>
-            <td>{{if .NgayBatDau}}{{.NgayBatDau.Format "02-01-2006"}}{{end}}</td>
-            <td>{{if .NgayKetThuc}}{{.NgayKetThuc.Format "02-01-2006"}}{{end}}</td>
-            <td>{{.LoaiNghi}}</td>
-            <td>{{.LyDo}}</td>
-            <td>{{.TrangThai}}</td>
-            <td>{{.GhiChu}}</td>
-        </tr>
-        {{else}}
-        <tr>
-            <td colspan="6">Chưa có dữ liệu nghỉ phép.</td>
-        </tr>
-        {{end}}
-    </table>
+            <a href="/" class="btn-home">
+                Trang chủ
+            </a>
+        </div>
 
-    <br>
+        <div class="personal-leave-table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ngày bắt đầu</th>
+                        <th>Ngày kết thúc</th>
+                        <th>Loại nghỉ</th>
+                        <th>Lý do</th>
+                        <th>Trạng thái</th>
+                        <th>Ghi chú</th>
+                    </tr>
+                </thead>
 
-    <a href="/thongtin-ca-nhan">Thông tin cá nhân</a>
-    |
-    <a href="/chamcong-ca-nhan">Chấm công cá nhân</a>
-    |
-    <a href="/">Trang chủ</a>
-    |
-    <a href="/dangxuat">Đăng xuất</a>
+                <tbody>
 
-</div>
+                    {{range .}}
+
+                    <tr>
+                        <td>
+                            {{if .NgayBatDau}}
+                                {{.NgayBatDau.Format "02-01-2006"}}
+                            {{end}}
+                        </td>
+
+                        <td>
+                            {{if .NgayKetThuc}}
+                                {{.NgayKetThuc.Format "02-01-2006"}}
+                            {{end}}
+                        </td>
+
+                        <td>{{.LoaiNghi}}</td>
+
+                        <td>{{.LyDo}}</td>
+
+                        <td>{{.TrangThai}}</td>
+
+                        <td>{{.GhiChu}}</td>
+                    </tr>
+
+                    {{else}}
+
+                    <tr>
+                        <td colspan="6">
+                            Chưa có dữ liệu nghỉ phép.
+                        </td>
+                    </tr>
+
+                    {{end}}
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
 </body>
 </html>

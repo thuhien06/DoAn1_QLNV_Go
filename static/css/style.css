@@ -1547,3 +1547,167 @@ h1 {
 .personal-attendance-table-wrapper td {
     white-space: nowrap;
 }
+
+
+/* công cá nhân*/
+.personal-leave-page {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 35px;
+    box-sizing: border-box;
+}
+
+.personal-leave-page .page-title {
+    text-align: center;
+    margin: 0 0 45px 0;
+}
+
+.personal-leave-actions {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.personal-leave-actions .btn-add,
+.personal-leave-actions .btn-home {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 42px;
+    padding: 0 16px;
+    box-sizing: border-box;
+    background: #fff;
+    color: #222;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font-size: 14px;
+    text-decoration: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,.08);
+}
+
+.personal-leave-actions .btn-home {
+    margin-left: auto;
+}
+
+.personal-leave-actions .btn-add:hover,
+.personal-leave-actions .btn-home:hover {
+    background: #f5f5f5;
+}
+
+.personal-leave-table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    box-sizing: border-box;
+}
+
+.personal-leave-table-wrapper table {
+    width: max-content;
+    min-width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    font-size: 13px;
+}
+
+.personal-leave-table-wrapper th,
+.personal-leave-table-wrapper td {
+    padding: 8px 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.personal-leave-table-wrapper th {
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.personal-leave-table-wrapper td {
+    white-space: nowrap;
+}
+
+
+/* hợp đồng cá nhân*/
+.personal-contract-page {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 35px;
+    box-sizing: border-box;
+}
+
+.personal-contract-page .page-title {
+    text-align: center;
+    margin: 0 0 45px 0;
+}
+
+.personal-contract-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 30px;
+}
+
+.personal-contract-actions .btn-home {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 42px;
+    padding: 0 16px;
+    box-sizing: border-box;
+    background: #fff;
+    color: #222;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font-size: 14px;
+    text-decoration: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,.08);
+}
+
+.personal-contract-actions .btn-home:hover {
+    background: #f5f5f5;
+}
+
+.personal-contract-table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    box-sizing: border-box;
+}
+
+.personal-contract-table-wrapper table {
+    width: max-content;
+    min-width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    font-size: 13px;
+}
+
+.personal-contract-table-wrapper th,
+.personal-contract-table-wrapper td {
+    padding: 8px 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.personal-contract-table-wrapper th {
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.personal-contract-table-wrapper td {
+    white-space: nowrap;
+}
+
+.personal-contract-table-wrapper td a {
+    color: #333;
+    text-decoration: none;
+}
+
+.personal-contract-table-wrapper td a:hover {
+    text-decoration: underline;
+}
+
+.personal-contract-empty {
+    text-align: center;
+    margin-top: 30px;
+}
