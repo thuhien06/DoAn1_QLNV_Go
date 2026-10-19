@@ -406,10 +406,11 @@ func SuaBangLuong(db *sql.DB) http.HandlerFunc {
 			// Lấy lương cơ bản từ hợp đồng
 			var luongCoBan float64
 
-			err := db.QueryRow(`
+			err = db.QueryRow(`
 				SELECT luong_co_ban
 				FROM hopdong
 				WHERE ma_nv = ?
+				AND nhom_hop_dong = 'lao_dong'
 				ORDER BY id DESC
 				LIMIT 1
 			`, maNV).Scan(&luongCoBan)
@@ -489,6 +490,45 @@ func SuaBangLuong(db *sql.DB) http.HandlerFunc {
 			}
 
 			http.Redirect(w, r, "/bangluong", http.StatusSeeOther)
+		}
+
+		// GET: lấy thông tin bảng lương để hiển thị form sửa
+		var bl models.BangLuong
+
+		err = db.QueryRow(`
+			SELECT id, ma_nv, thang, nam, luong_co_ban,
+			       so_ngay_cong, phu_cap, khau_tru,
+			       tong_luong, ghi_chu
+			FROM bangluong
+			WHERE id = ?
+		`, id).Scan(
+			&bl.ID,
+			&bl.MaNV,
+			&bl.Thang,
+			&bl.Nam,
+			&bl.LuongCoBan,
+			&bl.SoNgayCong,
+			&bl.PhuCap,
+			&bl.KhauTru,
+			&bl.TongLuong,
+			&bl.GhiChu,
+		)
+
+		if err != nil {
+			http.Error(w, "Không tìm thấy bảng lương", http.StatusNotFound)
+			return
+		}
+
+		tmpl, err := template.ParseFiles("templates/bangluong/sua.html")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		err = tmpl.Execute(w, bl)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 	}
