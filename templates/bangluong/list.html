@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Danh sách bảng lương</title>
@@ -8,68 +9,89 @@
 
 <body>
 
-    <h1>Danh sách bảng lương</h1>
+    <div class="payroll-page">
 
-    <p><strong>Tổng số bảng lương: {{len .}}</strong></p>
+        <h1 class="page-title">DANH SÁCH BẢNG LƯƠNG</h1>
 
-    <a href="/">Trang chủ</a>
+        <div class="payroll-actions">
 
-    <br><br>
-
-    <a href="/bangluong/them">Thêm bảng lương</a>
-
-    <br><br>
-
-    <table border="1">
-        <tr>
-            <th>ID</th>
-            <th>Mã nhân viên</th>
-            <th>Tháng</th>
-            <th>Năm</th>
-            <th>Lương cơ bản</th>
-            <th>Ngày công</th>
-            <th>Phụ cấp</th>
-            <th>Khấu trừ</th>
-            <th>Tổng lương</th>
-            <th>Ghi chú</th>
-            <th>Thao tác</th>
-        </tr>
-
-        {{range .}}
-        <tr>
-            <td>{{.ID}}</td>
-            <td>{{.MaNV}}</td>
-            <td>{{.Thang}}</td>
-            <td>{{.Nam}}</td>
-
-            <td>{{printf "%.0f" .LuongCoBan}}</td>
-
-            <td>{{.SoNgayCong}}</td>
-
-            <td>{{printf "%.0f" .PhuCap}}</td>
-
-            <td>{{printf "%.0f" .KhauTru}}</td>
-
-            <td>{{printf "%.0f" .TongLuong}}</td>
-
-            <td>{{.GhiChu}}</td>
-
-            <td>
-                <a href="/bangluong/sua?id={{.ID}}">
-                    Sửa
+            <div class="payroll-left">
+                <a href="/bangluong/them" class="btn-add">
+                    + Thêm bảng lương
                 </a>
 
-                |
+                <div class="payroll-count">
+                    Tổng số bảng lương:
+                    <strong>{{len .}}</strong>
+                </div>
+            </div>
 
-                <a href="/bangluong/xoa?id={{.ID}}"
-                   onclick="return confirm('Bạn có chắc chắn muốn xóa bảng lương này không?');">
-                    Xóa
-                </a>
-            </td>
-        </tr>
-        {{end}}
+            <a href="/" class="btn-home">Trang chủ</a>
 
-    </table>
+        </div>
+
+        <div class="payroll-table-wrapper">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Mã nhân viên</th>
+                        <th>Tháng</th>
+                        <th>Năm</th>
+                        <th>Lương cơ bản</th>
+                        <th>Ngày công</th>
+                        <th>Phụ cấp</th>
+                        <th>Khấu trừ</th>
+                        <th>Tổng lương</th>
+                        <th>Ghi chú</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {{range .}}
+                    <tr>
+                        <td>{{.ID}}</td>
+                        <td>{{.MaNV}}</td>
+                        <td>{{.Thang}}</td>
+                        <td>{{.Nam}}</td>
+
+                        <td>{{printf "%.0f" .LuongCoBan}}</td>
+
+                        <td>{{.SoNgayCong}}</td>
+
+                        <td>{{printf "%.0f" .PhuCap}}</td>
+
+                        <td>{{printf "%.0f" .KhauTru}}</td>
+
+                        <td>{{printf "%.0f" .TongLuong}}</td>
+
+                        <td>{{.GhiChu}}</td>
+
+                        <td>
+                            <a href="/bangluong/sua?id={{.ID}}">Sửa</a>
+
+                            <a href="/bangluong/xoa?id={{.ID}}"
+                               onclick="return confirm('Bạn có chắc chắn muốn xóa bảng lương này không?');">
+                                Xóa
+                            </a>
+                        </td>
+                    </tr>
+
+                    {{else}}
+                    <tr>
+                        <td colspan="11">
+                            Chưa có bảng lương nào.
+                        </td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
 
 </body>
 </html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Xem trước bảng lương</title>
@@ -7,66 +8,88 @@
 </head>
 
 <body>
+    <div class="payroll-preview-page">
 
-    <h1>Xem trước bảng lương</h1>
+        <h1>XEM TRƯỚC BẢNG LƯƠNG</h1>
 
-    <p><strong>Mã nhân viên:</strong> {{.MaNV}}</p>
+        <div class="payroll-preview">
 
-    <p><strong>Tháng:</strong> {{.Thang}}</p>
+            <div class="preview-row">
+                <span>Mã nhân viên:</span>
+                <strong>{{.MaNV}}</strong>
+            </div>
 
-    <p><strong>Năm:</strong> {{.Nam}}</p>
+            <div class="preview-row">
+                <span>Tháng:</span>
+                <strong>{{.Thang}}</strong>
+            </div>
 
-    <p>
-        <strong>Lương cơ bản:</strong>
-        {{printf "%.0f" .LuongCoBan}}
-    </p>
+            <div class="preview-row">
+                <span>Năm:</span>
+                <strong>{{.Nam}}</strong>
+            </div>
 
-    <p>
-        <strong>Số ngày công:</strong>
-        {{.SoNgayCong}}
-    </p>
+            <div class="preview-row">
+                <span>Lương cơ bản:</span>
+                <strong>{{printf "%.0f" .LuongCoBan}}</strong>
+            </div>
 
-    <p>
-        <strong>Thưởng:</strong>
-        {{printf "%.0f" .PhuCap}}
-    </p>
+            <div class="preview-row">
+                <span>Số ngày công:</span>
+                <strong>{{.SoNgayCong}}</strong>
+            </div>
 
-    <p>
-        <strong>Khấu trừ:</strong>
-        {{printf "%.0f" .KhauTru}}
-    </p>
+            <div class="preview-row">
+                <span>Thưởng:</span>
+                <strong>{{printf "%.0f" .PhuCap}}</strong>
+            </div>
 
-    <p>
-        <strong>Tổng lương:</strong>
-        {{printf "%.0f" .TongLuong}}
-    </p>
+            <div class="preview-row">
+                <span>Khấu trừ:</span>
+                <strong>{{printf "%.0f" .KhauTru}}</strong>
+            </div>
 
-    <p>
-        <strong>Ghi chú:</strong>
-        {{.GhiChu}}
-    </p>
+            <div class="preview-row preview-total">
+                <span>Tổng lương:</span>
+                <strong>{{printf "%.0f" .TongLuong}}</strong>
+            </div>
 
-    <br>
+            <div class="preview-row">
+                <span>Ghi chú:</span>
+                <strong>{{.GhiChu}}</strong>
+            </div>
 
-    <form action="/bangluong/luu" method="POST">
+            <form action="/bangluong/luu" method="POST">
 
-        <input type="hidden" name="ma_nv" value="{{.MaNV}}">
-        <input type="hidden" name="thang" value="{{.Thang}}">
-        <input type="hidden" name="nam" value="{{.Nam}}">
-        <input type="hidden" name="luong_co_ban" value="{{.LuongCoBan}}">
-        <input type="hidden" name="so_ngay_cong" value="{{.SoNgayCong}}">
-        <input type="hidden" name="phu_cap" value="{{.PhuCap}}">
-        <input type="hidden" name="khau_tru" value="{{.KhauTru}}">
-        <input type="hidden" name="tong_luong" value="{{.TongLuong}}">
-        <input type="hidden" name="ghi_chu" value="{{.GhiChu}}">
+                <input type="hidden" name="ma_nv" value="{{.MaNV}}">
+                <input type="hidden" name="thang" value="{{.Thang}}">
+                <input type="hidden" name="nam" value="{{.Nam}}">
+                <input type="hidden" name="luong_co_ban" value="{{.LuongCoBan}}">
+                <input type="hidden" name="so_ngay_cong" value="{{.SoNgayCong}}">
+                <input type="hidden" name="phu_cap" value="{{.PhuCap}}">
+                <input type="hidden" name="khau_tru" value="{{.KhauTru}}">
+                <input type="hidden" name="tong_luong" value="{{.TongLuong}}">
+                <input type="hidden" name="ghi_chu" value="{{.GhiChu}}">
 
-        <button type="submit">Xác nhận lưu</button>
+                <div class="preview-actions">
+                    <button type="submit" class="btn-save">
+                        Xác nhận lưu
+                    </button>
 
-    </form>
+                    <a href="/bangluong/them" class="btn-back">
+                        Quay lại
+                    </a>
 
-    <br>
+                    <a href="/" class="btn-home">
+                        Trang chủ
+                    </a>
+                </div>
 
-    <a href="/bangluong/them">Quay lại</a>
+            </form>
 
+        </div>
+
+    </div>
 </body>
+
 </html>

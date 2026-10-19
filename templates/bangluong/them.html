@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Thêm bảng lương</title>
@@ -7,75 +8,90 @@
 </head>
 
 <body>
+    <div class="payroll-form-page">
 
-    <h1>Thêm bảng lương</h1>
+        <h1>THÊM BẢNG LƯƠNG</h1>
 
-    {{if .Error}}
-        <p style="color: red;">{{.Error}}</p>
-    {{end}}
+        {{if .Error}}
+            <p class="payroll-form-error">{{.Error}}</p>
+        {{end}}
 
-    <a href="/bangluong">Danh sách bảng lương</a>
+        <form action="/bangluong/them" method="POST" class="payroll-form">
 
-    <br><br>
+            <div class="form-group">
+                <label for="ma_nv">Mã nhân viên:</label>
+                <input type="text"
+                       id="ma_nv"
+                       name="ma_nv"
+                       placeholder="Nhập mã nhân viên"
+                       required>
+            </div>
 
-    <form action="/bangluong/them" method="POST">
+            <div class="form-group">
+                <label for="thang">Tháng:</label>
+                <input type="number"
+                       id="thang"
+                       name="thang"
+                       min="1"
+                       max="12"
+                       value="{{.Thang}}"
+                       required>
+            </div>
 
-        <label>Mã nhân viên:</label>
-        <br>
-        <input type="text" name="ma_nv" placeholder="Nhập mã nhân viên" required>
+            <div class="form-group">
+                <label for="nam">Năm:</label>
+                <input type="number"
+                       id="nam"
+                       name="nam"
+                       min="2000"
+                       value="{{.Nam}}"
+                       required>
+            </div>
 
-        <br><br>
+            <div class="form-group">
+                <label for="phu_cap">Thưởng:</label>
+                <input type="number"
+                       id="phu_cap"
+                       name="phu_cap"
+                       min="0"
+                       step="0.01"
+                       value="0">
+            </div>
 
-        <label>Tháng:</label>
-        <br>
-        <input type="number"
-            name="thang"
-            min="1"
-            max="12"
-            value="{{.Thang}}"
-            required>
+            <div class="form-group">
+                <label for="khau_tru">Khấu trừ:</label>
+                <input type="number"
+                       id="khau_tru"
+                       name="khau_tru"
+                       min="0"
+                       step="0.01"
+                       value="0">
+            </div>
 
-        <br><br>
+            <div class="form-group">
+                <label for="ghi_chu">Ghi chú:</label>
+                <input type="text"
+                       id="ghi_chu"
+                       name="ghi_chu">
+            </div>
 
-        <label>Năm:</label>
-        <br>
-        <input type="number"
-            name="nam"
-            min="2000"
-            value="{{.Nam}}"
-            required>
+            <div class="form-actions">
+                <button type="submit" class="btn-save">
+                    Xem trước và lưu
+                </button>
 
-        <br><br>
+                <a href="/bangluong" class="btn-back">
+                    Quay lại
+                </a>
 
-        <label>Thưởng:</label>
-        <br>
-        <input type="number"
-            name="phu_cap"
-            min="0"
-            step="0.01"
-            value="0">
+                <a href="/" class="btn-home">
+                    Trang chủ
+                </a>
+            </div>
 
-        <br><br>
+        </form>
 
-        <label>Khấu trừ:</label>
-        <br>
-        <input type="number"
-            name="khau_tru"
-            min="0"
-            step="0.01"
-            value="0">
-
-        <br><br>
-
-        <label>Ghi chú:</label>
-        <br>
-        <input type="text" name="ghi_chu">
-
-        <br><br>
-
-        <button type="submit">Xem trước và lưu</button>
-
-    </form>
-
+    </div>
 </body>
+
 </html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Sửa bảng lương</title>
@@ -7,87 +8,97 @@
 </head>
 
 <body>
+    <div class="payroll-form-page">
 
-    <h1>Sửa bảng lương</h1>
+        <h1>SỬA BẢNG LƯƠNG</h1>
 
-    <a href="/bangluong">Danh sách bảng lương</a>
+        <form action="/bangluong/sua?id={{.ID}}" method="POST" class="payroll-form">
 
-    <br><br>
+            <div class="form-group">
+                <label for="ma_nv">Mã nhân viên:</label>
+                <input type="text"
+                       id="ma_nv"
+                       name="ma_nv"
+                       value="{{.MaNV}}"
+                       required>
+            </div>
 
-    <form action="/bangluong/sua?id={{.ID}}" method="POST">
+            <div class="form-group">
+                <label for="thang">Tháng:</label>
+                <input type="number"
+                       id="thang"
+                       name="thang"
+                       min="1"
+                       max="12"
+                       value="{{.Thang}}"
+                       required>
+            </div>
 
-        <label>Mã nhân viên:</label>
-        <br>
-        <input type="text"
-               name="ma_nv"
-               value="{{.MaNV}}"
-               required>
+            <div class="form-group">
+                <label for="nam">Năm:</label>
+                <input type="number"
+                       id="nam"
+                       name="nam"
+                       min="2000"
+                       value="{{.Nam}}"
+                       required>
+            </div>
 
-        <br><br>
+            <div class="form-group">
+                <label for="so_ngay_cong">Số ngày công:</label>
+                <input type="number"
+                       id="so_ngay_cong"
+                       name="so_ngay_cong"
+                       min="0"
+                       value="{{.SoNgayCong}}"
+                       required>
+            </div>
 
-        <label>Tháng:</label>
-        <br>
-        <input type="number"
-               name="thang"
-               min="1"
-               max="12"
-               value="{{.Thang}}"
-               required>
+            <div class="form-group">
+                <label for="phu_cap">Phụ cấp:</label>
+                <input type="number"
+                       id="phu_cap"
+                       name="phu_cap"
+                       min="0"
+                       step="0.01"
+                       value="{{.PhuCap}}">
+            </div>
 
-        <br><br>
+            <div class="form-group">
+                <label for="khau_tru">Khấu trừ:</label>
+                <input type="number"
+                       id="khau_tru"
+                       name="khau_tru"
+                       min="0"
+                       step="0.01"
+                       value="{{.KhauTru}}">
+            </div>
 
-        <label>Năm:</label>
-        <br>
-        <input type="number"
-               name="nam"
-               min="2000"
-               value="{{.Nam}}"
-               required>
+            <div class="form-group">
+                <label for="ghi_chu">Ghi chú:</label>
+                <input type="text"
+                       id="ghi_chu"
+                       name="ghi_chu"
+                       value="{{.GhiChu}}">
+            </div>
 
-        <br><br>
+            <div class="form-actions">
+                <button type="submit" class="btn-save">
+                    Cập nhật
+                </button>
 
+                <a href="/bangluong" class="btn-back">
+                    Quay lại
+                </a>
 
-        <label>Số ngày công:</label>
-        <br>
-        <input type="number"
-               name="so_ngay_cong"
-               min="0"
-               value="{{.SoNgayCong}}"
-               required>
+                <a href="/" class="btn-home">
+                    Trang chủ
+                </a>
+            </div>
 
-        <br><br>
+        </form>
 
-        <label>Phụ cấp:</label>
-        <br>
-        <input type="number"
-               name="phu_cap"
-               min="0"
-               step="0.01"
-               value="{{.PhuCap}}">
-
-        <br><br>
-
-        <label>Khấu trừ:</label>
-        <br>
-        <input type="number"
-               name="khau_tru"
-               min="0"
-               step="0.01"
-               value="{{.KhauTru}}">
-
-        <br><br>
-
-        <label>Ghi chú:</label>
-        <br>
-        <input type="text"
-               name="ghi_chu"
-               value="{{.GhiChu}}">
-
-        <br><br>
-
-        <button type="submit">Cập nhật</button>
-
-    </form>
-
+    </div>
 </body>
+
 </html>
