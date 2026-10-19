@@ -488,6 +488,18 @@ func ChamCongCaNhan(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
+		// Đếm số ngày chấm công khác nhau
+		ngayDaCham := make(map[string]bool)
+
+		for _, cc := range danhSach {
+			if cc.NgayChamCong != nil {
+				ngay := cc.NgayChamCong.Format("2006-01-02")
+				ngayDaCham[ngay] = true
+			}
+		}
+
+		tongSo := len(ngayDaCham)
+
 		data := struct {
 			DanhSach []models.ChamCong
 			Thang    int
@@ -497,7 +509,7 @@ func ChamCongCaNhan(db *sql.DB) http.HandlerFunc {
 			DanhSach: danhSach,
 			Thang:    thang,
 			Nam:      nam,
-			TongSo:   len(danhSach),
+			TongSo:   tongSo,
 		}
 
 		tmpl := template.Must(

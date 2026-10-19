@@ -1147,6 +1147,7 @@ h1 {
 .payroll-page .page-title {
     text-align: center;
     margin: 0 0 50px 0;
+    margin-top: 10px;
 }
 
 .payroll-actions {
@@ -1387,3 +1388,162 @@ h1 {
     background-color: #f5f5f5;
 }
 
+/* =========================
+   CHẤM CÔNG CÁ NHÂN
+   ========================= */
+
+.personal-attendance-page {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 35px;
+    box-sizing: border-box;
+}
+
+.personal-attendance-page .page-title {
+    text-align: center;
+    margin: 0 0 45px 0;
+}
+
+/* Nút chấm công + trang chủ */
+
+.personal-attendance-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.personal-attendance-actions .btn-home {
+    margin-left: auto;
+}
+
+.personal-attendance-actions .btn-attendance,
+.personal-attendance-actions .btn-home {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 42px;
+    padding: 0 16px;
+    box-sizing: border-box;
+
+    background: #fff;
+    color: #222;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+
+    box-shadow: 0 2px 5px rgba(0,0,0,.08);
+}
+
+.personal-attendance-actions .btn-attendance:hover,
+.personal-attendance-actions .btn-home:hover {
+    background: #f5f5f5;
+}
+
+/* Bộ lọc */
+
+.personal-attendance-filter {
+    width: 100%;
+    padding: 18px 20px;
+    margin-bottom: 30px;
+
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+
+    box-sizing: border-box;
+}
+
+.personal-attendance-filter form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.personal-attendance-filter label {
+    font-size: 14px;
+}
+
+.personal-attendance-filter select {
+    height: 38px;
+    padding: 0 10px;
+
+    border: 1px solid #ccc;
+    border-radius: 5px;
+
+    background: #fff;
+    font-size: 14px;
+}
+
+.personal-attendance-filter .btn-view {
+    height: 38px;
+    padding: 0 15px;
+
+    border: 1px solid #bbb;
+    border-radius: 5px;
+
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.personal-attendance-filter .btn-view:hover {
+    background: #f5f5f5;
+}
+
+/* Thông tin tháng */
+
+.personal-attendance-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 20px;
+}
+
+.personal-attendance-info h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.personal-attendance-count {
+    font-size: 16px;
+}
+
+/* Bảng */
+.personal-attendance-table-wrapper {
+    width: 850px;
+    max-width: calc(100vw - 40px);
+    margin-left: auto;
+    margin-right: auto;
+    overflow-x: auto;
+    box-sizing: border-box;
+}
+
+.personal-attendance-table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    font-size: 13px;
+}
+
+.personal-attendance-table-wrapper th,
+.personal-attendance-table-wrapper td {
+    padding: 7px 9px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.personal-attendance-table-wrapper th {
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.personal-attendance-table-wrapper td {
+    white-space: nowrap;
+}
