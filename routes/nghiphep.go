@@ -11,6 +11,41 @@ import (
 	"time"
 )
 
+// tinhSoNgayPhep tính số ngày nghỉ thực tế, chỉ tính từ thứ 2 đến thứ 6.
+func tinhSoNgayPhep(batDau, ketThuc time.Time) int {
+	count := 0
+
+	for ngay := batDau; !ngay.After(ketThuc); ngay = ngay.AddDate(0, 0, 1) {
+		thu := ngay.Weekday()
+
+		if thu != time.Saturday && thu != time.Sunday {
+			count++
+		}
+	}
+
+	return count
+}
+
+// tinhSoNgayPhepTrongNam tính số ngày phép nằm trong một năm cụ thể.
+func tinhSoNgayPhepTrongNam(batDau, ketThuc time.Time, nam int) int {
+	dauNam := time.Date(nam, 1, 1, 0, 0, 0, 0, time.Local)
+	cuoiNam := time.Date(nam, 12, 31, 0, 0, 0, 0, time.Local)
+
+	if batDau.Before(dauNam) {
+		batDau = dauNam
+	}
+
+	if ketThuc.After(cuoiNam) {
+		ketThuc = cuoiNam
+	}
+
+	if batDau.After(ketThuc) {
+		return 0
+	}
+
+	return tinhSoNgayPhep(batDau, ketThuc)
+}
+
 // Danh sách nghỉ phép
 func DanhSachNghiPhep(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -417,6 +452,7 @@ func NghiPhepCaNhan(db *sql.DB) http.HandlerFunc {
 }
 
 // Duyệt hoặc từ chối đơn nghỉ phép
+// Duyệt hoặc từ chối đơn nghỉ phép
 func XuLyDuyetNghiPhep(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -431,6 +467,7 @@ func XuLyDuyetNghiPhep(db *sql.DB) http.HandlerFunc {
 		}
 
 		vaiTro, _ := session.Values["vai_tro"].(string)
+
 		if vaiTro != "admin" && vaiTro != "hr" {
 			http.Error(w, "Bạn không có quyền xử lý đơn nghỉ phép", http.StatusForbidden)
 			return
@@ -455,11 +492,165 @@ func XuLyDuyetNghiPhep(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
+		// Nếu từ chối thì không cần kiểm tra số ngày phép.
+		if trangThai == "Từ chối" {
+			result, err := db.Exec(`
+				UPDATE nghiphep
+				SET trang_thai = ?, ghi_chu = ?
+				WHERE id = ? AND trang_thai = ?
+			`, trangThai, ghiChu, id, "Chờ duyệt")
+
+			if err != nil {
+				http.Error(w, "Lỗi cập nhật đơn nghỉ phép: "+err.Error(),
+					http.StatusInternalServerError)
+				return
+			}
+
+			affected, err := result.RowsAffected()
+			if err != nil {
+				http.Error(w, "Không kiểm tra được kết quả cập nhật",
+					http.StatusInternalServerError)
+				return
+			}
+
+			if affected == 0 {
+				http.Error(w, "Đơn không tồn tại hoặc đã được xử lý trước đó",
+					http.StatusConflict)
+				return
+			}
+
+			http.Redirect(w, r, "/nghiphep", http.StatusSeeOther)
+			return
+		}
+
+		// Lấy thông tin đơn đang chờ duyệt.
+		var maNV string
+		var ngayBatDau time.Time
+		var ngayKetThuc time.Time
+
+		err = db.QueryRow(`
+			SELECT ma_nv, ngay_bat_dau, ngay_ket_thuc
+			FROM nghiphep
+			WHERE id = ? AND trang_thai = ?
+		`, id, "Chờ duyệt").Scan(
+			&maNV,
+			&ngayBatDau,
+			&ngayKetThuc,
+		)
+
+		if err != nil {
+			if err == sql.ErrNoRows {
+				http.Error(w, "Đơn không tồn tại hoặc đã được xử lý trước đó",
+					http.StatusConflict)
+				return
+			}
+
+			http.Error(w, "Lỗi đọc thông tin đơn nghỉ phép: "+err.Error(),
+				http.StatusInternalServerError)
+			return
+		}
+
+		// Kiểm tra số ngày phép của đơn đang xin.
+		soNgayDon := tinhSoNgayPhep(ngayBatDau, ngayKetThuc)
+
+		if soNgayDon == 0 {
+			http.Error(w, "Đơn nghỉ phép không có ngày làm việc nào để tính phép",
+				http.StatusBadRequest)
+			return
+		}
+
+		// Kiểm tra theo từng năm.
+		// Mỗi nhân viên có tối đa 12 ngày phép trong một năm.
+		namBatDau := ngayBatDau.Year()
+		namKetThuc := ngayKetThuc.Year()
+
+		for nam := namBatDau; nam <= namKetThuc; nam++ {
+
+			// Số ngày của đơn đang xin nằm trong năm này.
+			soNgayDonTrongNam := tinhSoNgayPhepTrongNam(
+				ngayBatDau,
+				ngayKetThuc,
+				nam,
+			)
+
+			if soNgayDonTrongNam == 0 {
+				continue
+			}
+
+			// Lấy tất cả các đơn đã được duyệt của nhân viên trong năm.
+			rows, err := db.Query(`
+				SELECT ngay_bat_dau, ngay_ket_thuc
+				FROM nghiphep
+				WHERE ma_nv = ?
+				  AND trang_thai = ?
+				  AND ngay_bat_dau <= ?
+				  AND ngay_ket_thuc >= ?
+			`,
+				maNV,
+				"Đã duyệt",
+				time.Date(nam, 12, 31, 0, 0, 0, 0, time.Local),
+				time.Date(nam, 1, 1, 0, 0, 0, 0, time.Local),
+			)
+
+			if err != nil {
+				http.Error(w, "Lỗi kiểm tra ngày phép: "+err.Error(),
+					http.StatusInternalServerError)
+				return
+			}
+
+			soNgayDaDung := 0
+
+			for rows.Next() {
+				var batDau time.Time
+				var ketThuc time.Time
+
+				err := rows.Scan(&batDau, &ketThuc)
+				if err != nil {
+					rows.Close()
+					http.Error(w, "Lỗi đọc dữ liệu nghỉ phép: "+err.Error(),
+						http.StatusInternalServerError)
+					return
+				}
+
+				soNgayDaDung += tinhSoNgayPhepTrongNam(
+					batDau,
+					ketThuc,
+					nam,
+				)
+			}
+
+			if err := rows.Err(); err != nil {
+				rows.Close()
+				http.Error(w, "Lỗi đọc dữ liệu nghỉ phép: "+err.Error(),
+					http.StatusInternalServerError)
+				return
+			}
+
+			rows.Close()
+
+			// Không được vượt quá 12 ngày phép trong năm.
+			if soNgayDaDung+soNgayDonTrongNam > 12 {
+				http.Error(
+					w,
+					"Không thể duyệt đơn. Nhân viên đã sử dụng "+
+						strconv.Itoa(soNgayDaDung)+
+						"/12 ngày phép trong năm "+
+						strconv.Itoa(nam)+
+						", đơn này cần thêm "+
+						strconv.Itoa(soNgayDonTrongNam)+
+						" ngày.",
+					http.StatusBadRequest,
+				)
+				return
+			}
+		}
+
+		// Đủ ngày phép → duyệt đơn.
 		result, err := db.Exec(`
 			UPDATE nghiphep
 			SET trang_thai = ?, ghi_chu = ?
 			WHERE id = ? AND trang_thai = ?
-		`, trangThai, ghiChu, id, "Chờ duyệt")
+		`, "Đã duyệt", ghiChu, id, "Chờ duyệt")
 
 		if err != nil {
 			http.Error(w, "Lỗi cập nhật đơn nghỉ phép: "+err.Error(),

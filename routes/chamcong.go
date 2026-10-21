@@ -190,18 +190,27 @@ func DanhSachChamCong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		// Đếm số ngày có chấm công trong tháng
+		// Đếm số ngày công thực tế trong tháng
+		// Chỉ tính từ thứ 2 đến thứ 6.
 		ngayDaDem := make(map[string]bool)
 
 		for _, dong := range data.DanhSach {
-			if dong.NgayChamCong != nil {
-				ngay := dong.NgayChamCong.Format("2006-01-02")
-				ngayDaDem[ngay] = true
+			if dong.NgayChamCong == nil {
+				continue
 			}
+
+			thu := dong.NgayChamCong.Weekday()
+
+			// Thứ 7 và Chủ nhật không tính ngày công.
+			if thu == time.Saturday || thu == time.Sunday {
+				continue
+			}
+
+			ngay := dong.NgayChamCong.Format("2006-01-02")
+			ngayDaDem[ngay] = true
 		}
 
 		data.SoCong = len(ngayDaDem)
-
 		if err := tmpl.Execute(w, data); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -488,14 +497,24 @@ func ChamCongCaNhan(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		// Đếm số ngày chấm công khác nhau
+		// Đếm số ngày công thực tế.
+		// Chỉ tính từ thứ 2 đến thứ 6.
 		ngayDaCham := make(map[string]bool)
 
 		for _, cc := range danhSach {
-			if cc.NgayChamCong != nil {
-				ngay := cc.NgayChamCong.Format("2006-01-02")
-				ngayDaCham[ngay] = true
+			if cc.NgayChamCong == nil {
+				continue
 			}
+
+			thu := cc.NgayChamCong.Weekday()
+
+			// Thứ 7 và Chủ nhật không tính ngày công.
+			if thu == time.Saturday || thu == time.Sunday {
+				continue
+			}
+
+			ngay := cc.NgayChamCong.Format("2006-01-02")
+			ngayDaCham[ngay] = true
 		}
 
 		tongSo := len(ngayDaCham)
