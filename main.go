@@ -103,6 +103,14 @@ func main() {
 
 	//////////////////NHÂN VIÊN
 
+	http.HandleFunc("/quanly-nhanvien",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.QuanLyNhanVien(),
+			),
+		),
+	)
+
 	http.HandleFunc("/nhanvien",
 		routes.DaDangNhap(
 			routes.CoVaiTro("admin", "hr")(
@@ -141,6 +149,15 @@ func main() {
 		routes.DaDangNhap(
 			routes.CoVaiTro("nhanvien")(
 				routes.ThongTinCaNhan(db),
+			),
+		),
+	)
+
+	http.HandleFunc(
+		"/nhanvien/thongtin",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.ThongTinNhanVien(db),
 			),
 		),
 	)

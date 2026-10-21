@@ -343,3 +343,106 @@ func ThongTinCaNhan(db *sql.DB) http.HandlerFunc {
 		}
 	}
 }
+
+// Xem thông tin tổng hợp của một nhân viên
+func ThongTinNhanVien(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		maNV := r.URL.Query().Get("ma_nv")
+
+		// Nếu chưa nhập mã nhân viên thì chỉ hiển thị form tìm kiếm
+		if maNV == "" {
+			tmpl := template.Must(
+				template.ParseFiles("templates/nhanvien/thongtin_nhanvien.html"),
+			)
+
+			data := struct {
+				DaTim    bool
+				NhanVien *models.NhanVien
+			}{
+				DaTim: false,
+			}
+
+			tmpl.Execute(w, data)
+			return
+		}
+
+		var nv models.NhanVien
+
+		// Tìm nhân viên theo mã nhân viên
+		err := db.QueryRow(`
+			SELECT id, ma_nv, ho_ten, ngay_sinh, gioi_tinh,
+			       so_dien_thoai, email, dia_chi,
+			       ngay_vao_lam, phong_ban, chuc_vu
+			FROM nhanvien
+			WHERE ma_nv = ?
+		`, maNV).Scan(
+			&nv.ID,
+			&nv.MaNV,
+			&nv.HoTen,
+			&nv.NgaySinh,
+			&nv.GioiTinh,
+			&nv.SoDienThoai,
+			&nv.Email,
+			&nv.DiaChi,
+			&nv.NgayVaoLam,
+			&nv.PhongBan,
+			&nv.ChucVu,
+		)
+
+		// Không tìm thấy nhân viên
+		if err == sql.ErrNoRows {
+			tmpl := template.Must(
+				template.ParseFiles("templates/nhanvien/thongtin_nhanvien.html"),
+			)
+
+			data := struct {
+				DaTim    bool
+				NhanVien *models.NhanVien
+				Error    string
+			}{
+				DaTim: true,
+				Error: "Không tìm thấy nhân viên có mã: " + maNV,
+			}
+
+			tmpl.Execute(w, data)
+			return
+		}
+
+		if err != nil {
+			http.Error(w, "Lỗi truy vấn thông tin nhân viên", http.StatusInternalServerError)
+			return
+		}
+
+		tmpl := template.Must(
+			template.ParseFiles("templates/nhanvien/thongtin_nhanvien.html"),
+		)
+
+		data := struct {
+			DaTim    bool
+			NhanVien *models.NhanVien
+			Error    string
+		}{
+			DaTim:    true,
+			NhanVien: &nv,
+		}
+
+		if err := tmpl.Execute(w, data); err != nil {
+			http.Error(w, "Lỗi hiển thị thông tin nhân viên", http.StatusInternalServerError)
+		}
+	}
+}
+
+// Hiển thị menu quản lý nhân viên
+func QuanLyNhanVien() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		tmpl := template.Must(
+			template.ParseFiles("templates/nhanvien/index.html"),
+		)
+
+		if err := tmpl.Execute(w, nil); err != nil {
+			http.Error(w, "Lỗi hiển thị quản lý nhân viên", http.StatusInternalServerError)
+		}
+	}
+}

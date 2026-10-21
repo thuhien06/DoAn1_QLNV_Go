@@ -48,34 +48,21 @@
 
     <div class="menu">
 
-        <a href="/nhanvien" class="menu-item">
-            Nhân viên
-        </a>
-
-        <a href="/hopdong" class="menu-item">
-            Hợp đồng
+        <a href="/quanly-nhanvien" class="menu-item">
+            Quản lý nhân viên
         </a>
 
         <a href="/chamcong" class="menu-item">
-            Chấm công
+            Quản lý công
         </a>
 
-        <a href="/nghiphep" class="menu-item">
-            Nghỉ phép
+        <a href="/hopdong" class="menu-item">
+            Quản lý hợp đồng
         </a>
 
         <a href="/bangluong" class="menu-item">
-            Bảng lương
+            Quản lý bảng lương
         </a>
-
-        <!-- Chỉ Admin -->
-        {{if eq .VaiTro "admin"}}
-
-        <a href="/taikhoan" class="menu-item">
-            Quản lý tài khoản
-        </a>
-
-        {{end}}
 
     </div>
 
@@ -94,11 +81,7 @@
         </a>
 
         <a href="/chamcong-ca-nhan" class="menu-item">
-            Chấm công cá nhân
-        </a>
-
-        <a href="/nghiphep-ca-nhan" class="menu-item">
-            Nghỉ phép cá nhân
+            Chấm công - Nghỉ phép
         </a>
 
         <a href="/hopdong-ca-nhan" class="menu-item">

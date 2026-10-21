@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Thông tin nhân viên</title>
+
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+<div class="employee-info-page">
+
+    <h1 class="page-title">THÔNG TIN NHÂN VIÊN</h1>
+
+    <!-- Tìm kiếm nhân viên -->
+    <div class="employee-info-search">
+
+        <form action="/nhanvien/thongtin" method="GET">
+
+            <label for="ma_nv">Mã nhân viên:</label>
+
+            <input
+                type="text"
+                id="ma_nv"
+                name="ma_nv"
+                placeholder="Nhập mã nhân viên"
+                value="{{if .NhanVien}}{{.NhanVien.MaNV}}{{end}}"
+                required
+            >
+
+            <button type="submit">Tìm kiếm</button>
+
+        </form>
+
+    </div>
+
+    {{if .Error}}
+
+        <p class="employee-info-error">
+            {{.Error}}
+        </p>
+
+    {{end}}
+
+    {{if .NhanVien}}
+
+    <!-- Thông tin cá nhân -->
+    <div class="employee-info-card">
+
+        <h2>THÔNG TIN CÁ NHÂN</h2>
+
+        <div class="employee-info-grid">
+
+            <div>
+                <strong>Mã nhân viên:</strong>
+                {{.NhanVien.MaNV}}
+            </div>
+
+            <div>
+                <strong>Họ tên:</strong>
+                {{.NhanVien.HoTen}}
+            </div>
+
+            <div>
+                <strong>Ngày sinh:</strong>
+                {{if .NhanVien.NgaySinh}}
+                    {{.NhanVien.NgaySinh.Format "02-01-2006"}}
+                {{end}}
+            </div>
+
+            <div>
+                <strong>Giới tính:</strong>
+                {{.NhanVien.GioiTinh}}
+            </div>
+
+            <div>
+                <strong>Số điện thoại:</strong>
+                {{.NhanVien.SoDienThoai}}
+            </div>
+
+            <div>
+                <strong>Email:</strong>
+                {{.NhanVien.Email}}
+            </div>
+
+            <div>
+                <strong>Địa chỉ:</strong>
+                {{.NhanVien.DiaChi}}
+            </div>
+
+            <div>
+                <strong>Ngày vào làm:</strong>
+                {{if .NhanVien.NgayVaoLam}}
+                    {{.NhanVien.NgayVaoLam.Format "02-01-2006"}}
+                {{end}}
+            </div>
+
+            <div>
+                <strong>Phòng ban:</strong>
+                {{.NhanVien.PhongBan}}
+            </div>
+
+            <div>
+                <strong>Chức vụ:</strong>
+                {{.NhanVien.ChucVu}}
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Các phần sẽ nối ở bước sau -->
+    <div class="employee-info-sections">
+
+        <div class="employee-info-section">
+            <h2>HỢP ĐỒNG</h2>
+            <p>Thông tin hợp đồng của nhân viên sẽ được hiển thị tại đây.</p>
+        </div>
+
+        <div class="employee-info-section">
+            <h2>CHẤM CÔNG</h2>
+            <p>Thông tin chấm công của nhân viên sẽ được hiển thị tại đây.</p>
+        </div>
+
+        <div class="employee-info-section">
+            <h2>BẢNG LƯƠNG</h2>
+            <p>Thông tin bảng lương của nhân viên sẽ được hiển thị tại đây.</p>
+        </div>
+
+    </div>
+
+    {{end}}
+
+    <div class="employee-info-actions">
+
+        <a href="/nhanvien" class="btn-back">
+            Danh sách nhân viên
+        </a>
+
+        <a href="/" class="btn-home">
+            Trang chủ
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>
