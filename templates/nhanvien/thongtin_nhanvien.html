@@ -47,7 +47,8 @@
 
     {{if .NhanVien}}
 
-    <!-- Thông tin cá nhân -->
+    <!-- ==================== THÔNG TIN CÁ NHÂN ==================== -->
+
     <div class="employee-info-card">
 
         <h2>THÔNG TIN CÁ NHÂN</h2>
@@ -112,27 +113,282 @@
 
     </div>
 
-    <!-- Các phần sẽ nối ở bước sau -->
+
+    <!-- ==================== CÁC THÔNG TIN KHÁC ==================== -->
+
     <div class="employee-info-sections">
 
+
+        <!-- ==================== HỢP ĐỒNG ==================== -->
+
         <div class="employee-info-section">
+
             <h2>HỢP ĐỒNG</h2>
-            <p>Thông tin hợp đồng của nhân viên sẽ được hiển thị tại đây.</p>
+
+            {{if .HopDongs}}
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã HĐ</th>
+                        <th>Loại hợp đồng</th>
+                        <th>Nhóm hợp đồng</th>
+                        <th>Ngày bắt đầu</th>
+                        <th>Ngày kết thúc</th>
+                        <th>Lương cơ bản</th>
+                        <th>Đối tác</th>
+                        <th>Người đại diện</th>
+                        <th>Giá trị</th>
+                        <th>Ngày ký</th>
+                        <th>Dịch vụ / thiết bị</th>
+                        <th>Chi phí</th>
+                        <th>Ghi chú</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {{range .HopDongs}}
+
+                    <tr>
+
+                        <td>{{.MaHD}}</td>
+
+                        <td>{{.LoaiHopDong}}</td>
+
+                        <td>{{.NhomHopDong}}</td>
+
+                        <td>
+                            {{if .NgayBatDau}}
+                                {{.NgayBatDau.Format "02-01-2006"}}
+                            {{end}}
+                        </td>
+
+                        <td>
+                            {{if .NgayKetThuc}}
+                                {{.NgayKetThuc.Format "02-01-2006"}}
+                            {{end}}
+                        </td>
+
+                        <td>{{.LuongCoBan}}</td>
+
+                        <td>{{.DoiTac}}</td>
+
+                        <td>{{.NguoiDaiDien}}</td>
+
+                        <td>{{.GiaTri}}</td>
+
+                        <td>
+                            {{if .NgayKy}}
+                                {{.NgayKy.Format "02-01-2006"}}
+                            {{end}}
+                        </td>
+
+                        <td>{{.DichVuThietBi}}</td>
+
+                        <td>{{.ChiPhi}}</td>
+
+                        <td>{{.GhiChu}}</td>
+
+                    </tr>
+
+                {{end}}
+
+                </tbody>
+            </table>
+
+            {{else}}
+
+                <p>Nhân viên này chưa có thông tin hợp đồng.</p>
+
+            {{end}}
+
         </div>
 
-        <div class="employee-info-section">
-            <h2>CHẤM CÔNG</h2>
-            <p>Thông tin chấm công của nhân viên sẽ được hiển thị tại đây.</p>
-        </div>
+
+        <!-- ==================== CHẤM CÔNG ==================== -->
 
         <div class="employee-info-section">
+
+            <h2>CHẤM CÔNG / CA LÀM</h2>
+
+            {{if .ChamCongs}}
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Ngày chấm công</th>
+                        <th>Giờ vào</th>
+                        <th>Giờ ra</th>
+                        <th>Trạng thái</th>
+                        <th>Ghi chú</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {{range .ChamCongs}}
+
+                    <tr>
+
+                        <td>
+                            {{.NgayChamCong.Format "02-01-2006"}}
+                        </td>
+
+                        <td>{{.GioVao}}</td>
+
+                        <td>{{.GioRa}}</td>
+
+                        <td>{{.TrangThai}}</td>
+
+                        <td>{{.GhiChu}}</td>
+
+                    </tr>
+
+                {{end}}
+
+                </tbody>
+
+            </table>
+
+            {{else}}
+
+                <p>Nhân viên này chưa có dữ liệu chấm công.</p>
+
+            {{end}}
+
+        </div>
+
+
+        <!-- ==================== NGHỈ PHÉP ==================== -->
+
+        <div class="employee-info-section">
+
+            <h2>NGHỈ PHÉP</h2>
+
+            {{if .NghiPheps}}
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Ngày bắt đầu</th>
+                        <th>Ngày kết thúc</th>
+                        <th>Loại nghỉ</th>
+                        <th>Lý do</th>
+                        <th>Trạng thái</th>
+                        <th>Ghi chú</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {{range .NghiPheps}}
+
+                    <tr>
+
+                        <td>
+                            {{.NgayBatDau.Format "02-01-2006"}}
+                        </td>
+
+                        <td>
+                            {{.NgayKetThuc.Format "02-01-2006"}}
+                        </td>
+
+                        <td>{{.LoaiNghi}}</td>
+
+                        <td>{{.LyDo}}</td>
+
+                        <td>{{.TrangThai}}</td>
+
+                        <td>{{.GhiChu}}</td>
+
+                    </tr>
+
+                {{end}}
+
+                </tbody>
+
+            </table>
+
+            {{else}}
+
+                <p>Nhân viên này chưa có dữ liệu nghỉ phép.</p>
+
+            {{end}}
+
+        </div>
+
+
+        <!-- ==================== BẢNG LƯƠNG ==================== -->
+
+        <div class="employee-info-section">
+
             <h2>BẢNG LƯƠNG</h2>
-            <p>Thông tin bảng lương của nhân viên sẽ được hiển thị tại đây.</p>
+
+            {{if .BangLuongs}}
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Tháng</th>
+                        <th>Năm</th>
+                        <th>Lương cơ bản</th>
+                        <th>Số ngày công</th>
+                        <th>Phụ cấp</th>
+                        <th>Khấu trừ</th>
+                        <th>Tổng lương</th>
+                        <th>Ghi chú</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {{range .BangLuongs}}
+
+                    <tr>
+
+                        <td>{{.Thang}}</td>
+
+                        <td>{{.Nam}}</td>
+
+                        <td>{{.LuongCoBan}}</td>
+
+                        <td>{{.SoNgayCong}}</td>
+
+                        <td>{{.PhuCap}}</td>
+
+                        <td>{{.KhauTru}}</td>
+
+                        <td>{{.TongLuong}}</td>
+
+                        <td>{{.GhiChu}}</td>
+
+                    </tr>
+
+                {{end}}
+
+                </tbody>
+
+            </table>
+
+            {{else}}
+
+                <p>Nhân viên này chưa có dữ liệu bảng lương.</p>
+
+            {{end}}
+
         </div>
+
 
     </div>
 
     {{end}}
+
+
+    <!-- ==================== NÚT ==================== -->
 
     <div class="employee-info-actions">
 
@@ -143,6 +399,7 @@
         <a href="/" class="btn-home">
             Trang chủ
         </a>
+        <a href="/quanly-nhanvien" class="...">QLNV</a>
 
     </div>
 
