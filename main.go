@@ -225,6 +225,14 @@ func main() {
 		),
 	)
 
+	http.HandleFunc("/cong-ca-nhan",
+		routes.DaDangNhap(
+			routes.CoVaiTro("nhanvien")(
+				routes.CongCaNhan(),
+			),
+		),
+	)
+
 	//////////////////CHẤM CÔNG
 
 	// Khai báo đường dẫn quản lý chấm công
