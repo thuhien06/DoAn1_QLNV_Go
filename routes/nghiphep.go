@@ -559,8 +559,86 @@ func XuLyDuyetNghiPhep(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		// Kiểm tra theo từng năm.
-		// Mỗi nhân viên có tối đa 12 ngày phép trong một năm.
+		// =========================================================
+		// KIỂM TRA TRÙNG NGÀY VỚI CÁC ĐƠN ĐÃ ĐƯỢC DUYỆT
+		// =========================================================
+
+		rowsTrung, err := db.Query(`
+			SELECT ngay_bat_dau, ngay_ket_thuc
+			FROM nghiphep
+			WHERE ma_nv = ?
+			  AND trang_thai = 'Đã duyệt'
+			  AND id <> ?
+			  AND ngay_bat_dau <= ?
+			  AND ngay_ket_thuc >= ?
+		`,
+			maNV,
+			id,
+			ngayKetThuc,
+			ngayBatDau,
+		)
+
+		if err != nil {
+			http.Error(w, "Lỗi kiểm tra đơn nghỉ phép trùng ngày: "+err.Error(),
+				http.StatusInternalServerError)
+			return
+		}
+
+		for rowsTrung.Next() {
+			var batDauDaDuyet time.Time
+			var ketThucDaDuyet time.Time
+
+			if err := rowsTrung.Scan(&batDauDaDuyet, &ketThucDaDuyet); err != nil {
+				rowsTrung.Close()
+				http.Error(w, "Lỗi đọc dữ liệu nghỉ phép: "+err.Error(),
+					http.StatusInternalServerError)
+				return
+			}
+
+			// Tìm ngày làm việc bị trùng.
+			batDauTrung := ngayBatDau
+			if batDauDaDuyet.After(batDauTrung) {
+				batDauTrung = batDauDaDuyet
+			}
+
+			ketThucTrung := ngayKetThuc
+			if ketThucDaDuyet.Before(ketThucTrung) {
+				ketThucTrung = ketThucDaDuyet
+			}
+
+			for ngay := batDauTrung; !ngay.After(ketThucTrung); ngay = ngay.AddDate(0, 0, 1) {
+				thu := ngay.Weekday()
+
+				// Chỉ kiểm tra ngày làm việc từ thứ 2 đến thứ 6.
+				if thu == time.Saturday || thu == time.Sunday {
+					continue
+				}
+
+				rowsTrung.Close()
+
+				http.Error(
+					w,
+					"Không thể duyệt đơn. Nhân viên đã có đơn nghỉ phép được duyệt trùng ngày "+
+						ngay.Format("02/01/2006")+".",
+					http.StatusBadRequest,
+				)
+				return
+			}
+		}
+
+		if err := rowsTrung.Err(); err != nil {
+			rowsTrung.Close()
+			http.Error(w, "Lỗi kiểm tra ngày nghỉ phép trùng: "+err.Error(),
+				http.StatusInternalServerError)
+			return
+		}
+
+		rowsTrung.Close()
+
+		// =========================================================
+		// KIỂM TRA 12 NGÀY PHÉP TRONG TỪNG NĂM
+		// =========================================================
+
 		namBatDau := ngayBatDau.Year()
 		namKetThuc := ngayKetThuc.Year()
 
@@ -645,7 +723,7 @@ func XuLyDuyetNghiPhep(db *sql.DB) http.HandlerFunc {
 			}
 		}
 
-		// Đủ ngày phép → duyệt đơn.
+		// Đủ ngày phép và không bị trùng → duyệt đơn.
 		result, err := db.Exec(`
 			UPDATE nghiphep
 			SET trang_thai = ?, ghi_chu = ?
