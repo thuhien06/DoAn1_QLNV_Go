@@ -30,13 +30,14 @@ func DanhSachChamCong(db *sql.DB) http.HandlerFunc {
 		}
 
 		type DuLieuTrang struct {
-			DanhSach []DongChamCong
-			MaNV     string
-			Thang    string
-			Nam      string
-			DaTim    bool
-			Error    string
-			SoCong   int
+			DanhSach   []DongChamCong
+			MaNV       string
+			Thang      string
+			Nam        string
+			DaTim      bool
+			Error      string
+			SoCong     int
+			SoNgayPhep int
 		}
 
 		data := DuLieuTrang{
@@ -211,6 +212,66 @@ func DanhSachChamCong(db *sql.DB) http.HandlerFunc {
 		}
 
 		data.SoCong = len(ngayDaDem)
+		// Đếm số ngày nghỉ phép đã được duyệt trong tháng
+		ngayDauThang := time.Date(
+			namSo,
+			time.Month(thangSo),
+			1,
+			0, 0, 0, 0,
+			time.Local,
+		)
+
+		ngayCuoiThang := ngayDauThang.AddDate(0, 1, -1)
+
+		rowsPhep, err := db.Query(`
+	SELECT ngay_bat_dau, ngay_ket_thuc
+	FROM nghiphep
+	WHERE ma_nv = ?
+	  AND trang_thai = 'Đã duyệt'
+	  AND ngay_bat_dau <= ?
+	  AND ngay_ket_thuc >= ?
+`, maNV, ngayCuoiThang, ngayDauThang)
+
+		if err != nil {
+			data.Error = "Lỗi đọc dữ liệu nghỉ phép: " + err.Error()
+			tmpl.Execute(w, data)
+			return
+		}
+		defer rowsPhep.Close()
+
+		ngayPhepDaTinh := make(map[string]bool)
+
+		for rowsPhep.Next() {
+			var batDau, ketThuc time.Time
+
+			if err := rowsPhep.Scan(&batDau, &ketThuc); err != nil {
+				data.Error = "Lỗi đọc dữ liệu nghỉ phép: " + err.Error()
+				tmpl.Execute(w, data)
+				return
+			}
+
+			// Chỉ tính phần nghỉ phép nằm trong tháng đang xem.
+			if batDau.Before(ngayDauThang) {
+				batDau = ngayDauThang
+			}
+
+			if ketThuc.After(ngayCuoiThang) {
+				ketThuc = ngayCuoiThang
+			}
+
+			for ngay := batDau; !ngay.After(ketThuc); ngay = ngay.AddDate(0, 0, 1) {
+				thu := ngay.Weekday()
+
+				// Thứ 7 và Chủ nhật không tính ngày phép.
+				if thu == time.Saturday || thu == time.Sunday {
+					continue
+				}
+
+				ngayPhepDaTinh[ngay.Format("2006-01-02")] = true
+			}
+		}
+
+		data.SoNgayPhep = len(ngayPhepDaTinh)
 		if err := tmpl.Execute(w, data); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
