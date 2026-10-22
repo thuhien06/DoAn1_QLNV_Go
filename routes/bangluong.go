@@ -447,13 +447,13 @@ func LuuBangLuong(db *sql.DB) http.HandlerFunc {
 		maNV := r.FormValue("ma_nv")
 
 		thang, err := strconv.Atoi(r.FormValue("thang"))
-		if err != nil {
+		if err != nil || thang < 1 || thang > 12 {
 			http.Error(w, "Tháng không hợp lệ", http.StatusBadRequest)
 			return
 		}
 
 		nam, err := strconv.Atoi(r.FormValue("nam"))
-		if err != nil {
+		if err != nil || nam < 2000 {
 			http.Error(w, "Năm không hợp lệ", http.StatusBadRequest)
 			return
 		}
@@ -465,7 +465,7 @@ func LuuBangLuong(db *sql.DB) http.HandlerFunc {
 		}
 
 		soNgayCong, err := strconv.Atoi(r.FormValue("so_ngay_cong"))
-		if err != nil {
+		if err != nil || soNgayCong < 0 {
 			http.Error(w, "Số ngày công không hợp lệ", http.StatusBadRequest)
 			return
 		}
@@ -482,7 +482,26 @@ func LuuBangLuong(db *sql.DB) http.HandlerFunc {
 
 		ghiChu := r.FormValue("ghi_chu")
 
-		// Kiểm tra trùng lần cuối trước khi INSERT
+		// Kiểm tra nhân viên có tồn tại không
+		var tonTaiNhanVien int
+
+		err = db.QueryRow(`
+			SELECT COUNT(*)
+			FROM nhanvien
+			WHERE ma_nv = ?
+		`, maNV).Scan(&tonTaiNhanVien)
+
+		if err != nil {
+			http.Error(w, "Lỗi kiểm tra nhân viên: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if tonTaiNhanVien == 0 {
+			http.Error(w, "Nhân viên không tồn tại", http.StatusBadRequest)
+			return
+		}
+
+		// Kiểm tra trùng bảng lương
 		var daTonTai int
 
 		err = db.QueryRow(`
@@ -507,10 +526,56 @@ func LuuBangLuong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		// Tính lại tổng lương ở phía server
-		tongLuong := (luongCoBan / 26 * float64(soNgayCong)) +
+		// =========================================================
+		// TÍNH SỐ NGÀY CÔNG CHUẨN TRONG THÁNG
+		// Chỉ tính thứ 2 -> thứ 6
+		// =========================================================
+
+		ngayDauThang := time.Date(
+			nam,
+			time.Month(thang),
+			1,
+			0, 0, 0, 0,
+			time.Local,
+		)
+
+		ngayCuoiThang := ngayDauThang.AddDate(0, 1, -1)
+
+		soNgayCongChuan := 0
+
+		for ngay := ngayDauThang; !ngay.After(ngayCuoiThang); ngay = ngay.AddDate(0, 0, 1) {
+			thu := ngay.Weekday()
+
+			if thu == time.Saturday || thu == time.Sunday {
+				continue
+			}
+
+			soNgayCongChuan++
+		}
+
+		if soNgayCongChuan == 0 {
+			http.Error(w, "Không xác định được số ngày công chuẩn", http.StatusBadRequest)
+			return
+		}
+
+		// Không cho số ngày công vượt quá số ngày công chuẩn
+		if soNgayCong > soNgayCongChuan {
+			soNgayCong = soNgayCongChuan
+		}
+
+		// =========================================================
+		// TÍNH TỔNG LƯƠNG
+		// =========================================================
+
+		luongTheoNgay := luongCoBan / float64(soNgayCongChuan)
+
+		tongLuong := luongTheoNgay*float64(soNgayCong) +
 			phuCap -
 			khauTru
+
+		// =========================================================
+		// LƯU BẢNG LƯƠNG
+		// =========================================================
 
 		_, err = db.Exec(`
 			INSERT INTO bangluong
@@ -552,7 +617,6 @@ func SuaBangLuong(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		id, err := strconv.Atoi(r.URL.Query().Get("id"))
-
 		if err != nil {
 			http.Error(w, "ID không hợp lệ", http.StatusBadRequest)
 			return
@@ -568,41 +632,24 @@ func SuaBangLuong(db *sql.DB) http.HandlerFunc {
 			khauTru := r.FormValue("khau_tru")
 			ghiChu := r.FormValue("ghi_chu")
 
-			// Lấy lương cơ bản từ hợp đồng
-			var luongCoBan float64
-
-			err = db.QueryRow(`
-				SELECT luong_co_ban
-				FROM hopdong
-				WHERE ma_nv = ?
-				AND nhom_hop_dong = 'lao_dong'
-				ORDER BY id DESC
-				LIMIT 1
-			`, maNV).Scan(&luongCoBan)
-
-			if err != nil {
-				http.Error(
-					w,
-					"Không tìm thấy hợp đồng hoặc lương cơ bản của nhân viên",
-					http.StatusBadRequest,
-				)
-				return
-			}
+			// ==============================
+			// CHUYỂN DỮ LIỆU
+			// ==============================
 
 			thangValue, err := strconv.Atoi(thang)
-			if err != nil {
+			if err != nil || thangValue < 1 || thangValue > 12 {
 				http.Error(w, "Tháng không hợp lệ", http.StatusBadRequest)
 				return
 			}
 
 			namValue, err := strconv.Atoi(nam)
-			if err != nil {
+			if err != nil || namValue < 2000 {
 				http.Error(w, "Năm không hợp lệ", http.StatusBadRequest)
 				return
 			}
 
 			soNgayCongValue, err := strconv.Atoi(soNgayCong)
-			if err != nil {
+			if err != nil || soNgayCongValue < 0 {
 				http.Error(w, "Số ngày công không hợp lệ", http.StatusBadRequest)
 				return
 			}
@@ -617,12 +664,85 @@ func SuaBangLuong(db *sql.DB) http.HandlerFunc {
 				khauTruValue = 0
 			}
 
-			// Tính lại lương
-			luongTheoNgay := luongCoBan / 26
+			// ==============================
+			// LẤY LƯƠNG CƠ BẢN
+			// ==============================
+
+			var luongCoBan float64
+
+			err = db.QueryRow(`
+				SELECT luong_co_ban
+				FROM hopdong
+				WHERE ma_nv = ?
+				  AND nhom_hop_dong = 'lao_dong'
+				ORDER BY id DESC
+				LIMIT 1
+			`, maNV).Scan(&luongCoBan)
+
+			if err != nil {
+				http.Error(
+					w,
+					"Không tìm thấy hợp đồng hoặc lương cơ bản của nhân viên",
+					http.StatusBadRequest,
+				)
+				return
+			}
+
+			// ==============================
+			// TÍNH SỐ NGÀY CÔNG CHUẨN
+			// THỨ 2 -> THỨ 6
+			// ==============================
+
+			ngayDauThang := time.Date(
+				namValue,
+				time.Month(thangValue),
+				1,
+				0, 0, 0, 0,
+				time.Local,
+			)
+
+			ngayCuoiThang := ngayDauThang.AddDate(0, 1, -1)
+
+			soNgayCongChuan := 0
+
+			for ngay := ngayDauThang; !ngay.After(ngayCuoiThang); ngay = ngay.AddDate(0, 0, 1) {
+
+				thu := ngay.Weekday()
+
+				if thu == time.Saturday || thu == time.Sunday {
+					continue
+				}
+
+				soNgayCongChuan++
+			}
+
+			if soNgayCongChuan == 0 {
+				http.Error(
+					w,
+					"Không xác định được số ngày công chuẩn",
+					http.StatusBadRequest,
+				)
+				return
+			}
+
+			// Không cho số ngày công vượt quá ngày công chuẩn
+			if soNgayCongValue > soNgayCongChuan {
+				soNgayCongValue = soNgayCongChuan
+			}
+
+			// ==============================
+			// TÍNH LẠI TỔNG LƯƠNG
+			// ==============================
+
+			luongTheoNgay := luongCoBan / float64(soNgayCongChuan)
 
 			tongLuong := luongTheoNgay*float64(soNgayCongValue) +
 				phuCapValue -
 				khauTruValue
+
+			// ==============================
+			// CẬP NHẬT BẢNG LƯƠNG
+			// ==============================
 
 			_, err = db.Exec(`
 				UPDATE bangluong
@@ -655,9 +775,13 @@ func SuaBangLuong(db *sql.DB) http.HandlerFunc {
 			}
 
 			http.Redirect(w, r, "/bangluong", http.StatusSeeOther)
+			return
 		}
 
-		// GET: lấy thông tin bảng lương để hiển thị form sửa
+		// ==============================
+		// GET: HIỂN THỊ FORM SỬA
+		// ==============================
+
 		var bl models.BangLuong
 
 		err = db.QueryRow(`
@@ -695,7 +819,6 @@ func SuaBangLuong(db *sql.DB) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
 	}
 }
 
