@@ -439,11 +439,94 @@ func NghiPhepCaNhan(db *sql.DB) http.HandlerFunc {
 			danhSach = append(danhSach, np)
 		}
 
+		// =========================================================
+		// TÍNH PHÉP NĂM
+		// =========================================================
+
+		tongPhepNam := 12
+		daNghi := 0
+
+		namHienTai := time.Now().Year()
+
+		// Chỉ tính các đơn đã được duyệt
+		for _, np := range danhSach {
+
+			if np.TrangThai != "Đã duyệt" {
+				continue
+			}
+
+			if np.NgayBatDau == nil || np.NgayKetThuc == nil {
+				continue
+			}
+
+			batDau := *np.NgayBatDau
+			ketThuc := *np.NgayKetThuc
+
+			// Chỉ tính phần nghỉ trong năm hiện tại
+			ngayDauNam := time.Date(
+				namHienTai,
+				time.January,
+				1,
+				0, 0, 0, 0,
+				time.Local,
+			)
+
+			ngayCuoiNam := time.Date(
+				namHienTai,
+				time.December,
+				31,
+				0, 0, 0, 0,
+				time.Local,
+			)
+
+			if batDau.Before(ngayDauNam) {
+				batDau = ngayDauNam
+			}
+
+			if ketThuc.After(ngayCuoiNam) {
+				ketThuc = ngayCuoiNam
+			}
+
+			if batDau.After(ketThuc) {
+				continue
+			}
+
+			// Chỉ tính thứ 2 -> thứ 6
+			for ngay := batDau; !ngay.After(ketThuc); ngay = ngay.AddDate(0, 0, 1) {
+
+				thu := ngay.Weekday()
+
+				if thu == time.Saturday || thu == time.Sunday {
+					continue
+				}
+
+				daNghi++
+			}
+		}
+
+		conLai := tongPhepNam - daNghi
+
+		if conLai < 0 {
+			conLai = 0
+		}
+
+		data := struct {
+			DanhSach []models.NghiPhep
+			TongPhep int
+			DaNghi   int
+			ConLai   int
+		}{
+			DanhSach: danhSach,
+			TongPhep: tongPhepNam,
+			DaNghi:   daNghi,
+			ConLai:   conLai,
+		}
+
 		tmpl := template.Must(
 			template.ParseFiles("templates/nghiphep/canhan.html"),
 		)
 
-		err = tmpl.Execute(w, danhSach)
+		err = tmpl.Execute(w, data)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
