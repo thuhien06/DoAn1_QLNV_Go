@@ -7,9 +7,8 @@ import (
 
 func QuanLyCong() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		tmpl := template.Must(
-			template.ParseFiles("templates/cong.html"),
+			template.ParseFiles("templates/cong/cong.html"),
 		)
 
 		if err := tmpl.Execute(w, nil); err != nil {
@@ -18,7 +17,6 @@ func QuanLyCong() http.HandlerFunc {
 		}
 	}
 }
-
 
 func CongCaNhan() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
