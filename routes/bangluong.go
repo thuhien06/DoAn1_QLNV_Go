@@ -176,7 +176,169 @@ func ThemBangLuong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		// Lấy lương cơ bản từ hợp đồng nhân sự
+		// =========================================================
+		// TÍNH SỐ NGÀY CÔNG CHUẨN TRONG THÁNG
+		// Chỉ tính từ thứ 2 đến thứ 6.
+		// =========================================================
+
+		ngayDauThang := time.Date(
+			namValue,
+			time.Month(thangValue),
+			1,
+			0, 0, 0, 0,
+			time.Local,
+		)
+
+		ngayCuoiThang := ngayDauThang.AddDate(0, 1, -1)
+
+		soNgayCongChuan := 0
+
+		for ngay := ngayDauThang; !ngay.After(ngayCuoiThang); ngay = ngay.AddDate(0, 0, 1) {
+			thu := ngay.Weekday()
+
+			if thu == time.Saturday || thu == time.Sunday {
+				continue
+			}
+
+			soNgayCongChuan++
+		}
+
+		// =========================================================
+		// LẤY NGÀY CHẤM CÔNG THỰC TẾ
+		// Chỉ tính thứ 2 đến thứ 6.
+		// =========================================================
+
+		rowsCong, err := db.Query(`
+			SELECT DISTINCT ngay_cham_cong
+			FROM chamcong
+			WHERE ma_nv = ?
+			  AND MONTH(ngay_cham_cong) = ?
+			  AND YEAR(ngay_cham_cong) = ?
+			  AND ngay_cham_cong IS NOT NULL
+		`, maNV, thangValue, namValue)
+
+		if err != nil {
+			http.Error(w, "Lỗi đọc dữ liệu chấm công: "+err.Error(),
+				http.StatusInternalServerError)
+			return
+		}
+		defer rowsCong.Close()
+
+		ngayCongDaTinh := make(map[string]bool)
+
+		for rowsCong.Next() {
+			var ngay time.Time
+
+			if err := rowsCong.Scan(&ngay); err != nil {
+				http.Error(w, "Lỗi đọc dữ liệu chấm công: "+err.Error(),
+					http.StatusInternalServerError)
+				return
+			}
+
+			thu := ngay.Weekday()
+
+			if thu == time.Saturday || thu == time.Sunday {
+				continue
+			}
+
+			ngayCongDaTinh[ngay.Format("2006-01-02")] = true
+		}
+
+		if err := rowsCong.Err(); err != nil {
+			http.Error(w, "Lỗi đọc dữ liệu chấm công: "+err.Error(),
+				http.StatusInternalServerError)
+			return
+		}
+
+		// =========================================================
+		// LẤY NGÀY NGHỈ PHÉP ĐÃ DUYỆT
+		// Chỉ tính thứ 2 đến thứ 6.
+		// =========================================================
+
+		rowsPhep, err := db.Query(`
+			SELECT ngay_bat_dau, ngay_ket_thuc
+			FROM nghiphep
+			WHERE ma_nv = ?
+			  AND trang_thai = 'Đã duyệt'
+			  AND ngay_bat_dau <= ?
+			  AND ngay_ket_thuc >= ?
+		`,
+			maNV,
+			ngayCuoiThang,
+			ngayDauThang,
+		)
+
+		if err != nil {
+			http.Error(w, "Lỗi đọc dữ liệu nghỉ phép: "+err.Error(),
+				http.StatusInternalServerError)
+			return
+		}
+		defer rowsPhep.Close()
+
+		ngayPhepDaTinh := make(map[string]bool)
+
+		for rowsPhep.Next() {
+			var batDau time.Time
+			var ketThuc time.Time
+
+			if err := rowsPhep.Scan(&batDau, &ketThuc); err != nil {
+				http.Error(w, "Lỗi đọc dữ liệu nghỉ phép: "+err.Error(),
+					http.StatusInternalServerError)
+				return
+			}
+
+			// Chỉ lấy phần nghỉ nằm trong tháng đang tính lương.
+			if batDau.Before(ngayDauThang) {
+				batDau = ngayDauThang
+			}
+
+			if ketThuc.After(ngayCuoiThang) {
+				ketThuc = ngayCuoiThang
+			}
+
+			for ngay := batDau; !ngay.After(ketThuc); ngay = ngay.AddDate(0, 0, 1) {
+				thu := ngay.Weekday()
+
+				if thu == time.Saturday || thu == time.Sunday {
+					continue
+				}
+
+				ngayPhepDaTinh[ngay.Format("2006-01-02")] = true
+			}
+		}
+
+		if err := rowsPhep.Err(); err != nil {
+			http.Error(w, "Lỗi đọc dữ liệu nghỉ phép: "+err.Error(),
+				http.StatusInternalServerError)
+			return
+		}
+
+		// =========================================================
+		// TỔNG NGÀY CÔNG HƯỞNG LƯƠNG
+		// Chấm công + nghỉ phép đã duyệt.
+		// =========================================================
+
+		ngayHuongLuong := make(map[string]bool)
+
+		for ngay := range ngayCongDaTinh {
+			ngayHuongLuong[ngay] = true
+		}
+
+		for ngay := range ngayPhepDaTinh {
+			ngayHuongLuong[ngay] = true
+		}
+
+		soNgayCong := len(ngayHuongLuong)
+
+		// Không cho số công hưởng lương vượt quá số công chuẩn.
+		if soNgayCong > soNgayCongChuan {
+			soNgayCong = soNgayCongChuan
+		}
+
+		// =========================================================
+		// LẤY LƯƠNG CƠ BẢN TỪ HỢP ĐỒNG
+		// =========================================================
+
 		var luongCoBan float64
 
 		err = db.QueryRow(`
@@ -201,36 +363,25 @@ func ThemBangLuong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		// Tự động đếm ngày công
-		var soNgayCong int
+		// =========================================================
+		// PHỤ CẤP
+		// =========================================================
 
-		err = db.QueryRow(`
-			SELECT COUNT(DISTINCT ngay_cham_cong)
-			FROM chamcong
-			WHERE ma_nv = ?
-			  AND MONTH(ngay_cham_cong) = ?
-			  AND YEAR(ngay_cham_cong) = ?
-			  AND ngay_cham_cong IS NOT NULL
-		`, maNV, thangValue, namValue).Scan(&soNgayCong)
-
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		// Thưởng
 		phuCapValue := 0.0
 
 		if phuCap != "" {
 			phuCapValue, err = strconv.ParseFloat(phuCap, 64)
 
 			if err != nil || phuCapValue < 0 {
-				http.Error(w, "Thưởng không hợp lệ", http.StatusBadRequest)
+				http.Error(w, "Phụ cấp không hợp lệ", http.StatusBadRequest)
 				return
 			}
 		}
 
-		// Khấu trừ
+		// =========================================================
+		// KHẤU TRỪ
+		// =========================================================
+
 		khauTruValue := 0.0
 
 		if khauTru != "" {
@@ -242,14 +393,24 @@ func ThemBangLuong(db *sql.DB) http.HandlerFunc {
 			}
 		}
 
-		// Tính tổng lương
-		luongTheoNgay := luongCoBan / 26
+		// =========================================================
+		// TÍNH TỔNG LƯƠNG
+		// =========================================================
+
+		luongTheoNgay := 0.0
+
+		if soNgayCongChuan > 0 {
+			luongTheoNgay = luongCoBan / float64(soNgayCongChuan)
+		}
 
 		tongLuong := luongTheoNgay*float64(soNgayCong) +
 			phuCapValue -
 			khauTruValue
 
-		// Dữ liệu chuyển sang trang xem trước
+		// =========================================================
+		// DỮ LIỆU CHUYỂN SANG TRANG XEM TRƯỚC
+		// =========================================================
+
 		data := models.BangLuong{
 			MaNV:       maNV,
 			Thang:      thangValue,
@@ -266,7 +427,11 @@ func ThemBangLuong(db *sql.DB) http.HandlerFunc {
 			template.ParseFiles("templates/bangluong/xemtruoc.html"),
 		)
 
-		tmpl.Execute(w, data)
+		if err := tmpl.Execute(w, data); err != nil {
+			http.Error(w, "Lỗi hiển thị xem trước: "+err.Error(),
+				http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
