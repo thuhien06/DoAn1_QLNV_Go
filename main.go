@@ -215,7 +215,15 @@ func main() {
 		),
 	)
 
-	//http.HandleFunc("/hopdong/chi-tiet", routes.ChiTietHopDong(db))
+	//////////////////QUẢN LÝ CÔNG
+
+	http.HandleFunc("/cong",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.QuanLyCong(),
+			),
+		),
+	)
 
 	//////////////////CHẤM CÔNG
 
