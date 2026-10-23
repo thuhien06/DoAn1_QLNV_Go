@@ -132,7 +132,11 @@
 
                             {{range .DanhSach}}
 
+                            {{if or (eq .DanhGia "Đi muộn") (eq .DanhGia "Về sớm") (eq .DanhGia "Đi muộn, Về sớm")}}
+                            <tr class="attendance-warning">
+                            {{else}}
                             <tr>
+                            {{end}}
 
                                 <td>{{.ID}}</td>
 
@@ -150,7 +154,9 @@
 
                                 <td>{{.TrangThai}}</td>
 
-                                <td>{{.DanhGia}}</td>
+                                <td>
+                                    {{.DanhGia}}
+                                </td>
 
                                 <td>{{.GhiChu}}</td>
 

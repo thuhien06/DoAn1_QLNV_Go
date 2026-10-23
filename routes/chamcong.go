@@ -193,6 +193,7 @@ func DanhSachChamCong(db *sql.DB) http.HandlerFunc {
 
 		// Đếm số ngày công thực tế trong tháng
 		// Chỉ tính từ thứ 2 đến thứ 6.
+		// Ngày đi muộn hoặc về sớm không được tính công.
 		ngayDaDem := make(map[string]bool)
 
 		for _, dong := range data.DanhSach {
@@ -207,11 +208,19 @@ func DanhSachChamCong(db *sql.DB) http.HandlerFunc {
 				continue
 			}
 
+			// Đi muộn hoặc về sớm thì không tính công.
+			if dong.DanhGia == "Đi muộn" ||
+				dong.DanhGia == "Về sớm" ||
+				dong.DanhGia == "Đi muộn, Về sớm" {
+				continue
+			}
+
 			ngay := dong.NgayChamCong.Format("2006-01-02")
 			ngayDaDem[ngay] = true
 		}
 
 		data.SoCong = len(ngayDaDem)
+
 		// Đếm số ngày nghỉ phép đã được duyệt trong tháng
 		ngayDauThang := time.Date(
 			namSo,

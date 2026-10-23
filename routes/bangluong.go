@@ -206,16 +206,17 @@ func ThemBangLuong(db *sql.DB) http.HandlerFunc {
 		// =========================================================
 		// LẤY NGÀY CHẤM CÔNG THỰC TẾ
 		// Chỉ tính thứ 2 đến thứ 6.
+		// Đi muộn hoặc về sớm thì KHÔNG tính công.
 		// =========================================================
 
 		rowsCong, err := db.Query(`
-			SELECT DISTINCT ngay_cham_cong
-			FROM chamcong
-			WHERE ma_nv = ?
-			  AND MONTH(ngay_cham_cong) = ?
-			  AND YEAR(ngay_cham_cong) = ?
-			  AND ngay_cham_cong IS NOT NULL
-		`, maNV, thangValue, namValue)
+    SELECT ngay_cham_cong, gio_vao, gio_ra
+    FROM chamcong
+    WHERE ma_nv = ?
+      AND MONTH(ngay_cham_cong) = ?
+      AND YEAR(ngay_cham_cong) = ?
+      AND ngay_cham_cong IS NOT NULL
+`, maNV, thangValue, namValue)
 
 		if err != nil {
 			http.Error(w, "Lỗi đọc dữ liệu chấm công: "+err.Error(),
@@ -227,9 +228,12 @@ func ThemBangLuong(db *sql.DB) http.HandlerFunc {
 		ngayCongDaTinh := make(map[string]bool)
 
 		for rowsCong.Next() {
-			var ngay time.Time
 
-			if err := rowsCong.Scan(&ngay); err != nil {
+			var ngay time.Time
+			var gioVao sql.NullString
+			var gioRa sql.NullString
+
+			if err := rowsCong.Scan(&ngay, &gioVao, &gioRa); err != nil {
 				http.Error(w, "Lỗi đọc dữ liệu chấm công: "+err.Error(),
 					http.StatusInternalServerError)
 				return
@@ -237,10 +241,59 @@ func ThemBangLuong(db *sql.DB) http.HandlerFunc {
 
 			thu := ngay.Weekday()
 
+			// Thứ 7 và Chủ nhật không tính công.
 			if thu == time.Saturday || thu == time.Sunday {
 				continue
 			}
 
+			// Không có đủ giờ vào và giờ ra thì không tính công.
+			if !gioVao.Valid || !gioRa.Valid ||
+				gioVao.String == "" || gioRa.String == "" {
+				continue
+			}
+
+			// Đọc giờ vào.
+			gioVaoTime, errVao := time.Parse("15:04:05", gioVao.String)
+			if errVao != nil {
+				gioVaoTime, errVao = time.Parse("15:04", gioVao.String)
+			}
+
+			// Đọc giờ ra.
+			gioRaTime, errRa := time.Parse("15:04:05", gioRa.String)
+			if errRa != nil {
+				gioRaTime, errRa = time.Parse("15:04", gioRa.String)
+			}
+
+			if errVao != nil || errRa != nil {
+				continue
+			}
+
+			// Giờ chuẩn:
+			// Vào lúc 08:00
+			// Ra lúc 17:00
+			mocVao := time.Date(
+				0, 1, 1,
+				8, 0, 0, 0,
+				time.UTC,
+			)
+
+			mocRa := time.Date(
+				0, 1, 1,
+				17, 0, 0, 0,
+				time.UTC,
+			)
+
+			// Đi muộn -> không tính công.
+			if gioVaoTime.After(mocVao) {
+				continue
+			}
+
+			// Về sớm -> không tính công.
+			if gioRaTime.Before(mocRa) {
+				continue
+			}
+
+			// Đủ giờ -> tính công.
 			ngayCongDaTinh[ngay.Format("2006-01-02")] = true
 		}
 
