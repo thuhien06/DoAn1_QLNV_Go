@@ -170,13 +170,13 @@
                             {{end}}
                         </td>
 
-                        <td>{{.LuongCoBan}}</td>
+                        <td>{{printf "%.0f" .LuongCoBan}}</td>
 
                         <td>{{.DoiTac}}</td>
 
                         <td>{{.NguoiDaiDien}}</td>
 
-                        <td>{{.GiaTri}}</td>
+                        <td>{{if .GiaTri}}{{printf "%.0f" .GiaTri}}{{end}}</td>
 
                         <td>
                             {{if .NgayKy}}
@@ -186,7 +186,7 @@
 
                         <td>{{.DichVuThietBi}}</td>
 
-                        <td>{{.ChiPhi}}</td>
+                        <td>{{if .ChiPhi}}{{printf "%.0f" .ChiPhi}}{{end}}</td>
 
                         <td>{{.GhiChu}}</td>
 
@@ -354,15 +354,15 @@
 
                         <td>{{.Nam}}</td>
 
-                        <td>{{.LuongCoBan}}</td>
+                        <td>{{printf "%.0f" .LuongCoBan}}</td>
 
                         <td>{{.SoNgayCong}}</td>
 
-                        <td>{{.PhuCap}}</td>
+                        <td>{{printf "%.0f" .PhuCap}}</td>
 
-                        <td>{{.KhauTru}}</td>
+                        <td>{{printf "%.0f" .KhauTru}}</td>
 
-                        <td>{{.TongLuong}}</td>
+                        <td>{{printf "%.0f" .TongLuong}}</td>
 
                         <td>{{.GhiChu}}</td>
 
@@ -396,10 +396,10 @@
             Danh sách nhân viên
         </a>
 
-        <a href="/" class="btn-home">
-            Trang chủ
-        </a>
-        <a href="/quanly-nhanvien" class="...">QLNV</a>
+        <div class="nut-dieu-huong">
+            <a href="/" class="btn-home">Trang chủ</a>
+            <a href="/quanly-nhanvien" class="btn-home">QLNV</a>
+        </div>
 
     </div>
 
