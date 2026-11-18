@@ -12,6 +12,19 @@ import (
 	"time"
 )
 
+func TrangChuHopDong(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Hiển thị trang tổng quan hợp đồng
+		tmpl := template.Must(
+			template.ParseFiles("templates/hopdong/index.html"),
+		)
+
+		if err := tmpl.Execute(w, nil); err != nil {
+			http.Error(w, "Lỗi hiển thị trang quản lý hợp đồng", http.StatusInternalServerError)
+		}
+	}
+}
+
 // Danh sách hợp đồng
 func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -682,4 +695,3 @@ func HopDongCaNhan(db *sql.DB) http.HandlerFunc {
 		}
 	}
 }
-

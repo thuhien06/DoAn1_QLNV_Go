@@ -164,8 +164,17 @@ func main() {
 
 	//////////////////HỢP ĐỒNG
 
-	// Khai báo đường dẫn quản lý hợp đồng
+	// Trang tổng quan quản lý hợp đồng
 	http.HandleFunc("/hopdong",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.TrangChuHopDong(db),
+			),
+		),
+	)
+
+	// Danh sách hợp đồng
+	http.HandleFunc("/hopdong-danhsach",
 		routes.DaDangNhap(
 			routes.CoVaiTro("admin", "hr")(
 				routes.DanhSachHopDong(db),
