@@ -1,185 +1,185 @@
-<!DOCTYPE html>
-<html lang="vi">
+    <!DOCTYPE html>
+    <html lang="vi">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Chi tiết hợp đồng</title>
-    <link rel="stylesheet" href="/static/css/hopdong.css">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <title>Chi tiết hợp đồng</title>
+        <link rel="stylesheet" href="/static/css/hopdong.css">
+    </head>
 
-<body>
+    <body>
 
-    <div class="contract-detail-page">
+        <div class="contract-detail-page">
 
-        <h1>CHI TIẾT HỢP ĐỒNG</h1>
+            <h1>CHI TIẾT HỢP ĐỒNG</h1>
 
-        <div class="contract-detail">
+            <div class="contract-detail">
 
-            <div class="detail-group">
-                <p>
-                    <strong>Mã hợp đồng:</strong>
-                    {{.MaHD}}
-                </p>
+                <div class="detail-group">
+                    <p>
+                        <strong>Mã hợp đồng:</strong>
+                        {{.MaHD}}
+                    </p>
 
-                <p>
-                    <strong>Mã nhân viên:</strong>
-                    {{.MaNV}}
-                </p>
+                    <p>
+                        <strong>Mã nhân viên:</strong>
+                        {{.MaNV}}
+                    </p>
 
-                <p>
-                    <strong>Nhóm hợp đồng:</strong>
+                    <p>
+                        <strong>Nhóm hợp đồng:</strong>
 
-                    {{if eq .NhomHopDong "lao_dong"}}
-                        Lao động
-                    {{else if eq .NhomHopDong "kinh_doanh"}}
-                        Kinh doanh
-                    {{else if eq .NhomHopDong "van_hanh"}}
-                        Vận hành
-                    {{else}}
-                        Chưa phân loại
-                    {{end}}
-                </p>
-            </div>
-
-
-            {{if eq .NhomHopDong "lao_dong"}}
-
-            <div class="detail-section">
-
-                <h3>Thông tin hợp đồng lao động</h3>
-
-                <p>
-                    <strong>Loại hợp đồng:</strong>
-                    {{.LoaiHopDong}}
-                </p>
-
-                <p>
-                    <strong>Lương cơ bản:</strong>
-                    {{printf "%.0f" .LuongCoBan}} VNĐ
-                </p>
-
-            </div>
-
-            {{end}}
+                        {{if eq .NhomHopDong "lao_dong"}}
+                            Lao động
+                        {{else if eq .NhomHopDong "kinh_doanh"}}
+                            Kinh doanh
+                        {{else if eq .NhomHopDong "van_hanh"}}
+                            Vận hành
+                        {{else}}
+                            Chưa phân loại
+                        {{end}}
+                    </p>
+                </div>
 
 
-            {{if eq .NhomHopDong "kinh_doanh"}}
+                {{if eq .NhomHopDong "lao_dong"}}
 
-            <div class="detail-section">
+                <div class="detail-section">
 
-                <h3>Thông tin hợp đồng kinh doanh</h3>
+                    <h3>Thông tin hợp đồng lao động</h3>
 
-                <p>
-                    <strong>Đối tác:</strong>
-                    {{if .DoiTac}}{{.DoiTac}}{{end}}
-                </p>
+                    <p>
+                        <strong>Loại hợp đồng:</strong>
+                        {{.LoaiHopDong}}
+                    </p>
 
-                <p>
-                    <strong>Người đại diện:</strong>
-                    {{if .NguoiDaiDien}}{{.NguoiDaiDien}}{{end}}
-                </p>
+                    <p>
+                        <strong>Lương cơ bản:</strong>
+                        {{printf "%.0f" .LuongCoBan}} VNĐ
+                    </p>
 
-                <p>
-                    <strong>Nội dung:</strong>
-                    {{if .NoiDung}}{{.NoiDung}}{{end}}
-                </p>
+                </div>
 
-                <p>
-                    <strong>Giá trị:</strong>
-                    {{if .GiaTri}}
-                        {{printf "%.0f" (deref .GiaTri)}} VNĐ
-                    {{end}}
-                </p>
-
-                <p>
-                    <strong>Ngày ký:</strong>
-                    {{if .NgayKy}}
-                        {{.NgayKy.Format "02-01-2006"}}
-                    {{end}}
-                </p>
-
-            </div>
-
-            {{end}}
+                {{end}}
 
 
-            {{if eq .NhomHopDong "van_hanh"}}
+                {{if eq .NhomHopDong "kinh_doanh"}}
 
-            <div class="detail-section">
+                <div class="detail-section">
 
-                <h3>Thông tin hợp đồng vận hành</h3>
+                    <h3>Thông tin hợp đồng kinh doanh</h3>
 
-                <p>
-                    <strong>Đối tác/Nhà cung cấp:</strong>
-                    {{if .DoiTac}}{{.DoiTac}}{{end}}
-                </p>
+                    <p>
+                        <strong>Đối tác:</strong>
+                        {{if .DoiTac}}{{.DoiTac}}{{end}}
+                    </p>
 
-                <p>
-                    <strong>Dịch vụ/Thiết bị:</strong>
-                    {{if .DichVuThietBi}}{{.DichVuThietBi}}{{end}}
-                </p>
+                    <p>
+                        <strong>Người đại diện:</strong>
+                        {{if .NguoiDaiDien}}{{.NguoiDaiDien}}{{end}}
+                    </p>
 
-                <p>
-                    <strong>Nội dung công việc:</strong>
-                    {{if .NoiDung}}{{.NoiDung}}{{end}}
-                </p>
+                    <p>
+                        <strong>Nội dung:</strong>
+                        {{if .NoiDung}}{{.NoiDung}}{{end}}
+                    </p>
 
-                <p>
-                    <strong>Chi phí:</strong>
-                    {{if .ChiPhi}}
-                        {{printf "%.0f" (deref .ChiPhi)}} VNĐ
-                    {{end}}
-                </p>
+                    <p>
+                        <strong>Giá trị:</strong>
+                        {{if .GiaTri}}
+                            {{printf "%.0f" (deref .GiaTri)}} VNĐ
+                        {{end}}
+                    </p>
 
-                <p>
-                    <strong>Ngày ký:</strong>
-                    {{if .NgayKy}}
-                        {{.NgayKy.Format "02-01-2006"}}
-                    {{end}}
-                </p>
+                    <p>
+                        <strong>Ngày ký:</strong>
+                        {{if .NgayKy}}
+                            {{.NgayKy.Format "02-01-2006"}}
+                        {{end}}
+                    </p>
 
-            </div>
+                </div>
 
-            {{end}}
-
-
-            <div class="detail-section">
-
-                <h3>Thông tin chung</h3>
-
-                <p>
-                    <strong>Ngày bắt đầu:</strong>
-                    {{if .NgayBatDau}}
-                        {{.NgayBatDau.Format "02-01-2006"}}
-                    {{end}}
-                </p>
-
-                <p>
-                    <strong>Ngày kết thúc:</strong>
-                    {{if .NgayKetThuc}}
-                        {{.NgayKetThuc.Format "02-01-2006"}}
-                    {{end}}
-                </p>
-
-                <p>
-                    <strong>Ghi chú:</strong>
-                    {{.GhiChu}}
-                </p>
-
-            </div>
+                {{end}}
 
 
-            <div class="detail-actions">
+                {{if eq .NhomHopDong "van_hanh"}}
 
-                <a href="/hopdong" class="btn-back">
-                    Quay lại
-                </a>
+                <div class="detail-section">
+
+                    <h3>Thông tin hợp đồng vận hành</h3>
+
+                    <p>
+                        <strong>Đối tác/Nhà cung cấp:</strong>
+                        {{if .DoiTac}}{{.DoiTac}}{{end}}
+                    </p>
+
+                    <p>
+                        <strong>Dịch vụ/Thiết bị:</strong>
+                        {{if .DichVuThietBi}}{{.DichVuThietBi}}{{end}}
+                    </p>
+
+                    <p>
+                        <strong>Nội dung công việc:</strong>
+                        {{if .NoiDung}}{{.NoiDung}}{{end}}
+                    </p>
+
+                    <p>
+                        <strong>Chi phí:</strong>
+                        {{if .ChiPhi}}
+                            {{printf "%.0f" (deref .ChiPhi)}} VNĐ
+                        {{end}}
+                    </p>
+
+                    <p>
+                        <strong>Ngày ký:</strong>
+                        {{if .NgayKy}}
+                            {{.NgayKy.Format "02-01-2006"}}
+                        {{end}}
+                    </p>
+
+                </div>
+
+                {{end}}
+
+
+                <div class="detail-section">
+
+                    <h3>Thông tin chung</h3>
+
+                    <p>
+                        <strong>Ngày bắt đầu:</strong>
+                        {{if .NgayBatDau}}
+                            {{.NgayBatDau.Format "02-01-2006"}}
+                        {{end}}
+                    </p>
+
+                    <p>
+                        <strong>Ngày kết thúc:</strong>
+                        {{if .NgayKetThuc}}
+                            {{.NgayKetThuc.Format "02-01-2006"}}
+                        {{end}}
+                    </p>
+
+                    <p>
+                        <strong>Ghi chú:</strong>
+                        {{.GhiChu}}
+                    </p>
+
+                </div>
+
+
+                <div class="detail-actions">
+
+                    <a href="/hopdong" class="btn-back">
+                        Quay lại
+                    </a>
+
+                </div>
 
             </div>
 
         </div>
 
-    </div>
-
-</body>
-</html>
+    </body>
+    </html>

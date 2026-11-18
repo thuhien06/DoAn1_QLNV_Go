@@ -742,51 +742,84 @@ func ChiTietHopDong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		// Chuyển dữ liệu NULL về giá trị mặc định
-		if maNVDB.Valid {
-			hd.MaNV = maNVDB.String
+		// Dữ liệu truyền sang template
+		data := struct {
+			models.HopDong
+			NhanVien models.NhanVien
+		}{
+			HopDong: hd,
 		}
-		if nhomHopDong.Valid {
-			hd.NhomHopDong = nhomHopDong.String
-		}
-		if loaiHopDong.Valid {
-			hd.LoaiHopDong = loaiHopDong.String
-		}
-		if ghiChu.Valid {
-			hd.GhiChu = ghiChu.String
-		}
-		if doiTac.Valid {
-			hd.DoiTac = &doiTac.String
-		}
-		if nguoiDaiDien.Valid {
-			hd.NguoiDaiDien = &nguoiDaiDien.String
-		}
-		if noiDung.Valid {
-			hd.NoiDung = &noiDung.String
-		}
-		if dichVu.Valid {
-			hd.DichVuThietBi = &dichVu.String
-		}
-		if ngayBatDau.Valid {
-			hd.NgayBatDau = &ngayBatDau.Time
-		}
-		if ngayKetThuc.Valid {
-			hd.NgayKetThuc = &ngayKetThuc.Time
-		}
-		if ngayKy.Valid {
-			hd.NgayKy = &ngayKy.Time
-		}
-		if luong.Valid {
-			hd.LuongCoBan = luong.Float64
-		}
-		if phuCap.Valid {
-			hd.PhuCap = &phuCap.Float64
-		}
-		if giaTri.Valid {
-			hd.GiaTri = &giaTri.Float64
-		}
-		if chiPhi.Valid {
-			hd.ChiPhi = &chiPhi.Float64
+
+		// Chỉ lấy thông tin nhân viên đối với hợp đồng lao động
+		if hd.NhomHopDong == "lao_dong" {
+
+			var nv models.NhanVien
+
+			var ngaySinh, ngayCap sql.NullTime
+
+			var quocTich, noiSinh, cccd sql.NullString
+			var noiCap, diaChiThuongTru, diaChiTamTru sql.NullString
+			var phongBan, chucVu sql.NullString
+
+			err := db.QueryRow(`
+		SELECT ho_ten, ngay_sinh, quoc_tich, noi_sinh,
+		       cccd, ngay_cap_cccd, noi_cap_cccd,
+		       dia_chi_thuong_tru, dia_chi_tam_tru,
+		       phong_ban, chuc_vu
+		FROM nhanvien
+		WHERE ma_nv = ?
+	`, hd.MaNV).Scan(
+				&nv.HoTen,
+				&ngaySinh,
+				&quocTich,
+				&noiSinh,
+				&cccd,
+				&ngayCap,
+				&noiCap,
+				&diaChiThuongTru,
+				&diaChiTamTru,
+				&phongBan,
+				&chucVu,
+			)
+
+			if err != nil {
+				fmt.Println("Lỗi lấy thông tin nhân viên:", err)
+				http.Error(w, "Không tìm thấy thông tin nhân viên", http.StatusInternalServerError)
+				return
+			}
+
+			if ngaySinh.Valid {
+				nv.NgaySinh = &ngaySinh.Time
+			}
+			if ngayCap.Valid {
+				nv.NgayCapCCCD = &ngayCap.Time
+			}
+			if quocTich.Valid {
+				nv.QuocTich = quocTich.String
+			}
+			if noiSinh.Valid {
+				nv.NoiSinh = noiSinh.String
+			}
+			if cccd.Valid {
+				nv.CCCD = cccd.String
+			}
+			if noiCap.Valid {
+				nv.NoiCapCCCD = noiCap.String
+			}
+			if diaChiThuongTru.Valid {
+				nv.DiaChiThuongTru = diaChiThuongTru.String
+			}
+			if diaChiTamTru.Valid {
+				nv.DiaChiTamTru = diaChiTamTru.String
+			}
+			if phongBan.Valid {
+				nv.PhongBan = phongBan.String
+			}
+			if chucVu.Valid {
+				nv.ChucVu = chucVu.String
+			}
+
+			data.NhanVien = nv
 		}
 
 		funcMap := template.FuncMap{
@@ -808,7 +841,7 @@ func ChiTietHopDong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		if err := tmpl.Execute(w, hd); err != nil {
+		if err := tmpl.Execute(w, data); err != nil {
 			fmt.Println("Lỗi hiển thị chi tiết hợp đồng:", err)
 		}
 	}
