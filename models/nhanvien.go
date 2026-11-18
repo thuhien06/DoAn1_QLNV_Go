@@ -14,4 +14,12 @@ type NhanVien struct {
 	NgayVaoLam  *time.Time
 	PhongBan    string
 	ChucVu      string
+
+	QuocTich        string
+	NoiSinh         string
+	CCCD            string
+	NgayCapCCCD     *time.Time
+	NoiCapCCCD      string
+	DiaChiThuongTru string
+	DiaChiTamTru    string
 }

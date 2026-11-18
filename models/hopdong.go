@@ -9,16 +9,19 @@ type HopDong struct {
 	MaNV        string
 	NhomHopDong string
 	LoaiHopDong string
+
 	NgayBatDau  *time.Time
 	NgayKetThuc *time.Time
-	LuongCoBan  float64
-	GhiChu      string
+	NgayKy      *time.Time
+
+	LuongCoBan float64
+	PhuCap     *float64
+	GhiChu     string
 
 	DoiTac        *string
 	NguoiDaiDien  *string
 	NoiDung       *string
 	GiaTri        *float64
-	NgayKy        *time.Time
 	DichVuThietBi *string
 	ChiPhi        *float64
 

@@ -1,7 +1,9 @@
 package routes
 
 import (
+	"crypto/rand"
 	"database/sql"
+	"encoding/hex"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -213,6 +215,23 @@ func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+func taoMaHD(tx *sql.Tx) (string, error) {
+	nam := time.Now().Year()
+	tienTo := fmt.Sprintf("HD%d", nam)
+
+	var soLuong int
+	err := tx.QueryRow(`
+        SELECT COUNT(*) FROM hopdong
+        WHERE ma_hd LIKE ?
+    `, tienTo+"%").Scan(&soLuong)
+
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%s%04d", tienTo, soLuong+1), nil
+}
+
 func ThemHopDong(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tmpl := template.Must(template.ParseFiles("templates/hopdong/them.html"))
@@ -227,126 +246,203 @@ func ThemHopDong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		maHD := r.FormValue("ma_hd")
-		maNV := r.FormValue("ma_nv")
+		// Hàm hiển thị lỗi trên form
+		hienLoi := func(message string) {
+			tmpl.Execute(w, struct {
+				Error string
+			}{Error: message})
+		}
+
+		// Lấy thông tin chung
 		nhom := r.FormValue("nhom_hop_dong")
-		loai := r.FormValue("loai_hop_dong")
-		ngayBatDau := r.FormValue("ngay_bat_dau")
-		ngayKetThuc := r.FormValue("ngay_ket_thuc")
 		ngayKy := r.FormValue("ngay_ky")
-		luongCoBan := r.FormValue("luong_co_ban")
 		ghiChu := r.FormValue("ghi_chu")
 
-		doiTac := r.FormValue("doi_tac")
-		nguoiDaiDien := r.FormValue("nguoi_dai_dien")
-		noiDung := r.FormValue("noi_dung")
-		giaTri := r.FormValue("gia_tri")
-		dichVuThietBi := r.FormValue("dich_vu_thiet_bi")
-		chiPhi := r.FormValue("chi_phi")
+		if ngayKy == "" {
+			hienLoi("Vui lòng nhập ngày ký!")
+			return
+		}
 
 		if nhom != "lao_dong" &&
 			nhom != "kinh_doanh" &&
 			nhom != "van_hanh" {
-			http.Error(w, "Nhóm hợp đồng không hợp lệ", http.StatusBadRequest)
+			hienLoi("Nhóm hợp đồng không hợp lệ!")
 			return
 		}
 
-		// Kiểm tra nhân viên phụ trách
-		var count int
-		err := db.QueryRow(
-			"SELECT COUNT(*) FROM nhanvien WHERE ma_nv = ?",
-			maNV,
-		).Scan(&count)
-
-		if err != nil {
-			http.Error(w, "Lỗi kiểm tra mã nhân viên: "+err.Error(),
-				http.StatusInternalServerError)
-			return
-		}
-
-		if count == 0 {
-			tmpl.Execute(w, struct {
-				Error string
-			}{
-				Error: "Mã nhân viên " + maNV + " không tồn tại!",
-			})
-			return
-		}
-
-		// Đổi trường rỗng thành NULL để tránh lỗi với DATE và DECIMAL
+		// Chuyển chuỗi rỗng thành NULL
 		nullable := func(s string) interface{} {
+			s = strings.TrimSpace(s)
 			if s == "" {
 				return nil
 			}
 			return s
 		}
 
-		// Các trường dùng riêng cho từng nhóm
+		// Các biến dùng chung cho hợp đồng
+		var maNVDB interface{}
 		var loaiDB, ngayBatDauDB, ngayKetThucDB interface{}
-		var ngayKyDB, luongDB interface{}
+		var luongDB, phuCapDB interface{}
 		var doiTacDB, nguoiDaiDienDB, noiDungDB interface{}
 		var giaTriDB, dichVuDB, chiPhiDB interface{}
 
-		ngayBatDauDB = nullable(ngayBatDau)
-		ngayKetThucDB = nullable(ngayKetThuc)
-		ngayKyDB = nullable(ngayKy)
-		loaiDB = nullable(loai)
-		luongDB = nullable(luongCoBan)
-		doiTacDB = nullable(doiTac)
-		nguoiDaiDienDB = nullable(nguoiDaiDien)
-		noiDungDB = nullable(noiDung)
-		giaTriDB = nullable(giaTri)
-		dichVuDB = nullable(dichVuThietBi)
-		chiPhiDB = nullable(chiPhi)
+		ngayKyDB := ngayKy
 
-		switch nhom {
-		case "lao_dong":
-			// Hợp đồng lao động không dùng thông tin đối tác.
-			doiTacDB = nil
-			nguoiDaiDienDB = nil
-			noiDungDB = nil
-			giaTriDB = nil
-			ngayKyDB = nil
-			dichVuDB = nil
-			chiPhiDB = nil
-
-		case "kinh_doanh":
-			// Hợp đồng kinh doanh không dùng lương cơ bản.
-			loaiDB = nil
-			luongDB = nil
-			dichVuDB = nil
-			chiPhiDB = nil
-
-		case "van_hanh":
-			// Hợp đồng vận hành dùng chi phí, không dùng lương.
-			loaiDB = nil
-			luongDB = nil
-			nguoiDaiDienDB = nil
-			giaTriDB = nil
+		// Bắt đầu transaction
+		tx, err := db.Begin()
+		if err != nil {
+			hienLoi("Không thể bắt đầu giao dịch: " + err.Error())
+			return
+		}
+		defer tx.Rollback()
+		// Sinh mã hợp đồng tự động
+		maHD, err := taoMaHD(tx)
+		if err != nil {
+			hienLoi("Không thể tạo mã hợp đồng: " + err.Error())
+			return
 		}
 
-		_, err = db.Exec(`
-			INSERT INTO hopdong (
-				ma_hd, ma_nv, nhom_hop_dong, loai_hop_dong,
-				ngay_bat_dau, ngay_ket_thuc, luong_co_ban, ghi_chu,
-				doi_tac, nguoi_dai_dien, noi_dung, gia_tri,
-				ngay_ky, dich_vu_thiet_bi, chi_phi
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-		`,
-			maHD, maNV, nhom, loaiDB,
-			ngayBatDauDB, ngayKetThucDB, luongDB, ghiChu,
-			doiTacDB, nguoiDaiDienDB, noiDungDB, giaTriDB,
-			ngayKyDB, dichVuDB, chiPhiDB,
+		switch nhom {
+
+		// =================================
+		// HỢP ĐỒNG LAO ĐỘNG
+		// =================================
+		case "lao_dong":
+
+			hoTen := strings.TrimSpace(r.FormValue("ho_ten"))
+
+			if hoTen == "" {
+				hienLoi("Vui lòng nhập họ tên người lao động!")
+				return
+			}
+
+			// Sinh mã nhân viên tự động
+			maNV, err := taoMaNV()
+			if err != nil {
+				hienLoi("Không thể tạo mã nhân viên: " + err.Error())
+				return
+			}
+
+			// Thông tin cá nhân
+			ngaySinh := nullable(r.FormValue("ngay_sinh"))
+			gioiTinh := nullable(r.FormValue("gioi_tinh"))
+			soDienThoai := nullable(r.FormValue("so_dien_thoai"))
+			email := nullable(r.FormValue("email"))
+
+			quocTich := nullable(r.FormValue("quoc_tich"))
+			noiSinh := nullable(r.FormValue("noi_sinh"))
+			cccd := nullable(r.FormValue("cccd"))
+			ngayCapCCCD := nullable(r.FormValue("ngay_cap_cccd"))
+			noiCapCCCD := nullable(r.FormValue("noi_cap_cccd"))
+
+			diaChiThuongTru := nullable(r.FormValue("dia_chi_thuong_tru"))
+			diaChiTamTru := nullable(r.FormValue("dia_chi_tam_tru"))
+
+			// Dùng địa chỉ thường trú làm địa chỉ chung
+			diaChi := diaChiThuongTru
+			if diaChi == nil {
+				diaChi = diaChiTamTru
+			}
+
+			ngayBatDau := nullable(r.FormValue("ngay_bat_dau"))
+			phongBan := nullable(r.FormValue("bo_phan"))
+			chucVu := nullable(r.FormValue("chuc_danh"))
+
+			// Tạo hồ sơ nhân viên
+			_, err = tx.Exec(`
+                INSERT INTO nhanvien (
+                    ma_nv, ho_ten, ngay_sinh, gioi_tinh,
+                    so_dien_thoai, email, dia_chi, ngay_vao_lam,
+                    phong_ban, chuc_vu, quoc_tich, noi_sinh,
+                    cccd, ngay_cap_cccd, noi_cap_cccd,
+                    dia_chi_thuong_tru, dia_chi_tam_tru
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `,
+				maNV, hoTen, ngaySinh, gioiTinh,
+				soDienThoai, email, diaChi, ngayBatDau,
+				phongBan, chucVu, quocTich, noiSinh,
+				cccd, ngayCapCCCD, noiCapCCCD,
+				diaChiThuongTru, diaChiTamTru,
+			)
+
+			if err != nil {
+				hienLoi("Lỗi tạo hồ sơ nhân viên: " + err.Error())
+				return
+			}
+
+			maNVDB = maNV
+
+			// Thông tin hợp đồng lao động
+			loaiDB = nullable(r.FormValue("loai_hop_dong"))
+			ngayBatDauDB = ngayBatDau
+			ngayKetThucDB = nullable(r.FormValue("ngay_ket_thuc"))
+			luongDB = nullable(r.FormValue("luong_co_ban"))
+			phuCapDB = nullable(r.FormValue("phu_cap"))
+			noiDungDB = nullable(r.FormValue("noi_dung"))
+
+		// =================================
+		// HỢP ĐỒNG KINH DOANH
+		// =================================
+		case "kinh_doanh":
+
+			doiTacDB = nullable(r.FormValue("doi_tac"))
+			nguoiDaiDienDB = nullable(r.FormValue("nguoi_dai_dien"))
+			giaTriDB = nullable(r.FormValue("gia_tri"))
+			noiDungDB = nullable(r.FormValue("noi_dung_kinh_doanh"))
+
+		// =================================
+		// HỢP ĐỒNG VẬN HÀNH
+		// =================================
+		case "van_hanh":
+
+			doiTacDB = nullable(r.FormValue("doi_tac_van_hanh"))
+			dichVuDB = nullable(r.FormValue("dich_vu_thiet_bi"))
+			chiPhiDB = nullable(r.FormValue("chi_phi"))
+			noiDungDB = nullable(r.FormValue("noi_dung_van_hanh"))
+		}
+
+		// Tạo hợp đồng
+		_, err = tx.Exec(`
+            INSERT INTO hopdong (
+                ma_hd, ma_nv, nhom_hop_dong, loai_hop_dong,
+                ngay_bat_dau, ngay_ket_thuc,
+                luong_co_ban, phu_cap, ghi_chu,
+                doi_tac, nguoi_dai_dien, noi_dung,
+                gia_tri, ngay_ky, dich_vu_thiet_bi, chi_phi
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `,
+			maHD, maNVDB, nhom, loaiDB,
+			ngayBatDauDB, ngayKetThucDB,
+			luongDB, phuCapDB, nullable(ghiChu),
+			doiTacDB, nguoiDaiDienDB, noiDungDB,
+			giaTriDB, ngayKyDB, dichVuDB, chiPhiDB,
 		)
 
 		if err != nil {
-			http.Error(w, "Lỗi thêm hợp đồng: "+err.Error(),
-				http.StatusInternalServerError)
+			hienLoi("Lỗi thêm hợp đồng: " + err.Error())
+			return
+		}
+
+		// Xác nhận transaction
+		if err = tx.Commit(); err != nil {
+			hienLoi("Lỗi lưu dữ liệu: " + err.Error())
 			return
 		}
 
 		http.Redirect(w, r, "/hopdong", http.StatusSeeOther)
 	}
+}
+
+// Sinh mã nhân viên ngẫu nhiên
+func taoMaNV() (string, error) {
+	b := make([]byte, 8)
+
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+
+	return "NV" + strings.ToUpper(hex.EncodeToString(b)), nil
+
 }
 
 // Sửa hợp đồng
@@ -423,7 +519,6 @@ func SuaHopDong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		maHD := r.FormValue("ma_hd")
 		maNV := r.FormValue("ma_nv")
 		nhom := r.FormValue("nhom_hop_dong")
 		loai := r.FormValue("loai_hop_dong")
@@ -487,7 +582,6 @@ func SuaHopDong(db *sql.DB) http.HandlerFunc {
 			    chi_phi = ?
 			WHERE id = ?
 		`,
-			maHD,
 			maNV,
 			nhom,
 			nullable(loai),
