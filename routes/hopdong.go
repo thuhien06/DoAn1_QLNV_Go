@@ -1,9 +1,7 @@
 package routes
 
 import (
-	"crypto/rand"
 	"database/sql"
-	"encoding/hex"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -108,6 +106,7 @@ func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 			nhomHopDong,
 			nhomHopDong,
 		)
+
 		if err != nil {
 			http.Error(w, "Lỗi lấy danh sách hợp đồng: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -118,9 +117,12 @@ func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 
 		for rows.Next() {
 			var hd models.HopDong
-			var luongCoBan sql.NullFloat64
 
+			// Các trường có thể nhận NULL từ database
+			var luongCoBan sql.NullFloat64
 			var loaiHopDong sql.NullString
+			var ghiChu sql.NullString
+
 			err := rows.Scan(
 				&hd.ID,
 				&hd.MaHD,
@@ -130,7 +132,7 @@ func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 				&hd.NgayBatDau,
 				&hd.NgayKetThuc,
 				&luongCoBan,
-				&hd.GhiChu,
+				&ghiChu,
 				&hd.DoiTac,
 				&hd.NguoiDaiDien,
 				&hd.NoiDung,
@@ -139,23 +141,34 @@ func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 				&hd.DichVuThietBi,
 				&hd.ChiPhi,
 			)
+
 			if err != nil {
 				http.Error(w, "Lỗi đọc dữ liệu: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
 
+			// Xử lý loại hợp đồng
 			if loaiHopDong.Valid {
 				hd.LoaiHopDong = loaiHopDong.String
 			} else {
 				hd.LoaiHopDong = ""
 			}
 
+			// Xử lý lương cơ bản
 			if luongCoBan.Valid {
 				hd.LuongCoBan = luongCoBan.Float64
 			} else {
 				hd.LuongCoBan = 0
 			}
 
+			// Xử lý ghi chú
+			if ghiChu.Valid {
+				hd.GhiChu = ghiChu.String
+			} else {
+				hd.GhiChu = ""
+			}
+
+			// Xác định trạng thái hợp đồng
 			if hd.NgayKetThuc == nil {
 				hd.TrangThai = "Không xác định"
 			} else {
@@ -210,7 +223,7 @@ func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 		)
 
 		if err := tmpl.Execute(w, data); err != nil {
-			http.Error(w, "Lỗi hiển thị danh sách", http.StatusInternalServerError)
+			http.Error(w, "Lỗi hiển thị danh sách: "+err.Error(), http.StatusInternalServerError)
 		}
 	}
 }
@@ -316,13 +329,6 @@ func ThemHopDong(db *sql.DB) http.HandlerFunc {
 				return
 			}
 
-			// Sinh mã nhân viên tự động
-			maNV, err := taoMaNV()
-			if err != nil {
-				hienLoi("Không thể tạo mã nhân viên: " + err.Error())
-				return
-			}
-
 			// Thông tin cá nhân
 			ngaySinh := nullable(r.FormValue("ngay_sinh"))
 			gioiTinh := nullable(r.FormValue("gioi_tinh"))
@@ -348,17 +354,19 @@ func ThemHopDong(db *sql.DB) http.HandlerFunc {
 			phongBan := nullable(r.FormValue("bo_phan"))
 			chucVu := nullable(r.FormValue("chuc_danh"))
 
-			// Tạo hồ sơ nhân viên
-			_, err = tx.Exec(`
-                INSERT INTO nhanvien (
-                    ma_nv, ho_ten, ngay_sinh, gioi_tinh,
-                    so_dien_thoai, email, dia_chi, ngay_vao_lam,
-                    phong_ban, chuc_vu, quoc_tich, noi_sinh,
-                    cccd, ngay_cap_cccd, noi_cap_cccd,
-                    dia_chi_thuong_tru, dia_chi_tam_tru
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `,
-				maNV, hoTen, ngaySinh, gioiTinh,
+			// Tạo mã tạm để INSERT nhân viên
+			maNVTam := fmt.Sprintf("T%019d", time.Now().UnixNano())
+
+			result, err := tx.Exec(`
+    INSERT INTO nhanvien (
+        ma_nv, ho_ten, ngay_sinh, gioi_tinh,
+        so_dien_thoai, email, dia_chi, ngay_vao_lam,
+        phong_ban, chuc_vu, quoc_tich, noi_sinh,
+        cccd, ngay_cap_cccd, noi_cap_cccd,
+        dia_chi_thuong_tru, dia_chi_tam_tru
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`,
+				maNVTam, hoTen, ngaySinh, gioiTinh,
 				soDienThoai, email, diaChi, ngayBatDau,
 				phongBan, chucVu, quocTich, noiSinh,
 				cccd, ngayCapCCCD, noiCapCCCD,
@@ -367,6 +375,27 @@ func ThemHopDong(db *sql.DB) http.HandlerFunc {
 
 			if err != nil {
 				hienLoi("Lỗi tạo hồ sơ nhân viên: " + err.Error())
+				return
+			}
+
+			// Lấy ID tự tăng vừa được tạo
+			id, err := result.LastInsertId()
+			if err != nil {
+				hienLoi("Không lấy được ID nhân viên: " + err.Error())
+				return
+			}
+
+			// Tạo mã nhân viên từ ID
+			maNV := fmt.Sprintf("NV%04d", id)
+
+			// Cập nhật mã nhân viên chính thức
+			_, err = tx.Exec(
+				"UPDATE nhanvien SET ma_nv = ? WHERE id = ?",
+				maNV, id,
+			)
+
+			if err != nil {
+				hienLoi("Lỗi cập nhật mã nhân viên: " + err.Error())
 				return
 			}
 
@@ -431,18 +460,6 @@ func ThemHopDong(db *sql.DB) http.HandlerFunc {
 
 		http.Redirect(w, r, "/hopdong", http.StatusSeeOther)
 	}
-}
-
-// Sinh mã nhân viên ngẫu nhiên
-func taoMaNV() (string, error) {
-	b := make([]byte, 8)
-
-	if _, err := rand.Read(b); err != nil {
-		return "", err
-	}
-
-	return "NV" + strings.ToUpper(hex.EncodeToString(b)), nil
-
 }
 
 // Sửa hợp đồng
@@ -638,25 +655,21 @@ func XoaHopDong(db *sql.DB) http.HandlerFunc {
 // Chi tiết hợp đồng
 func ChiTietHopDong(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Lấy thông tin đăng nhập
 		session, err := Store.Get(r, "qlnv-session")
 		if err != nil {
-			http.Error(w, "Không thể đọc phiên đăng nhập",
-				http.StatusInternalServerError)
+			http.Error(w, "Không thể đọc phiên đăng nhập", http.StatusInternalServerError)
 			return
 		}
 
 		vaiTro, _ := session.Values["vai_tro"].(string)
 		maNV, _ := session.Values["ma_nv"].(string)
 
-		// Lấy ID hợp đồng
 		id := r.URL.Query().Get("id")
 		if id == "" {
 			http.Error(w, "Thiếu mã hợp đồng", http.StatusBadRequest)
 			return
 		}
 
-		// Xây dựng truy vấn theo vai trò
 		var query string
 		var args []interface{}
 
@@ -665,9 +678,9 @@ func ChiTietHopDong(db *sql.DB) http.HandlerFunc {
 			query = `
 				SELECT id, ma_hd, ma_nv, nhom_hop_dong,
 				       loai_hop_dong, ngay_bat_dau, ngay_ket_thuc,
-				       luong_co_ban, ghi_chu, doi_tac, nguoi_dai_dien,
-				       noi_dung, gia_tri, ngay_ky,
-				       dich_vu_thiet_bi, chi_phi
+				       luong_co_ban, phu_cap, ghi_chu,
+				       doi_tac, nguoi_dai_dien, noi_dung,
+				       gia_tri, ngay_ky, dich_vu_thiet_bi, chi_phi
 				FROM hopdong
 				WHERE id = ?
 			`
@@ -675,68 +688,99 @@ func ChiTietHopDong(db *sql.DB) http.HandlerFunc {
 
 		case "nhanvien":
 			if maNV == "" {
-				http.Error(w, "Không tìm thấy mã nhân viên",
-					http.StatusForbidden)
+				http.Error(w, "Không tìm thấy mã nhân viên", http.StatusForbidden)
 				return
 			}
 
 			query = `
 				SELECT id, ma_hd, ma_nv, nhom_hop_dong,
 				       loai_hop_dong, ngay_bat_dau, ngay_ket_thuc,
-				       luong_co_ban, ghi_chu, doi_tac, nguoi_dai_dien,
-				       noi_dung, gia_tri, ngay_ky,
-				       dich_vu_thiet_bi, chi_phi
+				       luong_co_ban, phu_cap, ghi_chu,
+				       doi_tac, nguoi_dai_dien, noi_dung,
+				       gia_tri, ngay_ky, dich_vu_thiet_bi, chi_phi
 				FROM hopdong
 				WHERE id = ? AND ma_nv = ?
 			`
 			args = []interface{}{id, maNV}
 
 		default:
-			http.Error(w, "Bạn không có quyền xem hợp đồng",
-				http.StatusForbidden)
+			http.Error(w, "Bạn không có quyền xem hợp đồng", http.StatusForbidden)
 			return
 		}
 
-		// Đọc dữ liệu hợp đồng
 		var hd models.HopDong
-		var nhomHopDong, loaiHopDong sql.NullString
-		var luongCoBan, giaTri, chiPhi sql.NullFloat64
+
+		var maNVDB, nhomHopDong, loaiHopDong sql.NullString
+		var ghiChu, doiTac, nguoiDaiDien sql.NullString
+		var noiDung, dichVu sql.NullString
+		var ngayBatDau, ngayKetThuc, ngayKy sql.NullTime
+		var luong, phuCap, giaTri, chiPhi sql.NullFloat64
 
 		err = db.QueryRow(query, args...).Scan(
 			&hd.ID,
 			&hd.MaHD,
-			&hd.MaNV,
+			&maNVDB,
 			&nhomHopDong,
 			&loaiHopDong,
-			&hd.NgayBatDau,
-			&hd.NgayKetThuc,
-			&luongCoBan,
-			&hd.GhiChu,
-			&hd.DoiTac,
-			&hd.NguoiDaiDien,
-			&hd.NoiDung,
+			&ngayBatDau,
+			&ngayKetThuc,
+			&luong,
+			&phuCap,
+			&ghiChu,
+			&doiTac,
+			&nguoiDaiDien,
+			&noiDung,
 			&giaTri,
-			&hd.NgayKy,
-			&hd.DichVuThietBi,
+			&ngayKy,
+			&dichVu,
 			&chiPhi,
 		)
 
 		if err != nil {
-			http.Error(w,
-				"Không tìm thấy hợp đồng hoặc bạn không có quyền xem",
-				http.StatusNotFound)
+			fmt.Println("Lỗi truy vấn chi tiết hợp đồng:", err)
+			http.Error(w, "Không tìm thấy hợp đồng hoặc bạn không có quyền xem", http.StatusNotFound)
 			return
 		}
 
-		// Chuyển các giá trị NULL về giá trị mặc định
+		// Chuyển dữ liệu NULL về giá trị mặc định
+		if maNVDB.Valid {
+			hd.MaNV = maNVDB.String
+		}
 		if nhomHopDong.Valid {
 			hd.NhomHopDong = nhomHopDong.String
 		}
 		if loaiHopDong.Valid {
 			hd.LoaiHopDong = loaiHopDong.String
 		}
-		if luongCoBan.Valid {
-			hd.LuongCoBan = luongCoBan.Float64
+		if ghiChu.Valid {
+			hd.GhiChu = ghiChu.String
+		}
+		if doiTac.Valid {
+			hd.DoiTac = &doiTac.String
+		}
+		if nguoiDaiDien.Valid {
+			hd.NguoiDaiDien = &nguoiDaiDien.String
+		}
+		if noiDung.Valid {
+			hd.NoiDung = &noiDung.String
+		}
+		if dichVu.Valid {
+			hd.DichVuThietBi = &dichVu.String
+		}
+		if ngayBatDau.Valid {
+			hd.NgayBatDau = &ngayBatDau.Time
+		}
+		if ngayKetThuc.Valid {
+			hd.NgayKetThuc = &ngayKetThuc.Time
+		}
+		if ngayKy.Valid {
+			hd.NgayKy = &ngayKy.Time
+		}
+		if luong.Valid {
+			hd.LuongCoBan = luong.Float64
+		}
+		if phuCap.Valid {
+			hd.PhuCap = &phuCap.Float64
 		}
 		if giaTri.Valid {
 			hd.GiaTri = &giaTri.Float64
@@ -745,7 +789,6 @@ func ChiTietHopDong(db *sql.DB) http.HandlerFunc {
 			hd.ChiPhi = &chiPhi.Float64
 		}
 
-		// Hàm hỗ trợ hiển thị các trường con trỏ float64
 		funcMap := template.FuncMap{
 			"deref": func(v *float64) float64 {
 				if v == nil {
@@ -761,8 +804,7 @@ func ChiTietHopDong(db *sql.DB) http.HandlerFunc {
 
 		if err != nil {
 			fmt.Println("Lỗi đọc template chi tiết hợp đồng:", err)
-			http.Error(w, "Không thể tải giao diện hợp đồng",
-				http.StatusInternalServerError)
+			http.Error(w, "Không thể tải giao diện hợp đồng", http.StatusInternalServerError)
 			return
 		}
 

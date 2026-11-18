@@ -7,6 +7,22 @@
     <link rel="stylesheet" href="/static/css/hopdong.css">
 </head>
 
+<script>
+    // Tự động điền ngày hiện tại nếu chưa có giá trị
+    document.addEventListener("DOMContentLoaded", function () {
+        const ngayKy = document.getElementById("ngay_ky");
+
+        if (ngayKy && !ngayKy.value) {
+            const homNay = new Date();
+            const ngay = new Date(
+                homNay.getTime() - homNay.getTimezoneOffset() * 60000
+            ).toISOString().split("T")[0];
+
+            ngayKy.value = ngay;
+        }
+    });
+</script>
+
 <body>
 <div class="contract-form-page">
 
@@ -42,12 +58,12 @@
 
             <div class="form-group">
                 <label>Mã hợp đồng</label>
-                <input type="text" value="Hệ thống tự động tạo" disabled>
+                <input type="text" value="Mã hợp đồng sẽ được tự động tạo khi lưu" disabled>
             </div>
 
             <div class="form-group">
                 <label>Ngày ký:</label>
-                <input type="date" name="ngay_ky" required>
+                <input type="date" name="ngay_ky" id="ngay_ky" required>
             </div>
         </div>
 
