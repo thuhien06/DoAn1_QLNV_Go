@@ -14,13 +14,67 @@ import (
 
 func TrangChuHopDong(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Hiển thị trang tổng quan hợp đồng
+
+		// Cấu trúc lưu số liệu thống kê hợp đồng
+		type ThongKeHopDong struct {
+			TongHopDong int
+			DangHieuLuc int
+			SapHetHan   int
+			DaHetHan    int
+		}
+
+		var tk ThongKeHopDong
+
+		// Lấy số liệu thống kê trực tiếp từ database
+		err := db.QueryRow(`
+            SELECT
+                COUNT(*),
+
+                COALESCE(SUM(
+                    CASE
+                        WHEN ngay_bat_dau <= CURDATE()
+                        AND ngay_ket_thuc >= CURDATE()
+                        THEN 1 ELSE 0
+                    END
+                ), 0),
+
+                COALESCE(SUM(
+                    CASE
+                        WHEN ngay_bat_dau <= CURDATE()
+                        AND ngay_ket_thuc BETWEEN CURDATE()
+                        AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+                        THEN 1 ELSE 0
+                    END
+                ), 0),
+
+                COALESCE(SUM(
+                    CASE
+                        WHEN ngay_ket_thuc < CURDATE()
+                        THEN 1 ELSE 0
+                    END
+                ), 0)
+
+            FROM hopdong
+        `).Scan(
+			&tk.TongHopDong,
+			&tk.DangHieuLuc,
+			&tk.SapHetHan,
+			&tk.DaHetHan,
+		)
+
+		if err != nil {
+			http.Error(w, "Lỗi thống kê hợp đồng: "+err.Error(),
+				http.StatusInternalServerError)
+			return
+		}
+
 		tmpl := template.Must(
 			template.ParseFiles("templates/hopdong/index.html"),
 		)
 
-		if err := tmpl.Execute(w, nil); err != nil {
-			http.Error(w, "Lỗi hiển thị trang quản lý hợp đồng", http.StatusInternalServerError)
+		if err := tmpl.Execute(w, tk); err != nil {
+			http.Error(w, "Lỗi hiển thị trang quản lý hợp đồng",
+				http.StatusInternalServerError)
 		}
 	}
 }
