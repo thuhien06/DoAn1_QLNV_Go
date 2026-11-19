@@ -1,0 +1,140 @@
+body {
+    margin: 0;
+    padding: 30px;
+    background: #e9e9e9;
+    font-family: "Times New Roman", serif;
+    color: #000;
+}
+
+.contract-paper {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    padding: 20mm 25mm;
+    box-sizing: border-box;
+    background: white;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    font-size: 14pt;
+    line-height: 1.45;
+}
+
+.contract-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.contract-header h3 {
+    font-size: 14pt;
+    margin: 5px 0;
+}
+
+.contract-header h4 {
+    font-size: 14pt;
+    margin: 5px 0;
+}
+
+.contract-header h1 {
+    font-size: 17pt;
+    margin: 22px 0 5px;
+}
+
+.contract-header p {
+    margin: 5px 0;
+}
+
+.contract-content p {
+    margin: 7px 0;
+    text-align: justify;
+}
+
+.contract-content h3 {
+    font-size: 14pt;
+    margin-top: 18px;
+    margin-bottom: 8px;
+    page-break-after: avoid;
+}
+
+.party-title {
+    text-decoration: underline;
+}
+
+.agreement-intro {
+    font-style: italic;
+    margin-top: 15px !important;
+}
+
+.signature-date {
+    text-align: right;
+    margin-top: 35px;
+    font-style: italic;
+}
+
+.signature-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.signature-area p {
+    text-align: center !important;
+    font-style: italic;
+    font-size: 12pt;
+}
+
+.contract-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 25px 0;
+}
+
+.contract-actions a,
+.contract-actions button {
+    padding: 10px 22px;
+    border: none;
+    border-radius: 5px;
+    background: #2457a6;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.contract-actions a {
+    background: #666;
+}
+
+@page {
+    size: A4;
+    margin: 15mm;
+}
+
+@media print {
+    body {
+        padding: 0;
+        margin: 0;
+        background: white;
+    }
+
+    .contract-paper {
+        width: 100%;
+        min-height: auto;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+    }
+
+    .contract-actions {
+        display: none;
+    }
+
+    .contract-content h3 {
+        page-break-after: avoid;
+    }
+
+    .signature-area {
+        break-inside: avoid;
+    }
+}

@@ -742,6 +742,53 @@ func ChiTietHopDong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
+		// Chuyển dữ liệu từ các biến Null vào model
+		if maNVDB.Valid {
+			hd.MaNV = maNVDB.String
+		}
+		if nhomHopDong.Valid {
+			hd.NhomHopDong = nhomHopDong.String
+		}
+		if loaiHopDong.Valid {
+			hd.LoaiHopDong = loaiHopDong.String
+		}
+		if ghiChu.Valid {
+			hd.GhiChu = ghiChu.String
+		}
+		if doiTac.Valid {
+			hd.DoiTac = &doiTac.String
+		}
+		if nguoiDaiDien.Valid {
+			hd.NguoiDaiDien = &nguoiDaiDien.String
+		}
+		if noiDung.Valid {
+			hd.NoiDung = &noiDung.String
+		}
+		if dichVu.Valid {
+			hd.DichVuThietBi = &dichVu.String
+		}
+		if ngayBatDau.Valid {
+			hd.NgayBatDau = &ngayBatDau.Time
+		}
+		if ngayKetThuc.Valid {
+			hd.NgayKetThuc = &ngayKetThuc.Time
+		}
+		if ngayKy.Valid {
+			hd.NgayKy = &ngayKy.Time
+		}
+		if luong.Valid {
+			hd.LuongCoBan = luong.Float64
+		}
+		if phuCap.Valid {
+			hd.PhuCap = &phuCap.Float64
+		}
+		if giaTri.Valid {
+			hd.GiaTri = &giaTri.Float64
+		}
+		if chiPhi.Valid {
+			hd.ChiPhi = &chiPhi.Float64
+		}
+
 		// Dữ liệu truyền sang template
 		data := struct {
 			models.HopDong

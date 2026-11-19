@@ -1,185 +1,256 @@
-    <!DOCTYPE html>
-    <html lang="vi">
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hợp đồng lao động</title>
+    <link rel="stylesheet" href="/static/css/chitiet-hopdong.css">
+</head>
+<body>
 
-    <head>
-        <meta charset="UTF-8">
-        <title>Chi tiết hợp đồng</title>
-        <link rel="stylesheet" href="/static/css/hopdong.css">
-    </head>
+{{if eq .NhomHopDong "lao_dong"}}
 
-    <body>
+<div class="contract-paper">
 
-        <div class="contract-detail-page">
+    <header class="contract-header">
+        <h3>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</h3>
+        <h4>Độc lập - Tự do - Hạnh phúc</h4>
+        <p>-------------------------</p>
 
-            <h1>CHI TIẾT HỢP ĐỒNG</h1>
+        <h1>HỢP ĐỒNG LAO ĐỘNG</h1>
+        <h3>(Có thời hạn)</h3>
+        <p>Số: {{.MaHD}}</p>
+    </header>
 
-            <div class="contract-detail">
+    <div class="contract-content">
 
-                <div class="detail-group">
-                    <p>
-                        <strong>Mã hợp đồng:</strong>
-                        {{.MaHD}}
-                    </p>
+        <p><i>Căn cứ Bộ luật Lao động hiện hành;</i></p>
+        <p><i>Căn cứ nhu cầu sử dụng lao động và sự thỏa thuận của hai bên;</i></p>
 
-                    <p>
-                        <strong>Mã nhân viên:</strong>
-                        {{.MaNV}}
-                    </p>
+        <p>
+            Hôm nay, ngày
+            {{if .NgayKy}}{{.NgayKy.Format "02"}}{{else}}.....{{end}}
+            tháng
+            {{if .NgayKy}}{{.NgayKy.Format "01"}}{{else}}.....{{end}}
+            năm
+            {{if .NgayKy}}{{.NgayKy.Format "2006"}}{{else}}..........{{end}},
+            tại ........................................, chúng tôi gồm:
+        </p>
 
-                    <p>
-                        <strong>Nhóm hợp đồng:</strong>
+        <h3 class="party-title">BÊN A: NGƯỜI SỬ DỤNG LAO ĐỘNG</h3>
 
-                        {{if eq .NhomHopDong "lao_dong"}}
-                            Lao động
-                        {{else if eq .NhomHopDong "kinh_doanh"}}
-                            Kinh doanh
-                        {{else if eq .NhomHopDong "van_hanh"}}
-                            Vận hành
-                        {{else}}
-                            Chưa phân loại
-                        {{end}}
-                    </p>
-                </div>
+        <p>Công ty: ........................................................................................</p>
+        <p>Địa chỉ: ..........................................................................................</p>
+        <p>Điện thoại: ......................................................................................</p>
+        <p>
+            Đại diện: ........................................
+            Chức vụ: ........................................
+            Quốc tịch: Việt Nam
+        </p>
 
+        <h3 class="party-title">BÊN B: NGƯỜI LAO ĐỘNG</h3>
 
-                {{if eq .NhomHopDong "lao_dong"}}
+        <p>Ông/Bà: <strong>{{.NhanVien.HoTen}}</strong></p>
+        <p>Quốc tịch: {{.NhanVien.QuocTich}}</p>
 
-                <div class="detail-section">
+        <p>
+            Ngày sinh:
+            {{if .NhanVien.NgaySinh}}
+                {{.NhanVien.NgaySinh.Format "02/01/2006"}}
+            {{end}}
+        </p>
 
-                    <h3>Thông tin hợp đồng lao động</h3>
+        <p>Nơi sinh: {{.NhanVien.NoiSinh}}</p>
+        <p>Địa chỉ thường trú: {{.NhanVien.DiaChiThuongTru}}</p>
+        <p>Địa chỉ tạm trú: {{.NhanVien.DiaChiTamTru}}</p>
 
-                    <p>
-                        <strong>Loại hợp đồng:</strong>
-                        {{.LoaiHopDong}}
-                    </p>
+        <p>
+            Số CCCD: {{.NhanVien.CCCD}}
+            &nbsp;&nbsp;
+            Cấp ngày:
+            {{if .NhanVien.NgayCapCCCD}}
+                {{.NhanVien.NgayCapCCCD.Format "02/01/2006"}}
+            {{end}}
+        </p>
 
-                    <p>
-                        <strong>Lương cơ bản:</strong>
-                        {{printf "%.0f" .LuongCoBan}} VNĐ
-                    </p>
+        <p>Tại: {{.NhanVien.NoiCapCCCD}}</p>
 
-                </div>
+        <p class="agreement-intro">
+            Cùng thỏa thuận ký kết Hợp đồng lao động và cam kết thực hiện
+            những điều khoản sau đây:
+        </p>
 
-                {{end}}
+        <h3>ĐIỀU 1. CÔNG VIỆC, ĐỊA ĐIỂM LÀM VIỆC VÀ THỜI HẠN HỢP ĐỒNG</h3>
 
+        <p>
+            - Loại hợp đồng:
+            {{.LoaiHopDong}}
+        </p>
 
-                {{if eq .NhomHopDong "kinh_doanh"}}
+        <p>
+            - Từ ngày:
+            {{if .NgayBatDau}}{{.NgayBatDau.Format "02/01/2006"}}{{end}}
+            &nbsp;&nbsp;
+            Đến ngày:
+            {{if .NgayKetThuc}}{{.NgayKetThuc.Format "02/01/2006"}}{{end}}
+        </p>
 
-                <div class="detail-section">
+        <p>- Địa điểm làm việc: ...................................................................</p>
+        <p>- Bộ phận công tác: {{.NhanVien.PhongBan}}</p>
+        <p>- Chức danh chuyên môn: {{.NhanVien.ChucVu}}</p>
+        <p>- Nhiệm vụ công việc: {{if .NoiDung}}{{.NoiDung}}{{end}}</p>
 
-                    <h3>Thông tin hợp đồng kinh doanh</h3>
+        <h3>ĐIỀU 2. THỜI GIỜ LÀM VIỆC VÀ THỜI GIỜ NGHỈ NGƠI</h3>
 
-                    <p>
-                        <strong>Đối tác:</strong>
-                        {{if .DoiTac}}{{.DoiTac}}{{end}}
-                    </p>
+        <p>
+            1. Thời giờ làm việc được thực hiện theo lịch làm việc và quy định
+            của người sử dụng lao động, bảo đảm tuân thủ pháp luật.
+        </p>
+        <p>
+            2. Người lao động được nghỉ hằng tuần, nghỉ lễ, Tết và nghỉ phép
+            năm theo quy định của pháp luật lao động.
+        </p>
 
-                    <p>
-                        <strong>Người đại diện:</strong>
-                        {{if .NguoiDaiDien}}{{.NguoiDaiDien}}{{end}}
-                    </p>
+        <h3>ĐIỀU 3. TIỀN LƯƠNG VÀ CÁC KHOẢN PHỤ CẤP</h3>
 
-                    <p>
-                        <strong>Nội dung:</strong>
-                        {{if .NoiDung}}{{.NoiDung}}{{end}}
-                    </p>
+        <p>
+            1. Mức lương cơ bản:
+            <strong>{{printf "%.0f" .LuongCoBan}} VNĐ/tháng</strong>
+        </p>
 
-                    <p>
-                        <strong>Giá trị:</strong>
-                        {{if .GiaTri}}
-                            {{printf "%.0f" (deref .GiaTri)}} VNĐ
-                        {{end}}
-                    </p>
+        <p>
+            2. Phụ cấp:
+            {{if .PhuCap}}
+                {{printf "%.0f" (deref .PhuCap)}} VNĐ/tháng
+            {{else}}
+                Theo thỏa thuận của hai bên.
+            {{end}}
+        </p>
 
-                    <p>
-                        <strong>Ngày ký:</strong>
-                        {{if .NgayKy}}
-                            {{.NgayKy.Format "02-01-2006"}}
-                        {{end}}
-                    </p>
+        <p>
+            3. Hình thức và thời hạn trả lương: thực hiện theo thỏa thuận
+            giữa hai bên và quy định của pháp luật.
+        </p>
 
-                </div>
+        <p>
+            4. Các khoản khấu trừ, thuế và nghĩa vụ liên quan được thực hiện
+            theo quy định hiện hành.
+        </p>
 
-                {{end}}
+        <h3>ĐIỀU 4. CHẾ ĐỘ NÂNG LƯƠNG, THƯỞNG</h3>
 
+        <p>
+            Người lao động được xem xét nâng lương, thưởng căn cứ vào kết quả
+            công việc, quy chế của người sử dụng lao động và thỏa thuận giữa
+            hai bên.
+        </p>
 
-                {{if eq .NhomHopDong "van_hanh"}}
+        <h3>ĐIỀU 5. ĐIỀU KIỆN LÀM VIỆC VÀ AN TOÀN LAO ĐỘNG</h3>
 
-                <div class="detail-section">
+        <p>
+            Người sử dụng lao động có trách nhiệm bảo đảm điều kiện làm việc,
+            an toàn, vệ sinh lao động và trang bị phương tiện bảo hộ cần thiết
+            theo tính chất công việc và quy định pháp luật.
+        </p>
 
-                    <h3>Thông tin hợp đồng vận hành</h3>
+        <h3>ĐIỀU 6. BẢO HIỂM VÀ CÁC CHẾ ĐỘ KHÁC</h3>
 
-                    <p>
-                        <strong>Đối tác/Nhà cung cấp:</strong>
-                        {{if .DoiTac}}{{.DoiTac}}{{end}}
-                    </p>
+        <p>
+            Hai bên thực hiện việc tham gia và đóng bảo hiểm xã hội,
+            bảo hiểm y tế, bảo hiểm thất nghiệp theo đối tượng và quy định
+            của pháp luật.
+        </p>
 
-                    <p>
-                        <strong>Dịch vụ/Thiết bị:</strong>
-                        {{if .DichVuThietBi}}{{.DichVuThietBi}}{{end}}
-                    </p>
+        <h3>ĐIỀU 7. QUYỀN VÀ NGHĨA VỤ CỦA NGƯỜI LAO ĐỘNG</h3>
 
-                    <p>
-                        <strong>Nội dung công việc:</strong>
-                        {{if .NoiDung}}{{.NoiDung}}{{end}}
-                    </p>
+        <p>1. Thực hiện đầy đủ công việc đã thỏa thuận trong hợp đồng.</p>
+        <p>2. Chấp hành nội quy lao động và quy định hợp pháp của doanh nghiệp.</p>
+        <p>3. Được trả lương, nghỉ ngơi và hưởng các chế độ theo hợp đồng và pháp luật.</p>
+        <p>4. Bảo vệ tài sản, thông tin và lợi ích hợp pháp của doanh nghiệp.</p>
 
-                    <p>
-                        <strong>Chi phí:</strong>
-                        {{if .ChiPhi}}
-                            {{printf "%.0f" (deref .ChiPhi)}} VNĐ
-                        {{end}}
-                    </p>
+        <h3>ĐIỀU 8. QUYỀN VÀ NGHĨA VỤ CỦA NGƯỜI SỬ DỤNG LAO ĐỘNG</h3>
 
-                    <p>
-                        <strong>Ngày ký:</strong>
-                        {{if .NgayKy}}
-                            {{.NgayKy.Format "02-01-2006"}}
-                        {{end}}
-                    </p>
+        <p>1. Bố trí công việc và bảo đảm điều kiện làm việc theo thỏa thuận.</p>
+        <p>2. Thanh toán đầy đủ tiền lương và các quyền lợi của người lao động.</p>
+        <p>3. Quản lý, điều hành người lao động theo hợp đồng và nội quy hợp pháp.</p>
+        <p>4. Thực hiện đầy đủ trách nhiệm của người sử dụng lao động theo pháp luật.</p>
 
-                </div>
+        <h3>ĐIỀU 9. ĐÀO TẠO VÀ BỒI DƯỠNG</h3>
 
-                {{end}}
+        <p>
+            Việc đào tạo, bồi dưỡng và nâng cao trình độ chuyên môn được thực hiện
+            theo nhu cầu công việc, thỏa thuận giữa hai bên và quy định pháp luật.
+        </p>
 
+        <h3>ĐIỀU 10. SỬA ĐỔI, CHẤM DỨT HỢP ĐỒNG VÀ GIẢI QUYẾT TRANH CHẤP</h3>
 
-                <div class="detail-section">
+        <p>
+            Việc sửa đổi, bổ sung, tạm hoãn hoặc chấm dứt hợp đồng được thực hiện
+            theo thỏa thuận của hai bên và quy định của pháp luật lao động.
+        </p>
 
-                    <h3>Thông tin chung</h3>
+        <p>
+            Tranh chấp phát sinh được ưu tiên giải quyết thông qua thương lượng;
+            trường hợp không đạt được thỏa thuận thì thực hiện theo trình tự
+            pháp luật quy định.
+        </p>
 
-                    <p>
-                        <strong>Ngày bắt đầu:</strong>
-                        {{if .NgayBatDau}}
-                            {{.NgayBatDau.Format "02-01-2006"}}
-                        {{end}}
-                    </p>
+        <h3>ĐIỀU 11. ĐIỀU KHOẢN THI HÀNH</h3>
 
-                    <p>
-                        <strong>Ngày kết thúc:</strong>
-                        {{if .NgayKetThuc}}
-                            {{.NgayKetThuc.Format "02-01-2006"}}
-                        {{end}}
-                    </p>
+        <p>
+            1. Những nội dung chưa được quy định trong hợp đồng này được thực hiện
+            theo pháp luật lao động hiện hành.
+        </p>
 
-                    <p>
-                        <strong>Ghi chú:</strong>
-                        {{.GhiChu}}
-                    </p>
+        <p>
+            2. Hợp đồng được lập thành 02 bản có giá trị như nhau,
+            mỗi bên giữ 01 bản.
+        </p>
 
-                </div>
+        <p>
+            3. Hai bên xác nhận đã đọc, hiểu và tự nguyện ký kết hợp đồng.
+        </p>
 
-
-                <div class="detail-actions">
-
-                    <a href="/hopdong" class="btn-back">
-                        Quay lại
-                    </a>
-
-                </div>
-
-            </div>
-
+        <div class="signature-date">
+            Ngày ...... tháng ...... năm ..........
         </div>
 
-    </body>
-    </html>
+        <div class="signature-area">
+            <div>
+                <strong>ĐẠI DIỆN BÊN A</strong>
+                <p>(Ký, ghi rõ họ tên và đóng dấu)</p>
+            </div>
+
+            <div>
+                <strong>NGƯỜI LAO ĐỘNG</strong>
+                <p>(Ký và ghi rõ họ tên)</p>
+                <br><br><br>
+                <strong>{{.NhanVien.HoTen}}</strong>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="contract-actions">
+        <a href="/hopdong">Quay lại</a>
+        <button onclick="window.print()">In hợp đồng</button>
+    </div>
+
+</div>
+
+{{else}}
+
+<div class="contract-paper">
+    <h1>CHI TIẾT HỢP ĐỒNG</h1>
+    <p><strong>Mã hợp đồng:</strong> {{.MaHD}}</p>
+    <p><strong>Mã nhân viên:</strong> {{.MaNV}}</p>
+    <p><strong>Nhóm hợp đồng:</strong> {{.NhomHopDong}}</p>
+    <p><strong>Đối tác:</strong> {{if .DoiTac}}{{.DoiTac}}{{end}}</p>
+    <p><strong>Nội dung:</strong> {{if .NoiDung}}{{.NoiDung}}{{end}}</p>
+    <p><strong>Ngày ký:</strong> {{if .NgayKy}}{{.NgayKy.Format "02/01/2006"}}{{end}}</p>
+    <a href="/hopdong">Quay lại</a>
+</div>
+
+{{end}}
+
+</body>
+</html>
