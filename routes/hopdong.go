@@ -15,7 +15,6 @@ import (
 func TrangChuHopDong(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		// Cấu trúc lưu số liệu thống kê hợp đồng
 		type ThongKeHopDong struct {
 			TongHopDong int
 			DangHieuLuc int
@@ -25,12 +24,10 @@ func TrangChuHopDong(db *sql.DB) http.HandlerFunc {
 
 		var tk ThongKeHopDong
 
-		// Lấy số liệu thống kê trực tiếp từ database
 		err := db.QueryRow(`
 			SELECT
 				COUNT(*),
 
-				-- Hợp đồng đang hiệu lực
 				COALESCE(SUM(
 					CASE
 						WHEN ngay_bat_dau <= CURDATE()
@@ -42,7 +39,6 @@ func TrangChuHopDong(db *sql.DB) http.HandlerFunc {
 					END
 				), 0),
 
-				-- Hợp đồng sắp hết hạn trong 30 ngày
 				COALESCE(SUM(
 					CASE
 						WHEN ngay_bat_dau <= CURDATE()
@@ -52,7 +48,6 @@ func TrangChuHopDong(db *sql.DB) http.HandlerFunc {
 					END
 				), 0),
 
-				-- Hợp đồng đã hết hạn
 				COALESCE(SUM(
 					CASE
 						WHEN ngay_ket_thuc < CURDATE()
@@ -74,6 +69,16 @@ func TrangChuHopDong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
+		// Hiển thị trang quản lý hợp đồng
+		tmpl := template.Must(
+			template.ParseFiles("templates/hopdong/index.html"),
+		)
+
+		if err := tmpl.Execute(w, tk); err != nil {
+			http.Error(w, "Lỗi hiển thị trang quản lý hợp đồng",
+				http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
