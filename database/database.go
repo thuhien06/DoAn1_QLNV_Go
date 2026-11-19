@@ -11,7 +11,7 @@ import (
 func Connect() (*sql.DB, error) {
 
 	// Thông tin kết nối đến database
-	dsn := "root:@tcp(127.0.0.1:3306)/quanlynhanvien?parseTime=true"
+	dsn := "qlnv_user:qlnv_pass_2026@tcp(127.0.0.1:3307)/quanlynhanvien?parseTime=true"
 
 	// Mở kết nối MySQL
 	db, err := sql.Open("mysql", dsn)

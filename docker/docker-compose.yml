@@ -1,0 +1,17 @@
+services:
+  mariadb:
+    image: mariadb:10.4
+    container_name: qlnv-mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: qlnv_root_2026
+      MARIADB_DATABASE: quanlynhanvien
+      MARIADB_USER: qlnv_user
+      MARIADB_PASSWORD: qlnv_pass_2026
+    ports:
+      - "3307:3306"
+    volumes:
+      - qlnv_data:/var/lib/mysql
+
+volumes:
+  qlnv_data:
