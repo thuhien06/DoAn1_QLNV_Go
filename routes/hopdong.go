@@ -27,35 +27,41 @@ func TrangChuHopDong(db *sql.DB) http.HandlerFunc {
 
 		// Lấy số liệu thống kê trực tiếp từ database
 		err := db.QueryRow(`
-            SELECT
-                COUNT(*),
+			SELECT
+				COUNT(*),
 
-                COALESCE(SUM(
-                    CASE
-                        WHEN ngay_bat_dau <= CURDATE()
-                        AND ngay_ket_thuc >= CURDATE()
-                        THEN 1 ELSE 0
-                    END
-                ), 0),
+				-- Hợp đồng đang hiệu lực
+				COALESCE(SUM(
+					CASE
+						WHEN ngay_bat_dau <= CURDATE()
+						AND (
+							ngay_ket_thuc IS NULL
+							OR ngay_ket_thuc >= CURDATE()
+						)
+						THEN 1 ELSE 0
+					END
+				), 0),
 
-                COALESCE(SUM(
-                    CASE
-                        WHEN ngay_bat_dau <= CURDATE()
-                        AND ngay_ket_thuc BETWEEN CURDATE()
-                        AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
-                        THEN 1 ELSE 0
-                    END
-                ), 0),
+				-- Hợp đồng sắp hết hạn trong 30 ngày
+				COALESCE(SUM(
+					CASE
+						WHEN ngay_bat_dau <= CURDATE()
+						AND ngay_ket_thuc BETWEEN CURDATE()
+						AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+						THEN 1 ELSE 0
+					END
+				), 0),
 
-                COALESCE(SUM(
-                    CASE
-                        WHEN ngay_ket_thuc < CURDATE()
-                        THEN 1 ELSE 0
-                    END
-                ), 0)
+				-- Hợp đồng đã hết hạn
+				COALESCE(SUM(
+					CASE
+						WHEN ngay_ket_thuc < CURDATE()
+						THEN 1 ELSE 0
+					END
+				), 0)
 
-            FROM hopdong
-        `).Scan(
+			FROM hopdong
+		`).Scan(
 			&tk.TongHopDong,
 			&tk.DangHieuLuc,
 			&tk.SapHetHan,
@@ -68,14 +74,6 @@ func TrangChuHopDong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		tmpl := template.Must(
-			template.ParseFiles("templates/hopdong/index.html"),
-		)
-
-		if err := tmpl.Execute(w, tk); err != nil {
-			http.Error(w, "Lỗi hiển thị trang quản lý hợp đồng",
-				http.StatusInternalServerError)
-		}
 	}
 }
 
