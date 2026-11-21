@@ -61,37 +61,43 @@ func DanhSachNhanVien(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		maNV := r.URL.Query().Get("ma_nv")
 
-		// Lấy tổng số nhân viên trong hệ thống
 		var tongSo int
 		err := db.QueryRow("SELECT COUNT(*) FROM nhanvien").Scan(&tongSo)
 		if err != nil {
 			http.Error(w, "Lỗi đếm số nhân viên", http.StatusInternalServerError)
 			return
 		}
-		// Lấy danh sách nhân viên
+
 		var rows *sql.Rows
 
+		query := `
+			SELECT
+				id,
+				COALESCE(ma_nv, ''),
+				COALESCE(ho_ten, ''),
+				ngay_sinh,
+				COALESCE(gioi_tinh, ''),
+				COALESCE(so_dien_thoai, ''),
+				COALESCE(email, ''),
+				COALESCE(dia_chi, ''),
+				ngay_vao_lam,
+				COALESCE(phong_ban, ''),
+				COALESCE(chuc_vu, '')
+			FROM nhanvien
+		`
+
 		if maNV != "" {
-			rows, err = db.Query(`
-				SELECT id, ma_nv, ho_ten, ngay_sinh, gioi_tinh,
-				       so_dien_thoai, email, dia_chi, ngay_vao_lam,
-				       phong_ban, chuc_vu
-				FROM nhanvien
-				WHERE ma_nv LIKE ?
-				ORDER BY id
-			`, "%"+maNV+"%")
+			rows, err = db.Query(
+				query+` WHERE ma_nv LIKE ? ORDER BY id`,
+				"%"+maNV+"%",
+			)
 		} else {
-			rows, err = db.Query(`
-				SELECT id, ma_nv, ho_ten, ngay_sinh, gioi_tinh,
-				       so_dien_thoai, email, dia_chi, ngay_vao_lam,
-				       phong_ban, chuc_vu
-				FROM nhanvien
-				ORDER BY id
-			`)
+			rows, err = db.Query(query + ` ORDER BY id`)
 		}
 
 		if err != nil {
-			http.Error(w, "Lỗi truy vấn database", http.StatusInternalServerError)
+			http.Error(w, "Lỗi truy vấn database: "+err.Error(),
+				http.StatusInternalServerError)
 			return
 		}
 		defer rows.Close()
@@ -114,8 +120,10 @@ func DanhSachNhanVien(db *sql.DB) http.HandlerFunc {
 				&nv.PhongBan,
 				&nv.ChucVu,
 			)
+
 			if err != nil {
-				http.Error(w, "Lỗi đọc dữ liệu", http.StatusInternalServerError)
+				http.Error(w, "Lỗi đọc dữ liệu: "+err.Error(),
+					http.StatusInternalServerError)
 				return
 			}
 
@@ -123,17 +131,17 @@ func DanhSachNhanVien(db *sql.DB) http.HandlerFunc {
 		}
 
 		if err = rows.Err(); err != nil {
-			http.Error(w, "Lỗi đọc danh sách nhân viên", http.StatusInternalServerError)
+			http.Error(w, "Lỗi đọc danh sách nhân viên: "+err.Error(),
+				http.StatusInternalServerError)
 			return
 		}
 
-		// Dữ liệu truyền sang giao diện
 		data := struct {
 			TongSo   int
 			TuKhoa   string
 			DanhSach []models.NhanVien
 		}{
-			TongSo:   len(danhSach),
+			TongSo:   tongSo,
 			TuKhoa:   maNV,
 			DanhSach: danhSach,
 		}
@@ -144,6 +152,7 @@ func DanhSachNhanVien(db *sql.DB) http.HandlerFunc {
 
 		if err := tmpl.Execute(w, data); err != nil {
 			http.Error(w, "Lỗi hiển thị danh sách", http.StatusInternalServerError)
+			return
 		}
 	}
 }
@@ -428,9 +437,18 @@ func ThongTinNhanVien(db *sql.DB) http.HandlerFunc {
 		var nv models.NhanVien
 
 		err := db.QueryRow(`
-			SELECT id, ma_nv, ho_ten, ngay_sinh, gioi_tinh,
-			       so_dien_thoai, email, dia_chi,
-			       ngay_vao_lam, phong_ban, chuc_vu
+			SELECT
+				id,
+				COALESCE(ma_nv, ''),
+				COALESCE(ho_ten, ''),
+				ngay_sinh,
+				COALESCE(gioi_tinh, ''),
+				COALESCE(so_dien_thoai, ''),
+				COALESCE(email, ''),
+				COALESCE(dia_chi, ''),
+				ngay_vao_lam,
+				COALESCE(phong_ban, ''),
+				COALESCE(chuc_vu, '')
 			FROM nhanvien
 			WHERE ma_nv = ?
 		`, maNV).Scan(
@@ -622,8 +640,13 @@ func ThongTinNhanVien(db *sql.DB) http.HandlerFunc {
 		var nghiPheps []ThongTinNghiPhep
 
 		rows, err = db.Query(`
-			SELECT ngay_bat_dau, ngay_ket_thuc,
-			       loai_nghi, ly_do, trang_thai, ghi_chu
+			SELECT
+				ngay_bat_dau,
+				ngay_ket_thuc,
+				COALESCE(loai_nghi, ''),
+				COALESCE(ly_do, ''),
+				COALESCE(trang_thai, ''),
+				COALESCE(ghi_chu, '')
 			FROM nghiphep
 			WHERE ma_nv = ?
 			ORDER BY ngay_bat_dau DESC
@@ -684,7 +707,7 @@ func ThongTinNhanVien(db *sql.DB) http.HandlerFunc {
 		rows, err = db.Query(`
 			SELECT thang, nam, luong_co_ban,
 			       so_ngay_cong, phu_cap, khau_tru,
-			       tong_luong, ghi_chu
+			       tong_luong, COALESCE(ghi_chu, '')
 			FROM bangluong
 			WHERE ma_nv = ?
 			ORDER BY nam DESC, thang DESC
