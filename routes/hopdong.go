@@ -99,6 +99,11 @@ func DanhSachHopDong(db *sql.DB) http.HandlerFunc {
 			WHERE ma_hd LIKE ?
 			AND ma_nv LIKE ?
 			AND (? = '' OR nhom_hop_dong = ?)
+			AND ngay_bat_dau <= CURDATE()
+			AND (
+				ngay_ket_thuc IS NULL
+				OR ngay_ket_thuc >= CURDATE()
+			)
 			ORDER BY id DESC
 		`
 

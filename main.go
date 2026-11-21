@@ -224,6 +224,14 @@ func main() {
 		),
 	)
 
+	http.HandleFunc("/hopdong/sap-het-han",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.HopDongSapHetHan(db),
+			),
+		),
+	)
+
 	//////////////////QUẢN LÝ CÔNG
 
 	http.HandleFunc("/cong",

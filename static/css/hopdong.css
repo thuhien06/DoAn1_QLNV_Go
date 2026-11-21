@@ -667,3 +667,14 @@
         font-size: 23px;
     }
 }
+
+/* hop dong sap het han */
+.status-expiring {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background-color: #fff0d6;
+    color: #a66a00;
+    font-weight: 600;
+    font-size: 13px;
+}

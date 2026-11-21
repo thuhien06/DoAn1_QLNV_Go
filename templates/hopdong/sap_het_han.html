@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hợp đồng sắp hết hạn</title>
+    <link rel="stylesheet" href="/static/css/hopdong.css">
+</head>
+
+<body>
+
+    <div class="contract-page">
+
+        <h1 class="page-title">HỢP ĐỒNG SẮP HẾT HẠN</h1>
+
+        <div class="contract-actions">
+
+            <div class="contract-count">
+                Tổng số hợp đồng sắp hết hạn:
+                <strong>{{len .DanhSach}}</strong>
+            </div>
+
+            <a href="/" class="btn-home">
+                Trang chủ
+            </a>
+
+            <a href="/hopdong" class="btn-home">
+                Trang chủ hợp đồng
+            </a>
+
+        </div>
+
+        <div class="contract-table-wrapper">
+
+            <table border="1">
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Mã hợp đồng</th>
+                        <th>Mã nhân viên</th>
+                        <th>Nhóm hợp đồng</th>
+                        <th>Ngày bắt đầu</th>
+                        <th>Ngày kết thúc</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {{range .DanhSach}}
+
+                    <tr>
+                        <td>{{.ID}}</td>
+                        <td>{{.MaHD}}</td>
+                        <td>{{.MaNV}}</td>
+
+                        <td>
+                            {{if eq .NhomHopDong "lao_dong"}}
+                                Lao động
+                            {{else if eq .NhomHopDong "kinh_doanh"}}
+                                Kinh doanh
+                            {{else if eq .NhomHopDong "van_hanh"}}
+                                Vận hành
+                            {{else}}
+                                Chưa phân loại
+                            {{end}}
+                        </td>
+
+                        <td>
+                            {{if .NgayBatDau}}
+                                {{.NgayBatDau.Format "02-01-2006"}}
+                            {{end}}
+                        </td>
+
+                        <td>
+                            {{if .NgayKetThuc}}
+                                {{.NgayKetThuc.Format "02-01-2006"}}
+                            {{end}}
+                        </td>
+
+                        <td>
+                            <span class="status-expiring">
+                                Sắp hết hạn
+                            </span>
+                        </td>
+
+                        <td>
+                            <a href="/hopdong/chi-tiet?id={{.ID}}">
+                                Chi tiết
+                            </a>
+
+                            |
+
+                            <a href="/hopdong/xu-ly?id={{.ID}}">
+                                Xử lý
+                            </a>
+                        </td>
+                    </tr>
+
+                    {{else}}
+
+                    <tr>
+                        <td colspan="8">
+                            Hiện không có hợp đồng nào sắp hết hạn.
+                        </td>
+                    </tr>
+
+                    {{end}}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
