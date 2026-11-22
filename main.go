@@ -232,6 +232,14 @@ func main() {
 		),
 	)
 
+	http.HandleFunc("/hopdong/xu-ly",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.XuLyHopDong(db),
+			),
+		),
+	)
+
 	//////////////////QUẢN LÝ CÔNG
 
 	http.HandleFunc("/cong",

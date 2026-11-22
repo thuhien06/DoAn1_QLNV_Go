@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Xử lý hợp đồng</title>
+    <link rel="stylesheet" href="/static/css/hopdong.css">
+</head>
+
+<body>
+
+    <div class="contract-detail-page">
+
+        <h1>XỬ LÝ HỢP ĐỒNG</h1>
+
+        <div class="contract-info">
+            <h2>Thông tin hợp đồng</h2>
+
+            <p><strong>Mã hợp đồng:</strong> {{.HopDong.MaHD}}</p>
+            <p><strong>Mã nhân viên:</strong> {{.HopDong.MaNV}}</p>
+            <p><strong>Nhóm hợp đồng:</strong> {{.HopDong.NhomHopDong}}</p>
+            <p><strong>Loại hợp đồng:</strong> {{.HopDong.LoaiHopDong}}</p>
+
+            <p>
+                <strong>Ngày bắt đầu:</strong>
+                {{if .HopDong.NgayBatDau}}
+                    {{.HopDong.NgayBatDau.Format "02/01/2006"}}
+                {{else}}
+                    Chưa có
+                {{end}}
+            </p>
+
+            <p>
+                <strong>Ngày kết thúc:</strong>
+                {{if .HopDong.NgayKetThuc}}
+                    {{.HopDong.NgayKetThuc.Format "02/01/2006"}}
+                {{else}}
+                    Không xác định
+                {{end}}
+            </p>
+
+            <p><strong>Trạng thái xử lý:</strong> {{.HopDong.TrangThai}}</p>
+        </div>
+
+        <div class="contract-info">
+            <h2>Quyết định xử lý</h2>
+
+            <form method="POST"
+                  action="/hopdong/xu-ly?id={{.HopDong.ID}}">
+
+                <button type="submit"
+                        name="quyet_dinh"
+                        value="tai_ky"
+                        onclick="return confirm('Xác nhận lựa chọn tái ký hợp đồng?')">
+                    Tái ký hợp đồng
+                </button>
+
+                <button type="submit"
+                        name="quyet_dinh"
+                        value="ket_thuc"
+                        onclick="return confirm('Xác nhận không tái ký hợp đồng này?')">
+                    Kết thúc hợp đồng
+                </button>
+
+            </form>
+        </div>
+
+        <a href="/hopdong/sap-het-han">← Quay lại danh sách</a>
+
+    </div>
+
+</body>
+</html>
