@@ -25,5 +25,6 @@ type HopDong struct {
 	DichVuThietBi *string
 	ChiPhi        *float64
 
-	TrangThai string
+	TrangThai     string
+	TrangThaiXuLy string
 }

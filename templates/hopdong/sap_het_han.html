@@ -43,6 +43,7 @@
                         <th>Ngày bắt đầu</th>
                         <th>Ngày kết thúc</th>
                         <th>Trạng thái</th>
+                        <th>Xử lý</th>
                         <th>Thao tác</th>
                     </tr>
                 </thead>
@@ -84,6 +85,18 @@
                             <span class="status-expiring">
                                 Sắp hết hạn
                             </span>
+                        </td>
+
+                        <td>
+                            {{if eq .TrangThaiXuLy "Chưa xử lý"}}
+                                <span class="status-unprocessed">Chưa xử lý</span>
+                            {{else if eq .TrangThaiXuLy "Chờ tái ký"}}
+                                <span class="status-expiring">Chờ tái ký</span>
+                            {{else if eq .TrangThaiXuLy "Đã tái ký"}}
+                                <span class="status-active">Đã tái ký</span>
+                            {{else if eq .TrangThaiXuLy "Đã xác nhận kết thúc"}}
+                                <span class="status-ended">Đã xác nhận kết thúc</span>
+                            {{end}}
                         </td>
 
                         <td>

@@ -240,6 +240,14 @@ func main() {
 		),
 	)
 
+	http.HandleFunc("/hopdong/tai-ky",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.TaiKyHopDong(db),
+			),
+		),
+	)
+
 	//////////////////QUẢN LÝ CÔNG
 
 	http.HandleFunc("/cong",

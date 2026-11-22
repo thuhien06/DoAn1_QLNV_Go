@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tái ký hợp đồng</title>
+    <link rel="stylesheet" href="/static/css/hopdong.css">
+</head>
+
+<body>
+<div class="contract-form-page">
+
+    <div class="contract-form-header">
+        <h1>TÁI KÝ HỢP ĐỒNG</h1>
+        <p>Tạo hợp đồng mới dựa trên hợp đồng hiện tại</p>
+    </div>
+
+    <form action="/hopdong/tai-ky?id={{.HopDong.ID}}"
+          method="POST" class="contract-form">
+
+        <div class="contract-form-section">
+            <h2>Thông tin chung</h2>
+
+            <div class="form-group">
+                <label>Mã hợp đồng cũ:</label>
+                <input type="text" value="{{.HopDong.MaHD}}" disabled>
+            </div>
+
+            <div class="form-group">
+                <label>Mã hợp đồng mới:</label>
+                <input type="text"
+                       value="Mã hợp đồng sẽ được tự động tạo khi lưu"
+                       disabled>
+            </div>
+
+            <div class="form-group">
+                <label>Mã nhân viên:</label>
+                <input type="text" value="{{.HopDong.MaNV}}" disabled>
+            </div>
+
+            <div class="form-group">
+                <label>Ngày ký hợp đồng mới:</label>
+                <input type="date" name="ngay_ky"
+                       value="{{.NgayKy}}" required>
+            </div>
+        </div>
+
+        <div class="contract-form-section">
+            <h2>Điều 1 - Công việc và thời hạn hợp đồng</h2>
+
+            <div class="form-group">
+                <label>Loại hợp đồng:</label>
+                <select name="loai_hop_dong" id="loai_hop_dong"
+                        onchange="xuLyLoaiHopDong()" required>
+                    <option value="">-- Chọn loại hợp đồng --</option>
+                    <option value="Thử việc"
+                        {{if eq .HopDong.LoaiHopDong "Thử việc"}}selected{{end}}>
+                        Thử việc
+                    </option>
+                    <option value="Xác định thời hạn"
+                        {{if eq .HopDong.LoaiHopDong "Xác định thời hạn"}}selected{{end}}>
+                        Xác định thời hạn
+                    </option>
+                    <option value="Không xác định thời hạn"
+                        {{if eq .HopDong.LoaiHopDong "Không xác định thời hạn"}}selected{{end}}>
+                        Không xác định thời hạn
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Ngày bắt đầu:</label>
+                <input type="date" name="ngay_bat_dau"
+                       value="{{if .HopDong.NgayBatDau}}{{.HopDong.NgayBatDau.Format "2006-01-02"}}{{end}}"
+                       required>
+            </div>
+
+            <div class="form-group" id="nhomNgayKetThuc">
+                <label>Ngày kết thúc:</label>
+                <input type="date" name="ngay_ket_thuc"
+                       id="ngay_ket_thuc"
+                       value="{{if .HopDong.NgayKetThuc}}{{.HopDong.NgayKetThuc.Format "2006-01-02"}}{{end}}">
+            </div>
+
+            <div class="form-group">
+                <label>Nhiệm vụ công việc:</label>
+                <textarea name="noi_dung" rows="3">{{.HopDong.NoiDung}}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Lương cơ bản (VNĐ/tháng):</label>
+                <input type="number" name="luong_co_ban"
+                       min="0" step="1000"
+                       value="{{.HopDong.LuongCoBan}}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Phụ cấp (VNĐ/tháng):</label>
+                <input type="number" name="phu_cap"
+                       min="0" step="1000"
+                       value="{{if .HopDong.PhuCap}}{{.HopDong.PhuCap}}{{end}}">
+            </div>
+        </div>
+
+        <div class="contract-form-section">
+            <div class="form-group">
+                <label>Ghi chú:</label>
+                <textarea name="ghi_chu" rows="2">{{.HopDong.GhiChu}}</textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-save">
+                Xác nhận tái ký
+            </button>
+            <a href="/hopdong/sap-het-han" class="btn-back">
+                Quay lại
+            </a>
+        </div>
+
+    </form>
+</div>
+
+<script>
+function xuLyLoaiHopDong() {
+    const loai = document.getElementById("loai_hop_dong").value;
+    const ngayKetThuc = document.getElementById("ngay_ket_thuc");
+    const nhomNgay = document.getElementById("nhomNgayKetThuc");
+
+    const khongXacDinh = loai === "Không xác định thời hạn";
+
+    nhomNgay.style.display = khongXacDinh ? "none" : "block";
+    ngayKetThuc.disabled = khongXacDinh;
+    ngayKetThuc.required = !khongXacDinh;
+
+    if (khongXacDinh) {
+        ngayKetThuc.value = "";
+    }
+}
+
+document.addEventListener("DOMContentLoaded", xuLyLoaiHopDong);
+</script>
+
+</body>
+</html>

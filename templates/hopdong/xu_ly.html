@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xử lý hợp đồng</title>
     <link rel="stylesheet" href="/static/css/hopdong.css">
 </head>
@@ -14,55 +15,60 @@
         <h1>XỬ LÝ HỢP ĐỒNG</h1>
 
         <div class="contract-info">
-            <h2>Thông tin hợp đồng</h2>
-
-            <p><strong>Mã hợp đồng:</strong> {{.HopDong.MaHD}}</p>
-            <p><strong>Mã nhân viên:</strong> {{.HopDong.MaNV}}</p>
-            <p><strong>Nhóm hợp đồng:</strong> {{.HopDong.NhomHopDong}}</p>
-            <p><strong>Loại hợp đồng:</strong> {{.HopDong.LoaiHopDong}}</p>
+            <h2>Tình trạng xử lý hợp đồng</h2>
 
             <p>
-                <strong>Ngày bắt đầu:</strong>
-                {{if .HopDong.NgayBatDau}}
-                    {{.HopDong.NgayBatDau.Format "02/01/2006"}}
-                {{else}}
-                    Chưa có
+                <strong>Trạng thái xử lý:</strong>
+
+                {{if eq .HopDong.TrangThai "Chưa xử lý"}}
+                    <span class="status-unprocessed">Chưa xử lý</span>
+                {{else if eq .HopDong.TrangThai "Chờ tái ký"}}
+                    <span class="status-expiring">Chờ tái ký</span>
+                {{else if eq .HopDong.TrangThai "Đã tái ký"}}
+                    <span class="status-active">Đã tái ký</span>
+                {{else if eq .HopDong.TrangThai "Đã xác nhận kết thúc"}}
+                    <span class="status-ended">Đã xác nhận kết thúc</span>
                 {{end}}
             </p>
 
-            <p>
-                <strong>Ngày kết thúc:</strong>
-                {{if .HopDong.NgayKetThuc}}
-                    {{.HopDong.NgayKetThuc.Format "02/01/2006"}}
-                {{else}}
-                    Không xác định
-                {{end}}
-            </p>
+            <h3>Quyết định xử lý</h3>
 
-            <p><strong>Trạng thái xử lý:</strong> {{.HopDong.TrangThai}}</p>
-        </div>
+            {{if eq .HopDong.TrangThai "Chưa xử lý"}}
 
-        <div class="contract-info">
-            <h2>Quyết định xử lý</h2>
+                <form method="POST"
+                      action="/hopdong/xu-ly?id={{.HopDong.ID}}">
 
-            <form method="POST"
-                  action="/hopdong/xu-ly?id={{.HopDong.ID}}">
+                    <button type="submit"
+                            name="quyet_dinh"
+                            value="tai_ky"
+                            onclick="return confirm('Xác nhận lựa chọn tái ký hợp đồng?')">
+                        Tái ký hợp đồng
+                    </button>
 
-                <button type="submit"
-                        name="quyet_dinh"
-                        value="tai_ky"
-                        onclick="return confirm('Xác nhận lựa chọn tái ký hợp đồng?')">
-                    Tái ký hợp đồng
-                </button>
+                    <button type="submit"
+                            name="quyet_dinh"
+                            value="ket_thuc"
+                            onclick="return confirm('Xác nhận kết thúc hợp đồng?')">
+                        Kết thúc hợp đồng
+                    </button>
 
-                <button type="submit"
-                        name="quyet_dinh"
-                        value="ket_thuc"
-                        onclick="return confirm('Xác nhận không tái ký hợp đồng này?')">
-                    Kết thúc hợp đồng
-                </button>
+                </form>
 
-            </form>
+            {{else if eq .HopDong.TrangThai "Chờ tái ký"}}
+
+                <p>Hợp đồng đã được xác nhận tái ký. Bạn có thể tiến hành tạo hợp đồng mới.</p>
+
+                <a href="/hopdong/tai-ky?id={{.HopDong.ID}}"
+                   class="btn-save">
+                    Tiến hành tái ký
+                </a>
+
+            {{else}}
+
+                <p>Hợp đồng này đã có quyết định xử lý và không thể chọn lại.</p>
+
+            {{end}}
+
         </div>
 
         <a href="/hopdong/sap-het-han">← Quay lại danh sách</a>

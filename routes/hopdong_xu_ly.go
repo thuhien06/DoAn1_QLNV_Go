@@ -38,11 +38,23 @@ func XuLyHopDong(db *sql.DB) http.HandlerFunc {
 				return
 			}
 
-			_, err := db.Exec(`
+			result, err := db.Exec(`
 				UPDATE hopdong
 				SET trang_thai_xu_ly = ?
 				WHERE id = ?
+				AND COALESCE(trang_thai_xu_ly, 'Chưa xử lý') = 'Chưa xử lý'
 			`, trangThaiXuLy, id)
+
+			if err != nil {
+				http.Error(w, "Lỗi cập nhật quyết định xử lý", http.StatusInternalServerError)
+				return
+			}
+
+			affected, err := result.RowsAffected()
+			if err != nil || affected != 1 {
+				http.Error(w, "Hợp đồng đã được xử lý hoặc không tồn tại", http.StatusConflict)
+				return
+			}
 
 			if err != nil {
 				http.Error(w, "Lỗi cập nhật quyết định xử lý", http.StatusInternalServerError)

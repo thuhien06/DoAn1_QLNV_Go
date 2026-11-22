@@ -22,7 +22,8 @@ func HopDongSapHetHan(db *sql.DB) http.HandlerFunc {
                 ngay_ket_thuc,
                 COALESCE(luong_co_ban, 0),
                 COALESCE(ghi_chu, ''),
-                COALESCE(trang_thai, '')
+                COALESCE(trang_thai, ''),
+				COALESCE(trang_thai_xu_ly, 'Chưa xử lý')
             FROM hopdong
             WHERE ngay_ket_thuc IS NOT NULL
               AND ngay_bat_dau <= CURDATE()
@@ -54,6 +55,7 @@ func HopDongSapHetHan(db *sql.DB) http.HandlerFunc {
 				&hd.LuongCoBan,
 				&hd.GhiChu,
 				&hd.TrangThai,
+				&hd.TrangThaiXuLy,
 			)
 
 			if err != nil {
