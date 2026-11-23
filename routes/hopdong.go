@@ -478,7 +478,7 @@ func SuaHopDong(db *sql.DB) http.HandlerFunc {
 		if r.Method == http.MethodGet {
 			var hd models.HopDong
 
-			var nhomHopDong, loaiHopDong sql.NullString
+			var nhomHopDong, loaiHopDong, ghiChu sql.NullString
 			var luongCoBan sql.NullFloat64
 
 			err := db.QueryRow(`
@@ -498,7 +498,7 @@ func SuaHopDong(db *sql.DB) http.HandlerFunc {
 				&hd.NgayBatDau,
 				&hd.NgayKetThuc,
 				&luongCoBan,
-				&hd.GhiChu,
+				&ghiChu,
 				&hd.DoiTac,
 				&hd.NguoiDaiDien,
 				&hd.NoiDung,
@@ -515,6 +515,8 @@ func SuaHopDong(db *sql.DB) http.HandlerFunc {
 
 			hd.NhomHopDong = nhomHopDong.String
 			hd.LoaiHopDong = loaiHopDong.String
+			hd.GhiChu = ghiChu.String
+
 			if luongCoBan.Valid {
 				hd.LuongCoBan = luongCoBan.Float64
 			}
@@ -533,6 +535,7 @@ func SuaHopDong(db *sql.DB) http.HandlerFunc {
 					Funcs(funcMap).
 					ParseFiles("templates/hopdong/sua.html"),
 			)
+
 			if err := tmpl.Execute(w, hd); err != nil {
 				http.Error(w, "Lỗi hiển thị hợp đồng: "+err.Error(), http.StatusInternalServerError)
 			}
@@ -544,6 +547,7 @@ func SuaHopDong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
+		maHD := r.FormValue("ma_hd")
 		maNV := r.FormValue("ma_nv")
 		nhom := r.FormValue("nhom_hop_dong")
 		loai := r.FormValue("loai_hop_dong")
@@ -567,7 +571,6 @@ func SuaHopDong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		// Chỉ giữ các trường phù hợp với nhóm hợp đồng.
 		if nhom == "lao_dong" {
 			doiTac, nguoiDaiDien, noiDung = "", "", ""
 			giaTri, ngayKy, dichVuThietBi, chiPhi = "", "", "", ""
@@ -580,7 +583,6 @@ func SuaHopDong(db *sql.DB) http.HandlerFunc {
 			}
 		}
 
-		// Chuyển các trường tùy chọn rỗng thành NULL.
 		nullable := func(s string) interface{} {
 			if s == "" {
 				return nil
@@ -607,6 +609,7 @@ func SuaHopDong(db *sql.DB) http.HandlerFunc {
 			    chi_phi = ?
 			WHERE id = ?
 		`,
+			maHD,
 			maNV,
 			nhom,
 			nullable(loai),
@@ -629,7 +632,7 @@ func SuaHopDong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		http.Redirect(w, r, "/hopdong", http.StatusSeeOther)
+		http.Redirect(w, r, "/hopdong-danhsach", http.StatusSeeOther)
 	}
 }
 
