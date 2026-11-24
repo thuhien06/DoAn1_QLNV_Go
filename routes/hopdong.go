@@ -976,3 +976,134 @@ func HopDongCaNhan(db *sql.DB) http.HandlerFunc {
 		}
 	}
 }
+
+func LichSuHopDong(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		maHD := strings.TrimSpace(r.URL.Query().Get("ma_hd"))
+		maNV := strings.TrimSpace(r.URL.Query().Get("ma_nv"))
+		nhomHopDong := strings.TrimSpace(r.URL.Query().Get("nhom_hop_dong"))
+
+		type HopDongLichSu struct {
+			models.HopDong
+			HoTen string
+		}
+
+		query := `
+			SELECT
+				hd.id,
+				hd.ma_hd,
+				hd.ma_nv,
+				COALESCE(hd.nhom_hop_dong, ''),
+				COALESCE(hd.loai_hop_dong, ''),
+				hd.ngay_bat_dau,
+				hd.ngay_ket_thuc,
+				COALESCE(hd.luong_co_ban, 0),
+				COALESCE(hd.ghi_chu, ''),
+				hd.doi_tac,
+				hd.nguoi_dai_dien,
+				hd.noi_dung,
+				hd.gia_tri,
+				hd.ngay_ky,
+				hd.dich_vu_thiet_bi,
+				hd.chi_phi,
+				COALESCE(hd.trang_thai_xu_ly, 'Chưa xử lý'),
+				COALESCE(nv.ho_ten, '')
+			FROM hopdong hd
+			LEFT JOIN nhanvien nv ON hd.ma_nv = nv.ma_nv
+			WHERE hd.ma_hd LIKE ?
+			AND hd.ma_nv LIKE ?
+			AND (? = '' OR hd.nhom_hop_dong = ?)
+			AND hd.ngay_ket_thuc IS NOT NULL
+			AND hd.ngay_ket_thuc < CURDATE()
+			ORDER BY hd.ngay_ket_thuc DESC
+		`
+
+		rows, err := db.Query(
+			query,
+			"%"+maHD+"%",
+			"%"+maNV+"%",
+			nhomHopDong,
+			nhomHopDong,
+		)
+
+		if err != nil {
+			http.Error(w, "Lỗi lấy lịch sử hợp đồng: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+
+		var danhSach []HopDongLichSu
+
+		for rows.Next() {
+			var item HopDongLichSu
+			var luongCoBan sql.NullFloat64
+			var ghiChu sql.NullString
+
+			err := rows.Scan(
+				&item.ID,
+				&item.MaHD,
+				&item.MaNV,
+				&item.NhomHopDong,
+				&item.LoaiHopDong,
+				&item.NgayBatDau,
+				&item.NgayKetThuc,
+				&luongCoBan,
+				&ghiChu,
+				&item.DoiTac,
+				&item.NguoiDaiDien,
+				&item.NoiDung,
+				&item.GiaTri,
+				&item.NgayKy,
+				&item.DichVuThietBi,
+				&item.ChiPhi,
+				&item.TrangThaiXuLy,
+				&item.HoTen,
+			)
+
+			if err != nil {
+				http.Error(w, "Lỗi đọc lịch sử hợp đồng: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if luongCoBan.Valid {
+				item.LuongCoBan = luongCoBan.Float64
+			}
+
+			if ghiChu.Valid {
+				item.GhiChu = ghiChu.String
+			}
+
+			item.TrangThai = "Đã hết hạn"
+
+			danhSach = append(danhSach, item)
+		}
+
+		if err := rows.Err(); err != nil {
+			http.Error(w, "Lỗi đọc lịch sử hợp đồng: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		data := struct {
+			TongSo      int
+			DanhSach    []HopDongLichSu
+			MaHD        string
+			MaNV        string
+			NhomHopDong string
+		}{
+			TongSo:      len(danhSach),
+			DanhSach:    danhSach,
+			MaHD:        maHD,
+			MaNV:        maNV,
+			NhomHopDong: nhomHopDong,
+		}
+
+		tmpl := template.Must(
+			template.ParseFiles("templates/hopdong/lich-su.html"),
+		)
+
+		if err := tmpl.Execute(w, data); err != nil {
+			http.Error(w, "Lỗi hiển thị lịch sử hợp đồng: "+err.Error(), http.StatusInternalServerError)
+		}
+	}
+}

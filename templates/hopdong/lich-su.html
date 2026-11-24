@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử hợp đồng</title>
+    <link rel="stylesheet" href="/static/css/hopdong.css">
+</head>
+<body>
+<div class="contract-page">
+
+    <h1 class="page-title">LỊCH SỬ HỢP ĐỒNG</h1>
+    <p class="page-subtitle">
+    </p>
+
+    <div class="contract-actions">
+        <a href="/" class="btn-home">← Trang chủ</a>
+    </div>
+
+    <form method="GET" action="/hopdong/lich-su" class="contract-filter">
+        <input
+            type="text"
+            name="ma_hd"
+            placeholder="Mã hợp đồng"
+            value="{{.MaHD}}">
+
+        <input
+            type="text"
+            name="ma_nv"
+            placeholder="Mã nhân viên"
+            value="{{.MaNV}}">
+
+        <select name="nhom_hop_dong">
+            <option value="">-- Tất cả nhóm hợp đồng --</option>
+            <option value="lao_dong" {{if eq .NhomHopDong "lao_dong"}}selected{{end}}>
+                Lao động
+            </option>
+            <option value="kinh_doanh" {{if eq .NhomHopDong "kinh_doanh"}}selected{{end}}>
+                Kinh doanh
+            </option>
+            <option value="van_hanh" {{if eq .NhomHopDong "van_hanh"}}selected{{end}}>
+                Vận hành
+            </option>
+        </select>
+
+        <button type="submit">Tìm kiếm</button>
+        <a href="/hopdong/lich-su">Xóa bộ lọc</a>
+    </form>
+
+    <div class="contract-count">
+        Tổng số hợp đồng đã hết hạn: <strong>{{len .DanhSach}}</strong>
+    </div>
+
+    <div class="contract-table-wrapper">
+        <table class="contract-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Mã hợp đồng</th>
+                    <th>Mã nhân viên</th>
+                    <th>Tên nhân viên</th>
+                    <th>Nhóm hợp đồng</th>
+                    <th>Ngày bắt đầu</th>
+                    <th>Ngày kết thúc</th>
+                    <th>Trạng thái</th>
+                    <th>Trạng thái xử lý</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {{range .DanhSach}}
+                <tr {{if or (eq .TrangThaiXuLy "Chưa xử lý") (eq .TrangThaiXuLy "Chờ tái ký")}}style="background-color: #ffe1e1;"{{end}}>
+                    <td>{{.ID}}</td>
+                    <td>{{.MaHD}}</td>
+                    <td>{{.MaNV}}</td>
+                    <td>
+                        {{if .HoTen}}
+                            {{.HoTen}}
+                        {{else}}
+                            Chưa có thông tin
+                        {{end}}
+                    </td>
+                    <td>
+                        {{if eq .NhomHopDong "lao_dong"}}
+                            Lao động
+                        {{else if eq .NhomHopDong "kinh_doanh"}}
+                            Kinh doanh
+                        {{else if eq .NhomHopDong "van_hanh"}}
+                            Vận hành
+                        {{else}}
+                            {{.NhomHopDong}}
+                        {{end}}
+                    </td>
+                    <td>
+                        {{if .NgayBatDau}}
+                            {{.NgayBatDau.Format "02/01/2006"}}
+                        {{else}}
+                            —
+                        {{end}}
+                    </td>
+                    <td>
+                        {{if .NgayKetThuc}}
+                            {{.NgayKetThuc.Format "02/01/2006"}}
+                        {{else}}
+                            —
+                        {{end}}
+                    </td>
+                    <td>
+                        <span style="color: #c0392b; font-weight: bold;">
+                            Đã hết hạn
+                        </span>
+                    </td>
+                    <td>
+                        {{if eq .TrangThaiXuLy "Chưa xử lý"}}
+                            <span style="color: #c0392b; font-weight: bold;">
+                                Chưa xử lý
+                            </span>
+                        {{else}}
+                            {{.TrangThaiXuLy}}
+                        {{end}}
+                    </td>
+                    <td>
+                        <a href="/hopdong/chi-tiet?id={{.ID}}">
+                            Chi tiết
+                        </a>
+
+                        {{if eq .TrangThaiXuLy "Chưa xử lý"}}
+                            <a href="/hopdong/xu-ly?id={{.ID}}&trang_nguon=lich_su">
+                                Xử lý
+                            </a>
+
+                        {{else if eq .TrangThaiXuLy "Chờ tái ký"}}
+                            <a href="/hopdong/tai-ky?id={{.ID}}&trang_nguon=lich_su">
+                                Tiến hành tái ký
+                            </a>
+                        {{end}}
+                    </td>
+                </tr>
+                {{else}}
+                <tr>
+                    <td colspan="10" style="text-align: center; padding: 20px;">
+                        Chưa có hợp đồng nào hết hạn.
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</body>
+</html>

@@ -248,6 +248,14 @@ func main() {
 		),
 	)
 
+	http.HandleFunc("/hopdong/lich-su",
+		routes.DaDangNhap(
+			routes.CoVaiTro("admin", "hr")(
+				routes.LichSuHopDong(db),
+			),
+		),
+	)
+
 	//////////////////QUẢN LÝ CÔNG
 
 	http.HandleFunc("/cong",

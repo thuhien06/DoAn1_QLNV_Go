@@ -68,14 +68,17 @@ func TaiKyHopDong(db *sql.DB) http.HandlerFunc {
 				template.ParseFiles("templates/hopdong/tai_ky.html"),
 			)
 
-			data := struct {
-				HopDong models.HopDong
-				NgayKy  string
-			}{
-				HopDong: hd,
-				NgayKy:  time.Now().Format("2006-01-02"),
-			}
+			trangNguon := r.URL.Query().Get("trang_nguon")
 
+			data := struct {
+				HopDong    models.HopDong
+				NgayKy     string
+				TrangNguon string
+			}{
+				HopDong:    hd,
+				NgayKy:     time.Now().Format("2006-01-02"),
+				TrangNguon: trangNguon,
+			}
 			if err := tmpl.Execute(w, data); err != nil {
 				http.Error(w, "Lỗi hiển thị form tái ký", http.StatusInternalServerError)
 			}
@@ -91,6 +94,7 @@ func TaiKyHopDong(db *sql.DB) http.HandlerFunc {
 			http.Error(w, "Dữ liệu gửi lên không hợp lệ", http.StatusBadRequest)
 			return
 		}
+		trangNguon := r.FormValue("trang_nguon")
 
 		loaiHopDong := strings.TrimSpace(r.FormValue("loai_hop_dong"))
 		ngayBatDau := strings.TrimSpace(r.FormValue("ngay_bat_dau"))
@@ -104,7 +108,8 @@ func TaiKyHopDong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		if _, err := time.Parse("2006-01-02", ngayBatDau); err != nil {
+		ngayBatDauParsed, err := time.Parse("2006-01-02", ngayBatDau)
+		if err != nil {
 			http.Error(w, "Ngày bắt đầu không hợp lệ", http.StatusBadRequest)
 			return
 		}
@@ -124,10 +129,18 @@ func TaiKyHopDong(db *sql.DB) http.HandlerFunc {
 				return
 			}
 
-			if _, err := time.Parse("2006-01-02", ngayKetThuc); err != nil {
+			ngayKetThucParsed, err := time.Parse("2006-01-02", ngayKetThuc)
+			if err != nil {
 				http.Error(w, "Ngày kết thúc không hợp lệ", http.StatusBadRequest)
 				return
 			}
+
+			if ngayKetThucParsed.Before(ngayBatDauParsed) {
+				http.Error(w, "Ngày kết thúc phải sau hoặc bằng ngày bắt đầu", http.StatusBadRequest)
+				return
+			}
+
+			ketThuc = ngayKetThuc
 
 			ketThuc = ngayKetThuc
 		}
@@ -229,6 +242,10 @@ func TaiKyHopDong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		http.Redirect(w, r, "/hopdong-danhsach", http.StatusSeeOther)
+		if trangNguon == "lich_su" {
+			http.Redirect(w, r, "/hopdong/lich-su", http.StatusSeeOther)
+		} else {
+			http.Redirect(w, r, "/hopdong/sap-het-han", http.StatusSeeOther)
+		}
 	}
 }

@@ -61,7 +61,13 @@ func XuLyHopDong(db *sql.DB) http.HandlerFunc {
 				return
 			}
 
-			http.Redirect(w, r, "/hopdong/sap-het-han", http.StatusSeeOther)
+			trangNguon := r.FormValue("trang_nguon")
+
+			if trangNguon == "lich_su" {
+				http.Redirect(w, r, "/hopdong/lich-su", http.StatusSeeOther)
+			} else {
+				http.Redirect(w, r, "/hopdong/sap-het-han", http.StatusSeeOther)
+			}
 			return
 		}
 
@@ -118,10 +124,14 @@ func XuLyHopDong(db *sql.DB) http.HandlerFunc {
 			hd.TrangThai = trangThaiXuLy.String
 		}
 
+		trangNguon := r.URL.Query().Get("trang_nguon")
+
 		data := struct {
-			HopDong models.HopDong
+			HopDong    models.HopDong
+			TrangNguon string
 		}{
-			HopDong: hd,
+			HopDong:    hd,
+			TrangNguon: trangNguon,
 		}
 
 		tmpl, err := template.ParseFiles("templates/hopdong/xu_ly.html")
