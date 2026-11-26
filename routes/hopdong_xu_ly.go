@@ -13,16 +13,46 @@ import (
 func XuLyHopDong(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		// Lấy ID hợp đồng
-		id, err := strconv.Atoi(r.URL.Query().Get("id"))
-		if err != nil || id <= 0 {
-			http.Error(w, "ID hợp đồng không hợp lệ", http.StatusBadRequest)
+		// Kiểm tra đăng nhập
+		session, err := Store.Get(r, "qlnv-session")
+		if err != nil {
+			http.Redirect(w, r, "/dangnhap", http.StatusSeeOther)
 			return
 		}
 
-		// Xử lý lựa chọn của HR
+		vaiTro, _ := session.Values["vai_tro"].(string)
+
+		if vaiTro != "admin" && vaiTro != "hr" {
+			http.Error(w, "Bạn không có quyền xử lý hợp đồng",
+				http.StatusForbidden)
+			return
+		}
+
+		id, err := strconv.Atoi(r.URL.Query().Get("id"))
+		if err != nil || id <= 0 {
+			http.Error(w, "ID hợp đồng không hợp lệ",
+				http.StatusBadRequest)
+			return
+		}
+
+		// Xử lý quyết định
 		if r.Method == http.MethodPost {
+
+			if err := r.ParseForm(); err != nil {
+				http.Error(w, "Dữ liệu gửi lên không hợp lệ",
+					http.StatusBadRequest)
+				return
+			}
+
+			trangNguon := r.FormValue("trang_nguon")
 			quyetDinh := strings.TrimSpace(r.FormValue("quyet_dinh"))
+
+			// Admin chỉ được thay đổi quyết định tại trang sắp hết hạn
+			if vaiTro == "admin" && trangNguon != "sap_het_han" {
+				http.Error(w, "Không có quyền chỉnh sửa tại trang này",
+					http.StatusForbidden)
+				return
+			}
 
 			var trangThaiXuLy string
 
@@ -34,51 +64,109 @@ func XuLyHopDong(db *sql.DB) http.HandlerFunc {
 				trangThaiXuLy = "Đã xác nhận kết thúc"
 
 			default:
-				http.Error(w, "Lựa chọn không hợp lệ", http.StatusBadRequest)
+				http.Error(w, "Lựa chọn không hợp lệ",
+					http.StatusBadRequest)
 				return
 			}
 
-			result, err := db.Exec(`
-				UPDATE hopdong
-				SET trang_thai_xu_ly = ?
-				WHERE id = ?
-				AND COALESCE(trang_thai_xu_ly, 'Chưa xử lý') = 'Chưa xử lý'
-			`, trangThaiXuLy, id)
+			var result sql.Result
+
+			if vaiTro == "admin" {
+
+				// Admin được xử lý mới hoặc thay đổi quyết định cũ.
+				// Không được thay đổi hợp đồng đã tái ký.
+				result, err = db.Exec(`
+					UPDATE hopdong
+					SET trang_thai_xu_ly = ?
+					WHERE id = ?
+					  AND ngay_ket_thuc IS NOT NULL
+					  AND ngay_ket_thuc >= CURDATE()
+					  AND ngay_ket_thuc <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+					  AND COALESCE(trang_thai_xu_ly, 'Chưa xử lý')
+					      IN (
+					          'Chưa xử lý',
+					          'Chờ tái ký',
+					          'Đã xác nhận kết thúc'
+					      )
+				`, trangThaiXuLy, id)
+
+			} else {
+
+				// HR chỉ được xử lý lần đầu.
+				result, err = db.Exec(`
+					UPDATE hopdong
+					SET trang_thai_xu_ly = ?
+					WHERE id = ?
+					  AND COALESCE(trang_thai_xu_ly, 'Chưa xử lý')
+					      = 'Chưa xử lý'
+				`, trangThaiXuLy, id)
+			}
 
 			if err != nil {
-				http.Error(w, "Lỗi cập nhật quyết định xử lý", http.StatusInternalServerError)
+				http.Error(w, "Lỗi cập nhật quyết định xử lý",
+					http.StatusInternalServerError)
 				return
 			}
 
 			affected, err := result.RowsAffected()
-			if err != nil || affected != 1 {
-				http.Error(w, "Hợp đồng đã được xử lý hoặc không tồn tại", http.StatusConflict)
-				return
-			}
-
 			if err != nil {
-				http.Error(w, "Lỗi cập nhật quyết định xử lý", http.StatusInternalServerError)
+				http.Error(w, "Không thể kiểm tra kết quả cập nhật",
+					http.StatusInternalServerError)
 				return
 			}
 
-			trangNguon := r.FormValue("trang_nguon")
+			// Kiểm tra trường hợp admin chọn lại đúng quyết định cũ.
+			if affected == 0 && vaiTro == "admin" {
+				var trangThaiHienTai string
+
+				err = db.QueryRow(`
+					SELECT COALESCE(trang_thai_xu_ly, 'Chưa xử lý')
+					FROM hopdong
+					WHERE id = ?
+					  AND ngay_ket_thuc IS NOT NULL
+					  AND ngay_ket_thuc >= CURDATE()
+					  AND ngay_ket_thuc <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+				`, id).Scan(&trangThaiHienTai)
+
+				if err == nil && trangThaiHienTai == trangThaiXuLy {
+					affected = 1
+				}
+			}
+
+			if affected != 1 {
+				http.Error(w,
+					"Hợp đồng không tồn tại, không đủ điều kiện xử lý hoặc đã tái ký",
+					http.StatusConflict)
+				return
+			}
 
 			if trangNguon == "lich_su" {
-				http.Redirect(w, r, "/hopdong/lich-su", http.StatusSeeOther)
+				http.Redirect(w, r, "/hopdong/lich-su",
+					http.StatusSeeOther)
 			} else {
-				http.Redirect(w, r, "/hopdong/sap-het-han", http.StatusSeeOther)
+				http.Redirect(w, r, "/hopdong/sap-het-han",
+					http.StatusSeeOther)
 			}
 			return
 		}
 
 		if r.Method != http.MethodGet {
-			http.Error(w, "Phương thức không hợp lệ", http.StatusMethodNotAllowed)
+			http.Error(w, "Phương thức không hợp lệ",
+				http.StatusMethodNotAllowed)
+			return
+		}
+
+		trangNguon := r.URL.Query().Get("trang_nguon")
+
+		// Admin chỉ được mở chức năng chỉnh sửa từ danh sách sắp hết hạn.
+		if vaiTro == "admin" && trangNguon != "sap_het_han" {
+			http.Error(w, "Không có quyền truy cập chức năng này",
+				http.StatusForbidden)
 			return
 		}
 
 		// Lấy thông tin hợp đồng
 		var hd models.HopDong
-		var trangThaiXuLy sql.NullString
 
 		query := `
 			SELECT
@@ -106,42 +194,59 @@ func XuLyHopDong(db *sql.DB) http.HandlerFunc {
 			&hd.NgayKetThuc,
 			&hd.LuongCoBan,
 			&hd.GhiChu,
-			&trangThaiXuLy,
+			&hd.TrangThai,
 		)
 
 		if err == sql.ErrNoRows {
-			http.Error(w, "Không tìm thấy hợp đồng", http.StatusNotFound)
+			http.Error(w, "Không tìm thấy hợp đồng",
+				http.StatusNotFound)
 			return
 		}
 
 		if err != nil {
-			http.Error(w, "Lỗi lấy thông tin hợp đồng", http.StatusInternalServerError)
+			http.Error(w, "Lỗi lấy thông tin hợp đồng",
+				http.StatusInternalServerError)
 			return
 		}
 
-		hd.TrangThai = "Chưa xử lý"
-		if trangThaiXuLy.Valid {
-			hd.TrangThai = trangThaiXuLy.String
-		}
+		// Xác định quyền thao tác
+		coTheXuLy := hd.TrangThai == "Chưa xử lý"
 
-		trangNguon := r.URL.Query().Get("trang_nguon")
+		coTheSuaQuyetDinh := vaiTro == "admin" &&
+			trangNguon == "sap_het_han" &&
+			(hd.TrangThai == "Chờ tái ký" ||
+				hd.TrangThai == "Đã xác nhận kết thúc")
+
+		coTheTaiKy := hd.TrangThai == "Chờ tái ký"
 
 		data := struct {
-			HopDong    models.HopDong
-			TrangNguon string
+			HopDong           models.HopDong
+			TrangNguon        string
+			VaiTro            string
+			CoTheXuLy         bool
+			CoTheSuaQuyetDinh bool
+			CoTheTaiKy        bool
 		}{
-			HopDong:    hd,
-			TrangNguon: trangNguon,
+			HopDong:           hd,
+			TrangNguon:        trangNguon,
+			VaiTro:            vaiTro,
+			CoTheXuLy:         coTheXuLy,
+			CoTheSuaQuyetDinh: coTheSuaQuyetDinh,
+			CoTheTaiKy:        coTheTaiKy,
 		}
 
-		tmpl, err := template.ParseFiles("templates/hopdong/xu_ly.html")
+		tmpl, err := template.ParseFiles(
+			"templates/hopdong/xu_ly.html",
+		)
 		if err != nil {
-			http.Error(w, "Lỗi tải giao diện xử lý hợp đồng", http.StatusInternalServerError)
+			http.Error(w, "Lỗi tải giao diện xử lý hợp đồng",
+				http.StatusInternalServerError)
 			return
 		}
 
 		if err := tmpl.Execute(w, data); err != nil {
-			http.Error(w, "Lỗi hiển thị trang xử lý", http.StatusInternalServerError)
+			http.Error(w, "Lỗi hiển thị trang xử lý",
+				http.StatusInternalServerError)
 			return
 		}
 	}

@@ -12,22 +12,29 @@
 
     <div class="contract-detail-page">
 
-        <input type="hidden" name="trang_nguon" value="{{.TrangNguon}}">
-
         <h1>XỬ LÝ HỢP ĐỒNG</h1>
 
         <div class="contract-info">
+
             <h2>Tình trạng xử lý hợp đồng</h2>
+
+            <p>
+                <strong>Mã hợp đồng:</strong>
+                {{.HopDong.MaHD}}
+            </p>
 
             <p>
                 <strong>Trạng thái xử lý:</strong>
 
                 {{if eq .HopDong.TrangThai "Chưa xử lý"}}
                     <span class="status-unprocessed">Chưa xử lý</span>
+
                 {{else if eq .HopDong.TrangThai "Chờ tái ký"}}
                     <span class="status-expiring">Chờ tái ký</span>
+
                 {{else if eq .HopDong.TrangThai "Đã tái ký"}}
                     <span class="status-active">Đã tái ký</span>
+
                 {{else if eq .HopDong.TrangThai "Đã xác nhận kết thúc"}}
                     <span class="status-ended">Đã xác nhận kết thúc</span>
                 {{end}}
@@ -35,10 +42,21 @@
 
             <h3>Quyết định xử lý</h3>
 
-            {{if eq .HopDong.TrangThai "Chưa xử lý"}}
+            {{if or .CoTheXuLy .CoTheSuaQuyetDinh}}
+
+                {{if .CoTheSuaQuyetDinh}}
+                    <p>
+                        <strong>Admin:</strong>
+                        Bạn có thể thay đổi quyết định xử lý của hợp đồng.
+                    </p>
+                {{end}}
 
                 <form method="POST"
                       action="/hopdong/xu-ly?id={{.HopDong.ID}}">
+
+                    <input type="hidden"
+                           name="trang_nguon"
+                           value="{{.TrangNguon}}">
 
                     <button type="submit"
                             name="quyet_dinh"
@@ -56,24 +74,50 @@
 
                 </form>
 
-            {{else if eq .HopDong.TrangThai "Chờ tái ký"}}
+                {{if .CoTheTaiKy}}
+                    <p>Hợp đồng đang chờ tái ký. Bạn có thể tiến hành tạo hợp đồng mới.</p>
 
-                <p>Hợp đồng đã được xác nhận tái ký. Bạn có thể tiến hành tạo hợp đồng mới.</p>
+                    <a href="/hopdong/tai-ky?id={{.HopDong.ID}}"
+                       class="btn-save">
+                        Tiến hành tái ký
+                    </a>
+                {{end}}
+
+            {{else if .CoTheTaiKy}}
+
+                <p>
+                    Hợp đồng đã được xác nhận tái ký.
+                    Bạn có thể tiến hành tạo hợp đồng mới.
+                </p>
 
                 <a href="/hopdong/tai-ky?id={{.HopDong.ID}}"
                    class="btn-save">
                     Tiến hành tái ký
                 </a>
 
-            {{else}}
+            {{else if eq .HopDong.TrangThai "Đã xác nhận kết thúc"}}
 
-                <p>Hợp đồng này đã có quyết định xử lý và không thể chọn lại.</p>
+                <p>
+                    Hợp đồng này đã được xử lý.
+                    Quyết định kết thúc hợp đồng đã được xác nhận.
+                </p>
+
+            {{else if eq .HopDong.TrangThai "Đã tái ký"}}
+
+                <p>
+                    Hợp đồng đã được tái ký thành công.
+                    Không thể thay đổi quyết định xử lý.
+                </p>
 
             {{end}}
 
         </div>
 
-        <a href="/hopdong/sap-het-han">← Quay lại danh sách</a>
+        {{if eq .TrangNguon "lich_su"}}
+            <a href="/hopdong/lich-su">← Quay lại lịch sử hợp đồng</a>
+        {{else}}
+            <a href="/hopdong/sap-het-han">← Quay lại danh sách</a>
+        {{end}}
 
     </div>
 

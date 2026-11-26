@@ -57,6 +57,7 @@ func home(db *sql.DB) http.HandlerFunc {
 			WHERE ngay_ket_thuc IS NOT NULL
 			  AND ngay_ket_thuc >= CURDATE()
 			  AND ngay_ket_thuc <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+			  AND COALESCE(trang_thai_xu_ly, 'Chưa xử lý') = 'Chưa xử lý'
 		`).Scan(&sapHetHan)
 
 		if err != nil {
