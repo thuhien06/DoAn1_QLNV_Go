@@ -30,7 +30,7 @@ func home(db *sql.DB) http.HandlerFunc {
 		tenDangNhap, _ := session.Values["ten_dang_nhap"].(string)
 		vaiTro, _ := session.Values["vai_tro"].(string)
 
-		// Đếm hợp đồng đã hết hạn
+		// Đếm hợp đồng đã hết hạn nhưng chưa xử lý
 		var hetHan int
 
 		err = db.QueryRow(`
@@ -38,10 +38,13 @@ func home(db *sql.DB) http.HandlerFunc {
 			FROM hopdong
 			WHERE ngay_ket_thuc IS NOT NULL
 			  AND ngay_ket_thuc < CURDATE()
+			  AND COALESCE(trang_thai_xu_ly, 'Chưa xử lý')
+			      IN ('Chưa xử lý', 'Chờ tái ký')
 		`).Scan(&hetHan)
 
 		if err != nil {
-			http.Error(w, "Lỗi kiểm tra hợp đồng: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Lỗi kiểm tra hợp đồng: "+err.Error(),
+				http.StatusInternalServerError)
 			return
 		}
 
@@ -57,7 +60,8 @@ func home(db *sql.DB) http.HandlerFunc {
 		`).Scan(&sapHetHan)
 
 		if err != nil {
-			http.Error(w, "Lỗi kiểm tra hợp đồng: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Lỗi kiểm tra hợp đồng: "+err.Error(),
+				http.StatusInternalServerError)
 			return
 		}
 
