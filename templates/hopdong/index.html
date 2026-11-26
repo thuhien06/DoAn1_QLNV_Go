@@ -63,7 +63,11 @@
             <p>Theo dõi và xử lý hợp đồng</p>
         </a>
 
-        <a href="/hopdong/lich-su" class="function-card">
+        <a href="/hopdong/lich-su" class="function-card history-card">
+            {{if gt .SoChuaXuLy 0}}
+                <span class="notification-badge">{{.SoChuaXuLy}}</span>
+            {{end}}
+
             <h3>Lịch sử hợp đồng</h3>
             <p>Những hợp đồng đã hết hạn</p>
         </a>

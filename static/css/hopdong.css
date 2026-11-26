@@ -678,3 +678,45 @@
     font-weight: 600;
     font-size: 13px;
 }
+
+/* Vị trí thông báo trên nút Lịch sử hợp đồng */
+.history-card {
+    position: relative;
+}
+
+.history-card h3 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+/* Số lượng hợp đồng chưa xử lý */
+.history-card {
+    position: relative;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+
+    min-width: 23px;
+    height: 23px;
+    padding: 0 6px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #e53935;
+    color: #ffffff;
+
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+    z-index: 10;
+}

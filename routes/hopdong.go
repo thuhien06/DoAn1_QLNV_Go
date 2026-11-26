@@ -20,6 +20,7 @@ func TrangChuHopDong(db *sql.DB) http.HandlerFunc {
 			DangHieuLuc int
 			SapHetHan   int
 			DaHetHan    int
+			SoChuaXuLy  int
 		}
 
 		var tk ThongKeHopDong
@@ -53,6 +54,16 @@ func TrangChuHopDong(db *sql.DB) http.HandlerFunc {
 						WHEN ngay_ket_thuc < CURDATE()
 						THEN 1 ELSE 0
 					END
+				), 0),
+
+				COALESCE(SUM(
+					CASE
+						WHEN ngay_ket_thuc IS NOT NULL
+						AND ngay_ket_thuc < CURDATE()
+						AND COALESCE(trang_thai_xu_ly, 'Chưa xử lý')
+							IN ('Chưa xử lý', 'Chờ tái ký')
+						THEN 1 ELSE 0
+					END
 				), 0)
 
 			FROM hopdong
@@ -61,6 +72,7 @@ func TrangChuHopDong(db *sql.DB) http.HandlerFunc {
 			&tk.DangHieuLuc,
 			&tk.SapHetHan,
 			&tk.DaHetHan,
+			&tk.SoChuaXuLy,
 		)
 
 		if err != nil {
@@ -69,7 +81,6 @@ func TrangChuHopDong(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		// Hiển thị trang quản lý hợp đồng
 		tmpl := template.Must(
 			template.ParseFiles("templates/hopdong/index.html"),
 		)
@@ -1081,6 +1092,22 @@ func LichSuHopDong(db *sql.DB) http.HandlerFunc {
 
 		if err := rows.Err(); err != nil {
 			http.Error(w, "Lỗi đọc lịch sử hợp đồng: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		var soChuaXuLy int
+
+		err = db.QueryRow(`
+			SELECT COUNT(*)
+			FROM hopdong
+			WHERE ngay_ket_thuc IS NOT NULL
+			AND ngay_ket_thuc < CURDATE()
+			AND COALESCE(trang_thai_xu_ly, 'Chưa xử lý')
+				IN ('Chưa xử lý', 'Chờ tái ký')
+		`).Scan(&soChuaXuLy)
+
+		if err != nil {
+			http.Error(w, "Lỗi đếm hợp đồng chưa xử lý", http.StatusInternalServerError)
 			return
 		}
 
