@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo phụ lục hợp đồng</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <style>
+        .phuluc-form {
+            max-width: 850px;
+            margin: 30px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .phuluc-form h2 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            margin: 25px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #198754;
+            color: #198754;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px 20px;
+        }
+
+        .info-item label,
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        .info-item input,
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .info-item input {
+            background: #f5f5f5;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .form-actions button,
+        .form-actions a {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .btn-create {
+            background: #198754;
+            color: white;
+        }
+
+        .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="phuluc-form">
+
+    <h2>TẠO PHỤ LỤC HỢP ĐỒNG</h2>
+
+    <form action="/phuluc/tao" method="POST">
+
+        <input type="hidden" name="id_hop_dong" value="{{.IDHopDong}}">
+        <input type="hidden" name="noi_dung_dieu_chinh" value="{{.NoiDungDieuChinh}}">
+
+        <h3 class="section-title">I. THÔNG TIN HỢP ĐỒNG GỐC</h3>
+
+        <div class="info-grid">
+
+            <div class="info-item">
+                <label>Mã hợp đồng</label>
+                <input type="text" value="{{.MaHD}}" readonly>
+            </div>
+
+            <div class="info-item">
+                <label>Loại hợp đồng</label>
+                <input type="text" value="{{.LoaiHopDong}}" readonly>
+            </div>
+
+            <div class="info-item">
+                <label>Ngày bắt đầu</label>
+                <input type="text" value="{{.NgayBatDau}}" readonly>
+            </div>
+
+            <div class="info-item">
+                <label>Nội dung điều chỉnh</label>
+                <input type="text" value="{{.NoiDungDieuChinh}}" readonly>
+            </div>
+
+        </div>
+
+        <h3 class="section-title">II. THÔNG TIN BÊN B</h3>
+
+        <div class="info-grid">
+
+            <div class="info-item">
+                <label>Mã nhân viên</label>
+                <input type="text" value="{{.MaNV}}" readonly>
+            </div>
+
+            <div class="info-item">
+                <label>Họ và tên</label>
+                <input type="text" value="{{.HoTen}}" readonly>
+            </div>
+
+            <div class="info-item">
+                <label>Ngày sinh</label>
+                <input type="text" value="{{.NgaySinh}}" readonly>
+            </div>
+
+            <div class="info-item">
+                <label>Giới tính</label>
+                <input type="text" value="{{.GioiTinh}}" readonly>
+            </div>
+
+            <div class="info-item">
+                <label>Số điện thoại</label>
+                <input type="text" value="{{.SoDienThoai}}" readonly>
+            </div>
+
+            <div class="info-item">
+                <label>Email</label>
+                <input type="text" value="{{.Email}}" readonly>
+            </div>
+
+            <div class="info-item">
+                <label>Phòng ban</label>
+                <input type="text" value="{{.PhongBan}}" readonly>
+            </div>
+
+            <div class="info-item">
+                <label>Chức vụ</label>
+                <input type="text" value="{{.ChucVu}}" readonly>
+            </div>
+
+            <div class="info-item" style="grid-column: 1 / -1;">
+                <label>Địa chỉ</label>
+                <input type="text" value="{{.DiaChi}}" readonly>
+            </div>
+
+        </div>
+
+        <h3 class="section-title">III. NỘI DUNG PHỤ LỤC</h3>
+
+        <div class="form-group">
+            <label>Nội dung cũ</label>
+            <textarea
+                name="noi_dung_cu"
+                placeholder="Nhập nội dung hiện tại của hợp đồng..."
+                required
+            ></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Nội dung mới</label>
+            <textarea
+                name="noi_dung_moi"
+                placeholder="Nhập nội dung điều chỉnh..."
+                required
+            ></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Ngày áp dụng</label>
+            <input type="date" name="ngay_ap_dung" required>
+        </div>
+
+        <div class="form-group">
+            <label>Lý do điều chỉnh</label>
+            <textarea
+                name="ly_do"
+                placeholder="Nhập lý do lập phụ lục..."
+                required
+            ></textarea>
+        </div>
+
+        <div class="form-actions">
+            <a href="/phuluc/them" class="btn-back">Quay lại</a>
+
+            <button type="submit" class="btn-create">
+                Lưu phụ lục
+            </button>
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>

@@ -6,7 +6,9 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
+	"time"
 
 	"qlnv/models"
 )
@@ -306,5 +308,346 @@ func TimHopDongGoc(db *sql.DB) http.HandlerFunc {
 		}
 
 		json.NewEncoder(w).Encode(danhSach)
+	}
+}
+
+func TaoPhuLuc(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		// Các nội dung được phép điều chỉnh theo từng nhóm
+		noiDungTheoNhom := map[string]map[string]string{
+			"lao_dong": {
+				"dieu_chinh_luong":     "Điều chỉnh mức lương",
+				"dieu_chinh_phu_cap":   "Điều chỉnh phụ cấp",
+				"dieu_chinh_thoi_han":  "Điều chỉnh thời hạn hợp đồng",
+				"dieu_chinh_cong_viec": "Điều chỉnh công việc, chức danh",
+				"dieu_chinh_dia_diem":  "Điều chỉnh địa điểm làm việc",
+				"noi_dung_khac":        "Nội dung khác",
+			},
+			"kinh_doanh": {
+				"dieu_chinh_gia_tri":    "Điều chỉnh giá trị hợp đồng",
+				"dieu_chinh_thanh_toan": "Điều chỉnh phương thức thanh toán",
+				"dieu_chinh_thoi_han":   "Điều chỉnh thời hạn hợp đồng",
+				"dieu_chinh_noi_dung":   "Điều chỉnh nội dung công việc",
+				"noi_dung_khac":         "Nội dung khác",
+			},
+			"van_hanh": {
+				"dieu_chinh_dich_vu":     "Điều chỉnh dịch vụ, thiết bị",
+				"dieu_chinh_chi_phi":     "Điều chỉnh chi phí vận hành",
+				"dieu_chinh_thoi_han":    "Điều chỉnh thời hạn hợp đồng",
+				"dieu_chinh_trach_nhiem": "Điều chỉnh trách nhiệm các bên",
+				"noi_dung_khac":          "Nội dung khác",
+			},
+		}
+
+		if r.Method == http.MethodPost {
+			idHopDong := strings.TrimSpace(r.FormValue("id_hop_dong"))
+			noiDung := strings.TrimSpace(r.FormValue("noi_dung_dieu_chinh"))
+			noiDungCu := strings.TrimSpace(r.FormValue("noi_dung_cu"))
+			noiDungMoi := strings.TrimSpace(r.FormValue("noi_dung_moi"))
+			ngayApDung := strings.TrimSpace(r.FormValue("ngay_ap_dung"))
+			lyDo := strings.TrimSpace(r.FormValue("ly_do"))
+
+			if idHopDong == "" || noiDung == "" ||
+				noiDungCu == "" || noiDungMoi == "" ||
+				ngayApDung == "" || lyDo == "" {
+				http.Error(w, "Vui lòng nhập đầy đủ thông tin phụ lục.",
+					http.StatusBadRequest)
+				return
+			}
+
+			// Kiểm tra ID hợp đồng
+			id, err := strconv.Atoi(idHopDong)
+			if err != nil || id <= 0 {
+				http.Error(w, "Mã hợp đồng không hợp lệ.",
+					http.StatusBadRequest)
+				return
+			}
+
+			// Lấy nhóm hợp đồng và kiểm tra hiệu lực
+			var nhomHopDong string
+
+			err = db.QueryRow(`
+				SELECT nhom_hop_dong
+				FROM hopdong
+				WHERE id = ?
+				  AND ngay_bat_dau <= CURDATE()
+				  AND (ngay_ket_thuc IS NULL OR ngay_ket_thuc >= CURDATE())
+			`, id).Scan(&nhomHopDong)
+
+			if err != nil {
+				if err == sql.ErrNoRows {
+					http.Error(w, "Hợp đồng gốc không tồn tại hoặc đã hết hiệu lực.",
+						http.StatusBadRequest)
+					return
+				}
+
+				http.Error(w, "Lỗi kiểm tra hợp đồng: "+err.Error(),
+					http.StatusInternalServerError)
+				return
+			}
+
+			// Kiểm tra nội dung điều chỉnh có thuộc nhóm hợp đồng không
+			tenNoiDung, hopLe := noiDungTheoNhom[nhomHopDong][noiDung]
+			if !hopLe {
+				http.Error(w, "Nội dung điều chỉnh không hợp lệ.",
+					http.StatusBadRequest)
+				return
+			}
+
+			// Sinh mã phụ lục
+			maPhuLuc := "PL" + strconv.FormatInt(time.Now().UnixNano(), 10)
+
+			// Lưu phụ lục
+			_, err = db.Exec(`
+				INSERT INTO phuluchopdong (
+					ma_phu_luc,
+					id_hop_dong,
+					nhom_hop_dong,
+					noi_dung_dieu_chinh,
+					noi_dung_cu,
+					noi_dung_moi,
+					ngay_ap_dung,
+					ly_do
+				)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+			`,
+				maPhuLuc,
+				id,
+				nhomHopDong,
+				tenNoiDung,
+				noiDungCu,
+				noiDungMoi,
+				ngayApDung,
+				lyDo,
+			)
+
+			if err != nil {
+				http.Error(w, "Lỗi lưu phụ lục: "+err.Error(),
+					http.StatusInternalServerError)
+				return
+			}
+
+			http.Redirect(w, r, "/phuluc", http.StatusSeeOther)
+			return
+		}
+
+		if r.Method == http.MethodPost {
+
+			idHopDong := strings.TrimSpace(r.FormValue("id_hop_dong"))
+			noiDung := strings.TrimSpace(r.FormValue("noi_dung_dieu_chinh"))
+			noiDungCu := strings.TrimSpace(r.FormValue("noi_dung_cu"))
+			noiDungMoi := strings.TrimSpace(r.FormValue("noi_dung_moi"))
+			ngayApDung := strings.TrimSpace(r.FormValue("ngay_ap_dung"))
+			lyDo := strings.TrimSpace(r.FormValue("ly_do"))
+
+			if idHopDong == "" || noiDung == "" ||
+				noiDungCu == "" || noiDungMoi == "" ||
+				ngayApDung == "" || lyDo == "" {
+
+				http.Error(w, "Vui lòng nhập đầy đủ thông tin phụ lục.",
+					http.StatusBadRequest)
+				return
+			}
+
+			// Kiểm tra ID hợp đồng
+			id, err := strconv.Atoi(idHopDong)
+			if err != nil || id <= 0 {
+				http.Error(w, "Mã hợp đồng không hợp lệ.",
+					http.StatusBadRequest)
+				return
+			}
+
+			// Kiểm tra định dạng ngày
+			if _, err := time.Parse("2006-01-02", ngayApDung); err != nil {
+				http.Error(w, "Ngày áp dụng không hợp lệ.",
+					http.StatusBadRequest)
+				return
+			}
+
+			// Kiểm tra hợp đồng gốc còn hiệu lực
+			var nhomHopDong string
+
+			err = db.QueryRow(`
+        SELECT nhom_hop_dong
+        FROM hopdong
+        WHERE id = ?
+          AND ngay_bat_dau <= CURDATE()
+          AND (ngay_ket_thuc IS NULL OR ngay_ket_thuc >= CURDATE())
+    `, id).Scan(&nhomHopDong)
+
+			if err != nil {
+				if err == sql.ErrNoRows {
+					http.Error(w, "Hợp đồng gốc không tồn tại hoặc đã hết hiệu lực.",
+						http.StatusBadRequest)
+					return
+				}
+
+				http.Error(w, "Lỗi kiểm tra hợp đồng: "+err.Error(),
+					http.StatusInternalServerError)
+				return
+			}
+
+			// Kiểm tra nội dung điều chỉnh
+			tenNoiDung, hopLe := noiDungTheoNhom[nhomHopDong][noiDung]
+
+			if !hopLe {
+				http.Error(w, "Nội dung điều chỉnh không hợp lệ.",
+					http.StatusBadRequest)
+				return
+			}
+
+			// Sinh mã phụ lục
+			maPhuLuc := "PL" + strconv.FormatInt(time.Now().UnixNano(), 10)
+
+			// Lưu vào cơ sở dữ liệu
+			_, err = db.Exec(`
+        INSERT INTO phuluchopdong (
+            ma_phu_luc,
+            id_hop_dong,
+            nhom_hop_dong,
+            noi_dung_dieu_chinh,
+            noi_dung_cu,
+            noi_dung_moi,
+            ngay_ap_dung,
+            ly_do
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `,
+				maPhuLuc,
+				id,
+				nhomHopDong,
+				tenNoiDung,
+				noiDungCu,
+				noiDungMoi,
+				ngayApDung,
+				lyDo,
+			)
+
+			if err != nil {
+				http.Error(w, "Lỗi lưu phụ lục: "+err.Error(),
+					http.StatusInternalServerError)
+				return
+			}
+
+			http.Redirect(w, r, "/phuluc", http.StatusSeeOther)
+			return
+		}
+
+		// Lấy thông tin từ bước 1
+		idHopDong := strings.TrimSpace(r.URL.Query().Get("id_hop_dong"))
+		noiDung := strings.TrimSpace(r.URL.Query().Get("noi_dung_dieu_chinh"))
+
+		id, err := strconv.Atoi(idHopDong)
+		if err != nil || id <= 0 {
+			http.Error(w, "Mã hợp đồng không hợp lệ.",
+				http.StatusBadRequest)
+			return
+		}
+
+		// Lấy tên nội dung điều chỉnh
+		var nhomHopDong string
+
+		err = db.QueryRow(`
+			SELECT nhom_hop_dong
+			FROM hopdong
+			WHERE id = ?
+			  AND ngay_bat_dau <= CURDATE()
+			  AND (ngay_ket_thuc IS NULL OR ngay_ket_thuc >= CURDATE())
+		`, id).Scan(&nhomHopDong)
+
+		if err != nil {
+			http.Error(w, "Hợp đồng gốc không tồn tại hoặc đã hết hiệu lực.",
+				http.StatusBadRequest)
+			return
+		}
+
+		tenNoiDung, hopLe := noiDungTheoNhom[nhomHopDong][noiDung]
+		if !hopLe {
+			http.Error(w, "Nội dung điều chỉnh không hợp lệ.",
+				http.StatusBadRequest)
+			return
+		}
+
+		// Lấy thông tin hợp đồng và nhân viên
+		var data struct {
+			IDHopDong           int
+			MaHD                string
+			MaNV                string
+			LoaiHopDong         string
+			NgayBatDau          string
+			NhomHopDong         string
+			NoiDungDieuChinh    string
+			TenNoiDungDieuChinh string
+
+			HoTen       string
+			NgaySinh    string
+			GioiTinh    string
+			SoDienThoai string
+			Email       string
+			DiaChi      string
+			PhongBan    string
+			ChucVu      string
+		}
+
+		err = db.QueryRow(`
+			SELECT
+				hd.id,
+				COALESCE(hd.ma_hd, ''),
+				COALESCE(hd.ma_nv, ''),
+				COALESCE(hd.loai_hop_dong, ''),
+				COALESCE(DATE_FORMAT(hd.ngay_bat_dau, '%d/%m/%Y'), ''),
+				COALESCE(hd.nhom_hop_dong, ''),
+				COALESCE(nv.ho_ten, ''),
+				COALESCE(DATE_FORMAT(nv.ngay_sinh, '%d/%m/%Y'), ''),
+				COALESCE(nv.gioi_tinh, ''),
+				COALESCE(nv.so_dien_thoai, ''),
+				COALESCE(nv.email, ''),
+				COALESCE(nv.dia_chi, ''),
+				COALESCE(nv.phong_ban, ''),
+				COALESCE(nv.chuc_vu, '')
+			FROM hopdong hd
+			LEFT JOIN nhanvien nv ON hd.ma_nv = nv.ma_nv
+			WHERE hd.id = ?
+			  AND hd.ngay_bat_dau <= CURDATE()
+			  AND (hd.ngay_ket_thuc IS NULL OR hd.ngay_ket_thuc >= CURDATE())
+		`, id).Scan(
+			&data.IDHopDong,
+			&data.MaHD,
+			&data.MaNV,
+			&data.LoaiHopDong,
+			&data.NgayBatDau,
+			&data.NhomHopDong,
+			&data.HoTen,
+			&data.NgaySinh,
+			&data.GioiTinh,
+			&data.SoDienThoai,
+			&data.Email,
+			&data.DiaChi,
+			&data.PhongBan,
+			&data.ChucVu,
+		)
+
+		if err != nil {
+			http.Error(w, "Lỗi lấy thông tin hợp đồng: "+err.Error(),
+				http.StatusInternalServerError)
+			return
+		}
+
+		data.NoiDungDieuChinh = noiDung
+		data.TenNoiDungDieuChinh = tenNoiDung
+
+		tmpl, err := template.ParseFiles("templates/phuluc/tao.html")
+		if err != nil {
+			http.Error(w, "Lỗi tải giao diện tạo phụ lục: "+err.Error(),
+				http.StatusInternalServerError)
+			return
+		}
+
+		if err := tmpl.Execute(w, data); err != nil {
+			http.Error(w, "Lỗi hiển thị giao diện: "+err.Error(),
+				http.StatusInternalServerError)
+			return
+		}
 	}
 }
