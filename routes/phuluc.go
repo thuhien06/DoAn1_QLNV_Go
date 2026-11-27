@@ -2,6 +2,7 @@ package routes
 
 import (
 	"database/sql"
+	"encoding/json"
 	"html/template"
 	"net/http"
 	"net/url"
@@ -158,16 +159,6 @@ func DanhSachPhuLuc(db *sql.DB) http.HandlerFunc {
 func ThemPhuLuc(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		type HopDongGoc struct {
-			ID          int
-			MaHD        string
-			MaNV        string
-			NhomHopDong string
-			LoaiHopDong string
-			NgayBatDau  string
-			NgayKetThuc string
-		}
-
 		if r.Method == http.MethodPost {
 			nhomHopDong := strings.TrimSpace(r.FormValue("nhom_hop_dong"))
 			noiDung := strings.TrimSpace(r.FormValue("noi_dung_dieu_chinh"))
@@ -178,71 +169,129 @@ func ThemPhuLuc(db *sql.DB) http.HandlerFunc {
 				return
 			}
 
-			// Kiểm tra hợp đồng gốc có tồn tại và đúng nhóm không
-			var id int
+			// Kiểm tra hợp đồng gốc có tồn tại, đúng nhóm và đang hiệu lực
+			var hopDongTonTai int
 
 			err := db.QueryRow(`
-				SELECT id
+				SELECT COUNT(*)
 				FROM hopdong
-				WHERE id = ? AND nhom_hop_dong = ?
-			`, idHopDong, nhomHopDong).Scan(&id)
+				WHERE id = ?
+				  AND nhom_hop_dong = ?
+				  AND ngay_bat_dau <= CURDATE()
+				  AND (ngay_ket_thuc IS NULL OR ngay_ket_thuc >= CURDATE())
+			`, idHopDong, nhomHopDong).Scan(&hopDongTonTai)
 
 			if err != nil {
-				http.Error(w, "Hợp đồng gốc không tồn tại hoặc không đúng nhóm hợp đồng.",
+				http.Error(w, "Lỗi kiểm tra hợp đồng gốc: "+err.Error(),
+					http.StatusInternalServerError)
+				return
+			}
+
+			if hopDongTonTai == 0 {
+				http.Error(w, "Hợp đồng gốc không tồn tại, không đúng nhóm hoặc đã hết hiệu lực.",
 					http.StatusBadRequest)
 				return
 			}
 
+			// Chuyển sang bước nhập nội dung phụ lục
+			params := url.Values{}
+			params.Set("id_hop_dong", idHopDong)
+			params.Set("noi_dung_dieu_chinh", noiDung)
+
 			http.Redirect(
 				w,
 				r,
-				"/phuluc/tao?id_hop_dong="+url.QueryEscape(idHopDong)+
-					"&noi_dung_dieu_chinh="+url.QueryEscape(noiDung),
+				"/phuluc/tao?"+params.Encode(),
 				http.StatusSeeOther,
 			)
 			return
 		}
 
 		if r.Method != http.MethodGet {
-			http.Error(w, "Phương thức không được hỗ trợ.", http.StatusMethodNotAllowed)
+			http.Error(w, "Phương thức không được hỗ trợ.",
+				http.StatusMethodNotAllowed)
 			return
 		}
 
-		rows, err := db.Query(`
+		// Không cần tải toàn bộ hợp đồng ở đây.
+		// Danh sách hợp đồng sẽ được tìm bằng AJAX qua TimHopDongGoc.
+		tmpl, err := template.ParseFiles("templates/phuluc/them.html")
+		if err != nil {
+			http.Error(w, "Lỗi tải giao diện: "+err.Error(),
+				http.StatusInternalServerError)
+			return
+		}
+
+		if err := tmpl.Execute(w, nil); err != nil {
+			http.Error(w, "Lỗi hiển thị giao diện: "+err.Error(),
+				http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
+type HopDongGoiY struct {
+	ID          int    `json:"id"`
+	MaHD        string `json:"ma_hd"`
+	MaNV        string `json:"ma_nv"`
+	LoaiHopDong string `json:"loai_hop_dong"`
+}
+
+func TimHopDongGoc(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		if r.Method != http.MethodGet {
+			http.Error(w, "Phương thức không hợp lệ",
+				http.StatusMethodNotAllowed)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+		nhom := strings.TrimSpace(r.URL.Query().Get("nhom_hop_dong"))
+		maHD := strings.TrimSpace(r.URL.Query().Get("ma_hd"))
+
+		if nhom == "" {
+			json.NewEncoder(w).Encode([]HopDongGoiY{})
+			return
+		}
+
+		// Chỉ tìm hợp đồng đã bắt đầu và chưa hết hạn
+		query := `
 			SELECT
 				id,
 				COALESCE(ma_hd, ''),
 				COALESCE(ma_nv, ''),
-				COALESCE(nhom_hop_dong, ''),
-				COALESCE(loai_hop_dong, ''),
-				COALESCE(DATE_FORMAT(ngay_bat_dau, '%d/%m/%Y'), ''),
-				COALESCE(DATE_FORMAT(ngay_ket_thuc, '%d/%m/%Y'), '')
+				COALESCE(loai_hop_dong, '')
 			FROM hopdong
-			ORDER BY id DESC
-		`)
+			WHERE nhom_hop_dong = ?
+			  AND ngay_bat_dau <= CURDATE()
+			  AND (ngay_ket_thuc IS NULL OR ngay_ket_thuc >= CURDATE())
+			  AND ma_hd LIKE ?
+			ORDER BY ma_hd
+			LIMIT 20
+		`
 
+		rows, err := db.Query(query, nhom, "%"+maHD+"%")
 		if err != nil {
-			http.Error(w, "Lỗi lấy danh sách hợp đồng: "+err.Error(),
+			http.Error(w, "Không thể tìm hợp đồng",
 				http.StatusInternalServerError)
 			return
 		}
 		defer rows.Close()
 
-		var danhSach []HopDongGoc
+		danhSach := []HopDongGoiY{}
 
 		for rows.Next() {
-			var hd HopDongGoc
+			var hd HopDongGoiY
 
 			if err := rows.Scan(
 				&hd.ID,
 				&hd.MaHD,
 				&hd.MaNV,
-				&hd.NhomHopDong,
 				&hd.LoaiHopDong,
-				&hd.NgayBatDau,
-				&hd.NgayKetThuc,
 			); err != nil {
-				http.Error(w, "Lỗi đọc hợp đồng: "+err.Error(),
+				http.Error(w, "Lỗi đọc dữ liệu hợp đồng",
 					http.StatusInternalServerError)
 				return
 			}
@@ -251,28 +300,11 @@ func ThemPhuLuc(db *sql.DB) http.HandlerFunc {
 		}
 
 		if err := rows.Err(); err != nil {
-			http.Error(w, "Lỗi đọc danh sách hợp đồng: "+err.Error(),
+			http.Error(w, "Lỗi đọc danh sách hợp đồng",
 				http.StatusInternalServerError)
 			return
 		}
 
-		data := struct {
-			DanhSach []HopDongGoc
-		}{
-			DanhSach: danhSach,
-		}
-
-		tmpl, err := template.ParseFiles("templates/phuluc/them.html")
-		if err != nil {
-			http.Error(w, "Lỗi tải giao diện: "+err.Error(),
-				http.StatusInternalServerError)
-			return
-		}
-
-		if err := tmpl.Execute(w, data); err != nil {
-			http.Error(w, "Lỗi hiển thị giao diện: "+err.Error(),
-				http.StatusInternalServerError)
-			return
-		}
+		json.NewEncoder(w).Encode(danhSach)
 	}
 }

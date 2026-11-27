@@ -37,6 +37,55 @@
             padding: 11px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .hopdong-combobox {
+            position: relative;
+            width: 100%;
+        }
+
+        .hopdong-combobox input[type="text"] {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 11px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .hopdong-combobox input:disabled {
+            background: #eee;
+            cursor: not-allowed;
+        }
+
+        .hopdong-suggestions {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 220px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .hopdong-option {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+
+        .hopdong-option:hover {
+            background: #f0f5ff;
+        }
+
+        .hopdong-empty {
+            padding: 12px;
+            color: #777;
         }
 
         .form-actions {
@@ -73,11 +122,11 @@
 
     <h2>THÊM PHỤ LỤC HỢP ĐỒNG</h2>
 
-    <form action="/phuluc/them" method="POST">
+    <form action="/phuluc/them" method="POST" id="formPhuLuc">
 
         <!-- NHÓM HỢP ĐỒNG -->
         <div class="form-group">
-            <label>Nhóm hợp đồng</label>
+            <label for="nhomHopDong">Nhóm hợp đồng</label>
 
             <select name="nhom_hop_dong" id="nhomHopDong" required>
                 <option value="">-- Chọn nhóm hợp đồng --</option>
@@ -89,7 +138,7 @@
 
         <!-- NỘI DUNG ĐIỀU CHỈNH -->
         <div class="form-group">
-            <label>Nội dung điều chỉnh</label>
+            <label for="noiDung">Nội dung điều chỉnh</label>
 
             <select
                 name="noi_dung_dieu_chinh"
@@ -103,32 +152,31 @@
 
         <!-- HỢP ĐỒNG GỐC -->
         <div class="form-group">
-            <label>Hợp đồng gốc</label>
+            <label for="hopDongGoc">Hợp đồng gốc</label>
 
-            <select
-                name="id_hop_dong"
-                id="hopDong"
-                required
-                disabled
-            >
-                <option value="">-- Chọn hợp đồng gốc --</option>
-
-                {{range .DanhSach}}
-                <option
-                    value="{{.ID}}"
-                    data-nhom="{{.NhomHopDong}}"
+            <div class="hopdong-combobox">
+                <input
+                    type="text"
+                    id="hopDongGoc"
+                    placeholder="Nhập mã hợp đồng để tìm kiếm..."
+                    autocomplete="off"
+                    disabled
+                    required
                 >
-                    {{.MaHD}} - {{.MaNV}} - {{.LoaiHopDong}}
-                    ({{.NgayBatDau}} đến
-                    {{if .NgayKetThuc}}{{.NgayKetThuc}}{{else}}Không xác định thời hạn{{end}})
-                </option>
-                {{end}}
 
-            </select>
+                <input
+                    type="hidden"
+                    name="id_hop_dong"
+                    id="idHopDong"
+                >
+
+                <div id="goiYHopDong" class="hopdong-suggestions"></div>
+            </div>
         </div>
 
         <div class="form-actions">
             <a href="/phuluc" class="btn-back">Quay lại</a>
+
             <button type="submit" class="btn-create">
                 Tạo phụ lục
             </button>
@@ -141,8 +189,14 @@
 <script>
     const nhomHopDong = document.getElementById("nhomHopDong");
     const noiDung = document.getElementById("noiDung");
-    const hopDong = document.getElementById("hopDong");
+    const hopDongGoc = document.getElementById("hopDongGoc");
+    const idHopDong = document.getElementById("idHopDong");
+    const goiYHopDong = document.getElementById("goiYHopDong");
+    const formPhuLuc = document.getElementById("formPhuLuc");
 
+    let timerTimKiem;
+
+    // Nội dung điều chỉnh theo từng nhóm hợp đồng
     const noiDungTheoNhom = {
         lao_dong: [
             ["dieu_chinh_luong", "Điều chỉnh mức lương"],
@@ -170,53 +224,138 @@
         ]
     };
 
+    // Khi thay đổi nhóm hợp đồng
     nhomHopDong.addEventListener("change", function () {
         const nhom = this.value;
 
+        // Xóa nội dung và hợp đồng đã chọn trước đó
         noiDung.innerHTML =
             '<option value="">-- Chọn nội dung điều chỉnh --</option>';
 
-        hopDong.value = "";
-        hopDong.disabled = true;
+        noiDung.disabled = !nhom;
+
+        hopDongGoc.value = "";
+        idHopDong.value = "";
+        hopDongGoc.disabled = !nhom;
+        goiYHopDong.style.display = "none";
 
         if (!nhom) {
-            noiDung.disabled = true;
             return;
         }
 
+        // Hiển thị nội dung điều chỉnh tương ứng
         noiDungTheoNhom[nhom].forEach(function (item) {
             const option = document.createElement("option");
             option.value = item[0];
             option.textContent = item[1];
             noiDung.appendChild(option);
         });
-
-        noiDung.disabled = false;
-
-        locHopDong();
     });
 
-    function locHopDong() {
+    // Tìm hợp đồng gốc đang hiệu lực
+    async function timHopDong() {
         const nhom = nhomHopDong.value;
+        const maHD = hopDongGoc.value.trim();
 
-        hopDong.value = "";
-        hopDong.disabled = !nhom;
+        idHopDong.value = "";
 
-        Array.from(hopDong.options).forEach(function (option, index) {
-            if (index === 0) return;
+        if (!nhom) {
+            goiYHopDong.style.display = "none";
+            return;
+        }
 
-            option.hidden = option.dataset.nhom !== nhom;
-        });
+        try {
+            const response = await fetch(
+                `/phuluc/tim-hop-dong?nhom_hop_dong=${encodeURIComponent(nhom)}&ma_hd=${encodeURIComponent(maHD)}`
+            );
 
-        hopDong.options[0].hidden = false;
+            if (!response.ok) {
+                throw new Error("Không thể tải danh sách hợp đồng");
+            }
+
+            const danhSach = await response.json();
+
+            goiYHopDong.innerHTML = "";
+
+            if (danhSach.length === 0) {
+                goiYHopDong.innerHTML =
+                    '<div class="hopdong-empty">Không tìm thấy hợp đồng đang hiệu lực</div>';
+
+                goiYHopDong.style.display = "block";
+                return;
+            }
+
+            danhSach.forEach(function (hd) {
+                const item = document.createElement("div");
+
+                item.className = "hopdong-option";
+                item.textContent =
+                    `${hd.ma_hd} - ${hd.ma_nv} - ${hd.loai_hop_dong}`;
+
+                item.addEventListener("click", function () {
+                    hopDongGoc.value = hd.ma_hd;
+                    idHopDong.value = hd.id;
+
+                    goiYHopDong.style.display = "none";
+                });
+
+                goiYHopDong.appendChild(item);
+            });
+
+            goiYHopDong.style.display = "block";
+
+        } catch (error) {
+            console.error(error);
+
+            goiYHopDong.innerHTML =
+                '<div class="hopdong-empty">Có lỗi khi tìm hợp đồng</div>';
+
+            goiYHopDong.style.display = "block";
+        }
     }
 
-    noiDung.addEventListener("change", function () {
-        // Chỉ cho chọn hợp đồng khi đã chọn nội dung điều chỉnh
-        hopDong.disabled = !this.value;
+    // Khi nhấn vào ô tìm kiếm
+    hopDongGoc.addEventListener("focus", function () {
+        timHopDong();
+    });
 
-        if (!this.value) {
-            hopDong.value = "";
+    // Khi nhập mã hợp đồng
+    hopDongGoc.addEventListener("input", function () {
+        idHopDong.value = "";
+
+        clearTimeout(timerTimKiem);
+
+        timerTimKiem = setTimeout(function () {
+            timHopDong();
+        }, 300);
+    });
+
+    // Ẩn danh sách gợi ý khi nhấn ra ngoài
+    document.addEventListener("click", function (e) {
+        if (!e.target.closest(".hopdong-combobox")) {
+            goiYHopDong.style.display = "none";
+        }
+    });
+
+    // Kiểm tra trước khi gửi form
+    formPhuLuc.addEventListener("submit", function (e) {
+        if (!nhomHopDong.value) {
+            e.preventDefault();
+            alert("Vui lòng chọn nhóm hợp đồng.");
+            return;
+        }
+
+        if (!noiDung.value) {
+            e.preventDefault();
+            alert("Vui lòng chọn nội dung điều chỉnh.");
+            return;
+        }
+
+        if (!idHopDong.value) {
+            e.preventDefault();
+            alert("Vui lòng chọn hợp đồng gốc từ danh sách gợi ý.");
+            hopDongGoc.focus();
+            return;
         }
     });
 </script>
