@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm phụ lục hợp đồng</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <style>
+        .phuluc-form {
+            max-width: 750px;
+            margin: 30px auto;
+            padding: 25px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .phuluc-form h2 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .form-actions button,
+        .form-actions a {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .btn-create {
+            background: #198754;
+            color: white;
+        }
+
+        .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="phuluc-form">
+
+    <h2>THÊM PHỤ LỤC HỢP ĐỒNG</h2>
+
+    <form action="/phuluc/them" method="POST">
+
+        <!-- NHÓM HỢP ĐỒNG -->
+        <div class="form-group">
+            <label>Nhóm hợp đồng</label>
+
+            <select name="nhom_hop_dong" id="nhomHopDong" required>
+                <option value="">-- Chọn nhóm hợp đồng --</option>
+                <option value="lao_dong">Lao động</option>
+                <option value="kinh_doanh">Kinh doanh</option>
+                <option value="van_hanh">Vận hành</option>
+            </select>
+        </div>
+
+        <!-- NỘI DUNG ĐIỀU CHỈNH -->
+        <div class="form-group">
+            <label>Nội dung điều chỉnh</label>
+
+            <select
+                name="noi_dung_dieu_chinh"
+                id="noiDung"
+                required
+                disabled
+            >
+                <option value="">-- Chọn nội dung điều chỉnh --</option>
+            </select>
+        </div>
+
+        <!-- HỢP ĐỒNG GỐC -->
+        <div class="form-group">
+            <label>Hợp đồng gốc</label>
+
+            <select
+                name="id_hop_dong"
+                id="hopDong"
+                required
+                disabled
+            >
+                <option value="">-- Chọn hợp đồng gốc --</option>
+
+                {{range .DanhSach}}
+                <option
+                    value="{{.ID}}"
+                    data-nhom="{{.NhomHopDong}}"
+                >
+                    {{.MaHD}} - {{.MaNV}} - {{.LoaiHopDong}}
+                    ({{.NgayBatDau}} đến
+                    {{if .NgayKetThuc}}{{.NgayKetThuc}}{{else}}Không xác định thời hạn{{end}})
+                </option>
+                {{end}}
+
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <a href="/phuluc" class="btn-back">Quay lại</a>
+            <button type="submit" class="btn-create">
+                Tạo phụ lục
+            </button>
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+    const nhomHopDong = document.getElementById("nhomHopDong");
+    const noiDung = document.getElementById("noiDung");
+    const hopDong = document.getElementById("hopDong");
+
+    const noiDungTheoNhom = {
+        lao_dong: [
+            ["dieu_chinh_luong", "Điều chỉnh mức lương"],
+            ["dieu_chinh_phu_cap", "Điều chỉnh phụ cấp"],
+            ["dieu_chinh_thoi_han", "Điều chỉnh thời hạn hợp đồng"],
+            ["dieu_chinh_cong_viec", "Điều chỉnh công việc, chức danh"],
+            ["dieu_chinh_dia_diem", "Điều chỉnh địa điểm làm việc"],
+            ["noi_dung_khac", "Nội dung khác"]
+        ],
+
+        kinh_doanh: [
+            ["dieu_chinh_gia_tri", "Điều chỉnh giá trị hợp đồng"],
+            ["dieu_chinh_thanh_toan", "Điều chỉnh phương thức thanh toán"],
+            ["dieu_chinh_thoi_han", "Điều chỉnh thời hạn hợp đồng"],
+            ["dieu_chinh_noi_dung", "Điều chỉnh nội dung công việc"],
+            ["noi_dung_khac", "Nội dung khác"]
+        ],
+
+        van_hanh: [
+            ["dieu_chinh_dich_vu", "Điều chỉnh dịch vụ, thiết bị"],
+            ["dieu_chinh_chi_phi", "Điều chỉnh chi phí vận hành"],
+            ["dieu_chinh_thoi_han", "Điều chỉnh thời hạn hợp đồng"],
+            ["dieu_chinh_trach_nhiem", "Điều chỉnh trách nhiệm các bên"],
+            ["noi_dung_khac", "Nội dung khác"]
+        ]
+    };
+
+    nhomHopDong.addEventListener("change", function () {
+        const nhom = this.value;
+
+        noiDung.innerHTML =
+            '<option value="">-- Chọn nội dung điều chỉnh --</option>';
+
+        hopDong.value = "";
+        hopDong.disabled = true;
+
+        if (!nhom) {
+            noiDung.disabled = true;
+            return;
+        }
+
+        noiDungTheoNhom[nhom].forEach(function (item) {
+            const option = document.createElement("option");
+            option.value = item[0];
+            option.textContent = item[1];
+            noiDung.appendChild(option);
+        });
+
+        noiDung.disabled = false;
+
+        locHopDong();
+    });
+
+    function locHopDong() {
+        const nhom = nhomHopDong.value;
+
+        hopDong.value = "";
+        hopDong.disabled = !nhom;
+
+        Array.from(hopDong.options).forEach(function (option, index) {
+            if (index === 0) return;
+
+            option.hidden = option.dataset.nhom !== nhom;
+        });
+
+        hopDong.options[0].hidden = false;
+    }
+
+    noiDung.addEventListener("change", function () {
+        // Chỉ cho chọn hợp đồng khi đã chọn nội dung điều chỉnh
+        hopDong.disabled = !this.value;
+
+        if (!this.value) {
+            hopDong.value = "";
+        }
+    });
+</script>
+
+</body>
+</html>

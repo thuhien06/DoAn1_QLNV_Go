@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách phụ lục hợp đồng</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+    <div class="employee-page">
+
+        <!-- TIÊU ĐỀ -->
+        <h1 class="page-title">DANH SÁCH PHỤ LỤC HỢP ĐỒNG</h1>
+
+        <!-- TÌM KIẾM + LỌC -->
+        <div class="employee-toolbar">
+
+            <form action="/phuluc" method="GET" class="employee-search">
+
+                <input
+                    type="text"
+                    name="ma_phu_luc"
+                    placeholder="Mã phụ lục"
+                    value="{{.MaPhuLuc}}"
+                >
+
+                <input
+                    type="text"
+                    name="ma_hd"
+                    placeholder="Mã hợp đồng gốc"
+                    value="{{.MaHD}}"
+                >
+
+                <input
+                    type="text"
+                    name="ma_nv"
+                    placeholder="Mã nhân viên"
+                    value="{{.MaNV}}"
+                >
+
+                <select name="nhom_hop_dong">
+                    <option value="">Tất cả nhóm hợp đồng</option>
+
+                    <option value="lao_dong"
+                        {{if eq .NhomHopDong "lao_dong"}}selected{{end}}>
+                        Lao động
+                    </option>
+
+                    <option value="kinh_doanh"
+                        {{if eq .NhomHopDong "kinh_doanh"}}selected{{end}}>
+                        Kinh doanh
+                    </option>
+
+                    <option value="van_hanh"
+                        {{if eq .NhomHopDong "van_hanh"}}selected{{end}}>
+                        Vận hành
+                    </option>
+                </select>
+
+                <input
+                    type="text"
+                    name="noi_dung_dieu_chinh"
+                    placeholder="Nội dung điều chỉnh"
+                    value="{{.NoiDung}}"
+                >
+
+                <button type="submit">Tìm kiếm</button>
+
+                <a href="/phuluc">Xem tất cả</a>
+
+            </form>
+
+        </div>
+
+        <!-- THÊM PHỤ LỤC + THỐNG KÊ -->
+        <div class="employee-actions">
+
+            <div class="employee-left">
+
+                <a href="/phuluc/them" class="btn-add">
+                    + Thêm phụ lục
+                </a>
+
+                <div class="employee-count">
+                    Tổng số phụ lục:
+                    <strong>{{.TongSo}}</strong>
+                </div>
+
+            </div>
+
+            <div class="nut-dieu-huong">
+                <a href="/" class="btn-home">Trang chủ</a>
+                <a href="/hopdong" class="btn-home">Quản lý hợp đồng</a>
+            </div>
+
+        </div>
+
+        <!-- BẢNG DANH SÁCH -->
+        <div class="employee-table-wrapper">
+
+            <table border="1">
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Mã phụ lục</th>
+                        <th>Mã hợp đồng gốc</th>
+                        <th>Mã nhân viên</th>
+                        <th>Nhóm hợp đồng</th>
+                        <th>Nội dung điều chỉnh</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {{range .DanhSach}}
+
+                    <tr>
+                        <td>{{.ID}}</td>
+                        <td>{{.MaPhuLuc}}</td>
+                        <td>{{.MaHD}}</td>
+                        <td>{{.MaNV}}</td>
+
+                        <td>
+                            {{if eq .NhomHopDong "lao_dong"}}
+                                Lao động
+                            {{else if eq .NhomHopDong "kinh_doanh"}}
+                                Kinh doanh
+                            {{else if eq .NhomHopDong "van_hanh"}}
+                                Vận hành
+                            {{else}}
+                                {{.NhomHopDong}}
+                            {{end}}
+                        </td>
+
+                        <td>{{.NoiDungDieuChinh}}</td>
+                        <td>{{.NgayTao}}</td>
+
+                        <td>
+                            <a href="/phuluc/chi-tiet?id={{.ID}}">
+                                Chi tiết
+                            </a>
+                        </td>
+                    </tr>
+
+                    {{else}}
+
+                    <tr>
+                        <td colspan="8">
+                            Chưa có phụ lục hợp đồng nào.
+                        </td>
+                    </tr>
+
+                    {{end}}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

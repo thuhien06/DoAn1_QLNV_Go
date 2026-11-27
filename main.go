@@ -261,6 +261,11 @@ func main() {
 		),
 	)
 
+	////phu luc hop dong
+	http.HandleFunc("/phuluc", routes.DanhSachPhuLuc(db))
+	http.HandleFunc("/phuluc/them", routes.ThemPhuLuc(db))
+
+
 	//////////////////QUẢN LÝ CÔNG
 
 	http.HandleFunc("/cong",
